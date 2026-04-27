@@ -35,12 +35,24 @@ header p{font-size:11px;color:#666;letter-spacing:.15em;margin-top:1px;}
 /* カラーパレット：横並び（丸＋名前） */
 .pal-box{background:#fff;border-radius:12px;padding:10px 12px;}
 .palette{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-.cb-wrap{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;cursor:pointer;}
+.cb-wrap{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:10px;cursor:pointer;min-width:0;}
 .cb-wrap:active{background:#f0ede8;}
 .cb{width:32px;height:32px;flex-shrink:0;border-radius:50%;border:3px solid transparent;pointer-events:none;}
 .cb.on{border-color:#111;box-shadow:0 0 0 2px #fff inset;}
-.color-name{font-size:12px;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;}
+.color-name{font-size:12px;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;min-width:0;flex:1;}
 .color-name.on{font-weight:600;color:#111;}
+/* 幅が狭いとき：色名を非表示にして丸を4列に */
+@media (max-width:360px){
+  .palette{grid-template-columns:repeat(4,1fr);gap:6px;}
+  .cb-wrap{justify-content:center;gap:0;padding:6px 2px;}
+  .cb{width:36px;height:36px;}
+  .color-name{display:none;}
+}
+@media (min-width:361px) and (max-width:400px){
+  .cb{width:28px;height:28px;}
+  .color-name{font-size:10px;}
+  .cb-wrap{gap:6px;padding:5px 4px;}
+}
 
 .grad-box{background:#fff;border-radius:12px;padding:10px 12px;}
 .grad-note{font-size:10px;color:#c0392b;margin-bottom:7px;line-height:1.5;}
@@ -206,7 +218,7 @@ function buildStrapRows(){
     const frontNum=N-i;
     const cv=document.createElement('canvas');
     cv.width=(PW+10)*dpr; cv.height=PH*dpr;
-    cv.style.cssText=`position:absolute;left:0;top:${y}px;width:${PW+10}px;height:${PH}px;cursor:pointer;`;
+    cv.style.cssText=`position:absolute;left:0;top:${y}px;width:${PW+10}px;height:${PH}px;cursor:pointer;background:transparent;`;
     cv.dataset.idx=i;
     cv.addEventListener('click',()=>handleTap(i));
     cv.addEventListener('touchend',e=>{e.preventDefault();handleTap(i);},{passive:false});
@@ -259,14 +271,22 @@ function drawDrop(ctx,cx,y,color,isSel,badge,isEndPin,isBodyPin){
   ctx.strokeStyle=isSel?'rgba(255,215,0,.95)':'rgba(0,0,0,.4)';
   ctx.lineWidth=isSel?2.2:.7; ctx.stroke();
   if(isEndPin){
-    ctx.beginPath(); ctx.arc(cx,top+hw*.52,hw*.30,0,Math.PI*2);
-    ctx.fillStyle='#f0ede8'; ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.save();
+    ctx.globalCompositeOperation='destination-out';
+    ctx.beginPath(); ctx.arc(cx,top+hw*.52,hw*.20,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,1)'; ctx.fill();
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(cx,top+hw*.52,hw*.20,0,Math.PI*2);
+    ctx.strokeStyle='rgba(0,0,0,.4)'; ctx.lineWidth=.7; ctx.stroke();
   }
   if(isBodyPin){
-    ctx.beginPath(); ctx.arc(cx,bot-hw*.52,hw*.30,0,Math.PI*2);
-    ctx.fillStyle='#f0ede8'; ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.save();
+    ctx.globalCompositeOperation='destination-out';
+    ctx.beginPath(); ctx.arc(cx,bot-hw*.52,hw*.20,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,1)'; ctx.fill();
+    ctx.restore();
+    ctx.beginPath(); ctx.arc(cx,bot-hw*.52,hw*.20,0,Math.PI*2);
+    ctx.strokeStyle='rgba(0,0,0,.4)'; ctx.lineWidth=.7; ctx.stroke();
   }
   if(badge){
     ctx.fillStyle='rgba(255,255,255,.80)';
