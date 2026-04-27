@@ -9,65 +9,58 @@
 html,body{height:100%;overscroll-behavior:none;background:#f0ede8;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;}
 body{display:flex;flex-direction:column;align-items:center;}
 header{width:100%;background:#111;color:#fff;text-align:center;padding:10px 16px 7px;flex-shrink:0;}
-header h1{font-size:13px;letter-spacing:.25em;font-weight:400;}
-header p{font-size:9px;color:#666;letter-spacing:.15em;margin-top:1px;}
+header h1{font-size:15px;letter-spacing:.25em;font-weight:400;}
+header p{font-size:11px;color:#666;letter-spacing:.15em;margin-top:1px;}
 .app{width:100%;max-width:520px;display:flex;flex-direction:column;}
-
 .top-area{display:flex;flex-direction:row;padding:10px 10px 0;gap:10px;align-items:stretch;}
-
 .ctrl-col{flex:1;display:flex;flex-direction:column;gap:7px;min-width:0;}
-
 .strap-col{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:130px;}
-.dir-tag{width:100%;text-align:center;padding:5px 4px;border-radius:8px;background:#333;color:#fff;font-size:10px;font-weight:500;line-height:1.3;}
-.dir-tag small{display:block;font-size:8px;color:#aaa;font-weight:400;margin-top:1px;}
+.dir-tag{width:100%;text-align:center;padding:6px 4px;border-radius:8px;background:#333;color:#fff;font-size:11px;font-weight:500;line-height:1.3;}
+.dir-tag small{display:block;font-size:9px;color:#aaa;font-weight:400;margin-top:1px;}
 .strap-scroll{width:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:4px 0;}
 .strap-scroll::-webkit-scrollbar{display:none;}
-
 .count-row{display:flex;align-items:center;gap:5px;background:#fff;border-radius:12px;padding:6px 8px;}
-.cnt-btn{width:28px;height:28px;border:1px solid #ddd;border-radius:50%;background:#fff;font-size:16px;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cnt-btn{width:34px;height:34px;border:1px solid #ddd;border-radius:50%;background:#fff;font-size:20px;color:#555;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .cnt-btn:active{background:#111;color:#fff;border-color:#111;}
-.cnt-num{font-size:12px;font-weight:600;color:#111;text-align:center;}
-.cnt-sub{font-size:9px;color:#aaa;margin-top:1px;text-align:center;}
-
-.sel-box{background:#fff;border-radius:12px;padding:6px 10px;}
-.box-label{font-size:9px;color:#aaa;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px;}
-.sel-info{font-size:11px;color:#444;line-height:1.4;}
+.cnt-num{font-size:15px;font-weight:600;color:#111;text-align:center;}
+.cnt-sub{font-size:11px;color:#aaa;margin-top:2px;text-align:center;}
+.sel-box{background:#fff;border-radius:12px;padding:8px 12px;}
+.box-label{font-size:11px;color:#aaa;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+.sel-info{font-size:13px;color:#444;line-height:1.4;}
 .sel-info b{color:#111;}
-
 .mode-row{display:flex;gap:4px;}
-.mbt{flex:1;padding:6px 2px;border:1px solid #e0e0e0;border-radius:7px;background:#fff;font-size:9px;color:#888;cursor:pointer;transition:all .12s;}
+.mbt{flex:1;padding:9px 2px;border:1px solid #e0e0e0;border-radius:7px;background:#fff;font-size:11px;color:#888;cursor:pointer;transition:all .12s;}
 .mbt.on{background:#111;color:#fff;border-color:#111;}
 
-.pal-box{background:#fff;border-radius:12px;padding:8px 10px;}
-.palette{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
-.cb{width:100%;aspect-ratio:1;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .1s,border-color .1s;}
-.cb:active{transform:scale(.8);}
-.cb.on{border-color:#111;transform:scale(1.1);}
-.color-name{font-size:8px;color:#888;text-align:center;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* カラーパレット：横並び（丸＋名前） */
+.pal-box{background:#fff;border-radius:12px;padding:10px 12px;}
+.palette{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.cb-wrap{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;cursor:pointer;}
+.cb-wrap:active{background:#f0ede8;}
+.cb{width:32px;height:32px;flex-shrink:0;border-radius:50%;border:3px solid transparent;pointer-events:none;}
+.cb.on{border-color:#111;box-shadow:0 0 0 2px #fff inset;}
+.color-name{font-size:12px;color:#444;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;}
+.color-name.on{font-weight:600;color:#111;}
 
-.grad-box{background:#fff;border-radius:12px;padding:7px 10px;}
-.grad-note{font-size:8px;color:#c0392b;margin-bottom:5px;line-height:1.4;}
-.grad-row{display:flex;gap:4px;flex-wrap:wrap;}
-.gb{padding:4px 7px;border-radius:10px;border:1px solid #e0e0e0;background:#fff;font-size:9px;cursor:pointer;color:#666;white-space:nowrap;}
+.grad-box{background:#fff;border-radius:12px;padding:10px 12px;}
+.grad-note{font-size:10px;color:#c0392b;margin-bottom:7px;line-height:1.5;}
+.grad-row{display:flex;gap:6px;flex-wrap:wrap;}
+.gb{padding:7px 11px;border-radius:10px;border:1px solid #e0e0e0;background:#fff;font-size:11px;cursor:pointer;color:#666;white-space:nowrap;}
 .gb:active{background:#111;color:#fff;}
-
-.sum-box{background:#fff;border-radius:12px;padding:7px 10px;}
-.summary{font-size:10px;color:#666;line-height:1.9;display:flex;flex-wrap:wrap;gap:1px 6px;}
-.si{display:flex;align-items:center;gap:3px;}
-.sw{width:8px;height:8px;border-radius:50%;border:1px solid rgba(0,0,0,.12);flex-shrink:0;}
-
+.sum-box{background:#fff;border-radius:12px;padding:10px 12px;}
+.summary{font-size:11px;color:#666;line-height:2;display:flex;flex-wrap:wrap;gap:1px 8px;}
+.si{display:flex;align-items:center;gap:4px;}
+.sw{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,.12);flex-shrink:0;}
 .share-area{width:100%;max-width:520px;padding:10px 10px 0;}
 .sbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:11px;border:1px solid #e0e0e0;background:#fff;cursor:pointer;font-size:12px;color:#444;}
 .sbtn:active{background:#111;color:#fff;}
-
 #toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:8px 18px;border-radius:20px;font-size:11px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:999;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
 .bottom-bar{width:100%;max-width:520px;padding:8px 10px 24px;display:flex;gap:6px;margin-top:10px;}
-.btn-reset{flex:1;padding:11px;border:1px solid #ddd;border-radius:10px;background:#fff;font-size:11px;color:#666;cursor:pointer;}
-.btn-undo{flex:1;padding:11px;border:1px solid #ddd;border-radius:10px;background:#fff;font-size:11px;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;}
+.btn-reset{flex:1;padding:14px;border:1px solid #ddd;border-radius:10px;background:#fff;font-size:13px;color:#666;cursor:pointer;}
+.btn-undo{flex:1;padding:14px;border:1px solid #ddd;border-radius:10px;background:#fff;font-size:13px;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;}
 .btn-undo:disabled{opacity:.35;cursor:default;}
-.btn-order{flex:2.5;padding:11px;border:none;border-radius:10px;background:#111;color:#fff;font-size:11px;cursor:pointer;font-weight:500;letter-spacing:.04em;}
+.btn-order{flex:2.5;padding:14px;border:none;border-radius:10px;background:#111;color:#fff;font-size:13px;cursor:pointer;font-weight:500;letter-spacing:.04em;}
 .btn-order:active{opacity:.7;}
 </style>
 </head>
@@ -76,11 +69,8 @@ header p{font-size:9px;color:#666;letter-spacing:.15em;margin-top:1px;}
   <h1>FOLKLORE</h1>
   <p>COLOR SIMULATOR &nbsp;|&nbsp; 708works</p>
 </header>
-
 <div class="app">
   <div class="top-area">
-
-    <!-- 左：コントロール -->
     <div class="ctrl-col">
       <div class="count-row">
         <button class="cnt-btn" onclick="changeCount(-1)">−</button>
@@ -90,44 +80,35 @@ header p{font-size:9px;color:#666;letter-spacing:.15em;margin-top:1px;}
         </div>
         <button class="cnt-btn" onclick="changeCount(+1)">＋</button>
       </div>
-
       <div class="sel-box">
         <div class="box-label">選択中</div>
         <div class="sel-info" id="sel-info">パーツをタップ</div>
       </div>
-
       <div class="mode-row">
         <button class="mbt on" id="m-single" onclick="setMode('single')">1枚ずつ</button>
         <button class="mbt" id="m-all"    onclick="setMode('all')">一括</button>
         <button class="mbt" id="m-range"  onclick="setMode('range')">範囲</button>
       </div>
-
       <div class="pal-box">
         <div class="box-label">カラー</div>
         <div class="palette" id="palette"></div>
       </div>
-
       <div class="grad-box">
         <div class="box-label">おすすめ配色</div>
         <div class="grad-note">※ タップすると全色変更になりますのでご注意ください</div>
         <div class="grad-row" id="grad-row"></div>
       </div>
-
       <div class="sum-box">
         <div class="box-label">カラーサマリー</div>
         <div class="summary" id="summary"></div>
       </div>
     </div>
-
-    <!-- 右：ストラップ＋色名 -->
     <div class="strap-col" id="strap-col">
       <div class="dir-tag">後ろ<small>エンドピン側</small></div>
       <div class="strap-scroll" id="strap-scroll"></div>
       <div class="dir-tag">前<small>ボディ上部側</small></div>
     </div>
-
   </div>
-
   <div class="share-area">
     <button class="sbtn" onclick="saveImage()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -138,7 +119,6 @@ header p{font-size:9px;color:#666;letter-spacing:.15em;margin-top:1px;}
       画像を保存する
     </button>
   </div>
-
   <div class="bottom-bar">
     <button class="btn-reset" onclick="resetAll()">リセット</button>
     <button class="btn-undo" id="btn-undo" onclick="undo()" disabled>
@@ -149,7 +129,6 @@ header p{font-size:9px;color:#666;letter-spacing:.15em;margin-top:1px;}
     <button class="btn-order" onclick="goOrder()">この配色でカートに入れる →</button>
   </div>
 </div>
-
 <div id="toast"></div>
 <canvas id="save-canvas" style="display:none;"></canvas>
 
@@ -184,104 +163,76 @@ const GRADS=[
   {name:'キャンディ', fn:i=>['#d96090','#f0a0a8','#e8c84a','#7baed0','#a8c43a','#d96090'][i%6]},
 ];
 
-// ── 状態 ──
 let N=20, partColors=Array(N).fill('#c46030');
 let selected=new Set(), mode='single', rangeStart=null;
-let activeColor=COLORS[12]; // Camel
+let activeColor=COLORS[12];
 let history=[];
-
 const VARIANT_ID='XXXXXX';
+const PW=40,PH=50,OVL=16,PAD=6,LABEL_W=72;
 
-// ── パーツサイズ ──
-const PW=40, PH=50, OVL=16, PAD=6;
-const LABEL_W=72;
-
-// ── 履歴 ──
 function saveHistory(){
-  history.push({colors:[...partColors], n:N});
+  history.push({colors:[...partColors],n:N});
   if(history.length>30) history.shift();
   document.getElementById('btn-undo').disabled=false;
 }
-
 function undo(){
-  if(!history.length) return;
+  if(!history.length)return;
   const prev=history.pop();
-  N=prev.n;
-  partColors=prev.colors;
+  N=prev.n; partColors=prev.colors;
   selected.clear();
   updateCountDisplay();
   document.getElementById('sel-info').textContent='パーツをタップ';
-  buildStrapRows();
-  updateSummary();
+  buildStrapRows(); updateSummary();
   if(!history.length) document.getElementById('btn-undo').disabled=true;
 }
-
-// ── カウント表示更新 ──
 function updateCountDisplay(){
   document.getElementById('cnt-disp').textContent=N+'個';
-  const diff=N-20, length=1150+diff*60;
-  const diffTxt=diff===0?'標準':diff>0?`標準より${diff}個多い`:`標準より${Math.abs(diff)}個少ない`;
-  document.getElementById('cnt-sub').textContent=`${diffTxt}（全長 約${length}mm）`;
+  const diff=N-20, len=1150+diff*60;
+  const txt=diff===0?'標準':diff>0?`標準より${diff}個多い`:`標準より${Math.abs(diff)}個少ない`;
+  document.getElementById('cnt-sub').textContent=`${txt}（全長 約${len}mm）`;
 }
 
-// ── ストラップ行をDOMで構築 ──
 function buildStrapRows(){
   const scroll=document.getElementById('strap-scroll');
   const col=document.getElementById('strap-col');
   col.style.width=(PW+10+LABEL_W)+'px';
   scroll.innerHTML='';
-
   const totalH=PAD+N*PH-(N-1)*OVL+PAD;
   const wrap=document.createElement('div');
   wrap.style.cssText=`position:relative;width:${PW+10+LABEL_W}px;height:${totalH}px;`;
-
   const dpr=window.devicePixelRatio||1;
-
   for(let i=0;i<N;i++){
     const y=PAD+i*(PH-OVL);
-    const frontNum=N-i; // 前から何番目（i=N-1が前=P1）
-
+    const frontNum=N-i;
     const cv=document.createElement('canvas');
     cv.width=(PW+10)*dpr; cv.height=PH*dpr;
     cv.style.cssText=`position:absolute;left:0;top:${y}px;width:${PW+10}px;height:${PH}px;cursor:pointer;`;
     cv.dataset.idx=i;
     cv.addEventListener('click',()=>handleTap(i));
     cv.addEventListener('touchend',e=>{e.preventDefault();handleTap(i);},{passive:false});
-
     const ctx=cv.getContext('2d');
     ctx.scale(dpr,dpr);
-    const isEndPin =(i===0);     // 後ろ端（エンドピン側）：一番上のパーツ
-    const isBodyPin=(i===N-1);   // 前端（ボディ上部側）：一番下のパーツ
-    const badge=frontNum===3?'ロゴ刻印':null;
-    drawDrop(ctx,(PW+10)/2,0,partColors[i],selected.has(i),badge,isEndPin,isBodyPin);
-
-    // 色名ラベル
+    drawDrop(ctx,(PW+10)/2,0,partColors[i],selected.has(i),frontNum===3?'ロゴ刻印':null,i===0,i===N-1);
     const lbl=document.createElement('div');
     lbl.id=`lbl-${i}`;
     lbl.style.cssText=`position:absolute;left:${PW+14}px;top:${y+PH*0.46}px;transform:translateY(-50%);font-size:9px;white-space:nowrap;pointer-events:none;line-height:1.3;`;
     const cname=COLORS.find(c=>c.hex===partColors[i])?.name||'';
     lbl.innerHTML=`<span style="font-size:8px;color:#bbb;">P${frontNum}</span><br><span style="color:${selected.has(i)?'#111':'#666'};font-weight:${selected.has(i)?600:400};">${cname}</span>`;
-
-    wrap.appendChild(cv);
-    wrap.appendChild(lbl);
+    wrap.appendChild(cv); wrap.appendChild(lbl);
   }
   scroll.appendChild(wrap);
 }
 
-// ── 再描画のみ（DOM再構築なし） ──
 function redrawAll(){
   const dpr=window.devicePixelRatio||1;
   for(let i=0;i<N;i++){
     const cv=document.querySelector(`canvas[data-idx="${i}"]`);
-    if(!cv) continue;
+    if(!cv)continue;
     const ctx=cv.getContext('2d');
     ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,PW+10,PH);
     const frontNum=N-i;
-    const isEndPin =(i===0);
-    const isBodyPin=(i===N-1);
-    drawDrop(ctx,(PW+10)/2,0,partColors[i],selected.has(i),frontNum===3?'ロゴ刻印':null,isEndPin,isBodyPin);
-
+    drawDrop(ctx,(PW+10)/2,0,partColors[i],selected.has(i),frontNum===3?'ロゴ刻印':null,i===0,i===N-1);
     const lbl=document.getElementById(`lbl-${i}`);
     if(lbl){
       const cname=COLORS.find(c=>c.hex===partColors[i])?.name||'';
@@ -290,85 +241,59 @@ function redrawAll(){
   }
 }
 
-// ── パーツ描画 ──
 function drawDrop(ctx,cx,y,color,isSel,badge,isEndPin,isBodyPin){
-  const hw=PW/2, top=y, bot=y+PH;
+  const hw=PW/2,top=y,bot=y+PH;
   ctx.save();
-
-  // 形状パス（下丸・上細）
   ctx.beginPath();
   ctx.moveTo(cx,top+1);
-  ctx.bezierCurveTo(cx+hw*.55,top+PH*.12, cx+hw,top+PH*.45, cx+hw,bot-hw*.85);
-  ctx.bezierCurveTo(cx+hw,bot, cx-hw,bot, cx-hw,bot-hw*.85);
-  ctx.bezierCurveTo(cx-hw,top+PH*.45, cx-hw*.55,top+PH*.12, cx,top+1);
+  ctx.bezierCurveTo(cx+hw*.55,top+PH*.12,cx+hw,top+PH*.45,cx+hw,bot-hw*.85);
+  ctx.bezierCurveTo(cx+hw,bot,cx-hw,bot,cx-hw,bot-hw*.85);
+  ctx.bezierCurveTo(cx-hw,top+PH*.45,cx-hw*.55,top+PH*.12,cx,top+1);
   ctx.closePath();
   ctx.fillStyle=color; ctx.fill();
-
-  // ハイライト
   const g=ctx.createLinearGradient(cx,top,cx,bot);
   g.addColorStop(0,'rgba(255,255,255,.22)');
   g.addColorStop(.4,'rgba(255,255,255,.06)');
   g.addColorStop(1,'rgba(0,0,0,.15)');
   ctx.fillStyle=g; ctx.fill();
-
-  // アウトライン
   ctx.strokeStyle=isSel?'rgba(255,215,0,.95)':'rgba(0,0,0,.4)';
-  ctx.lineWidth=isSel?2.2:.7;
-  ctx.stroke();
-
-  // エンドピン側（後ろ・上端）取付穴
+  ctx.lineWidth=isSel?2.2:.7; ctx.stroke();
   if(isEndPin){
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, top+hw*.52, hw*.30, 0, Math.PI*2);
+    ctx.beginPath(); ctx.arc(cx,top+hw*.52,hw*.30,0,Math.PI*2);
     ctx.fillStyle='#f0ede8'; ctx.fill();
     ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=1.2; ctx.stroke();
-    ctx.restore();
   }
-
-  // ボディ上部側（前・下端）取付穴
   if(isBodyPin){
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, bot-hw*.52, hw*.30, 0, Math.PI*2);
+    ctx.beginPath(); ctx.arc(cx,bot-hw*.52,hw*.30,0,Math.PI*2);
     ctx.fillStyle='#f0ede8'; ctx.fill();
     ctx.strokeStyle='rgba(0,0,0,.55)'; ctx.lineWidth=1.2; ctx.stroke();
-    ctx.restore();
   }
-
-  // バッジ（ロゴ刻印）
   if(badge){
     ctx.fillStyle='rgba(255,255,255,.80)';
     ctx.font=`bold ${Math.max(5,PH*.11)}px sans-serif`;
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(badge, cx, top+PH*.58);
+    ctx.fillText(badge,cx,top+PH*.58);
   }
-
   ctx.restore();
 }
 
-// ── タップ処理 ──
 function handleTap(i){
   if(mode==='single'){
     saveHistory();
     selected.clear(); selected.add(i);
-    partColors[i]=activeColor.hex;
-    updateSummary();
-  } else if(mode==='range'){
-    if(rangeStart===null){
-      rangeStart=i; selected.clear(); selected.add(i);
-    } else {
+    partColors[i]=activeColor.hex; updateSummary();
+  }else if(mode==='range'){
+    if(rangeStart===null){rangeStart=i;selected.clear();selected.add(i);}
+    else{
       saveHistory();
-      const a=Math.min(rangeStart,i), b=Math.max(rangeStart,i);
-      selected.clear();
-      for(let j=a;j<=b;j++) selected.add(j);
+      const a=Math.min(rangeStart,i),b=Math.max(rangeStart,i);
+      selected.clear(); for(let j=a;j<=b;j++) selected.add(j);
       rangeStart=null;
     }
   }
   updateSelInfo(); redrawAll();
 }
 
-// ── モード ──
 function setMode(m){
   mode=m; rangeStart=null;
   document.querySelectorAll('.mbt').forEach(b=>b.classList.remove('on'));
@@ -376,7 +301,7 @@ function setMode(m){
   if(m==='all'){
     selected.clear(); for(let i=0;i<N;i++) selected.add(i);
     document.getElementById('sel-info').innerHTML=`全 <b>${N}枚</b>`;
-  } else {
+  }else{
     selected.clear();
     document.getElementById('sel-info').textContent='パーツをタップ';
   }
@@ -392,59 +317,53 @@ function updateSelInfo(){
   else el.innerHTML=`前から <b>#${front(arr[arr.length-1])}〜#${front(arr[0])}</b>（<b>${arr.length}枚</b>）`;
 }
 
-// ── パーツ増減 ──
 function changeCount(d){
-  const nx=N+d; if(nx<10||nx>30) return;
-  saveHistory();
-  N=nx;
+  const nx=N+d; if(nx<10||nx>30)return;
+  saveHistory(); N=nx;
   if(d>0) for(let k=0;k<d;k++) partColors.push('#c46030');
   else partColors=partColors.slice(0,N);
   selected.clear();
   document.getElementById('sel-info').textContent='パーツをタップ';
-  updateCountDisplay();
-  buildStrapRows();
-  updateSummary();
+  updateCountDisplay(); buildStrapRows(); updateSummary();
 }
 
-// ── パレット ──
 function buildPalette(){
   const p=document.getElementById('palette');
   COLORS.forEach(c=>{
     const wrap=document.createElement('div');
-    const btn=document.createElement('button');
-    btn.className='cb'+(c.id===activeColor.id?' on':'');
-    btn.style.background=c.hex; btn.title=c.name; btn.dataset.id=c.id;
-    btn.onclick=()=>{
+    wrap.className='cb-wrap';
+    wrap.dataset.id=c.id;
+    const dot=document.createElement('div');
+    dot.className='cb'+(c.id===activeColor.id?' on':'');
+    dot.style.background=c.hex;
+    dot.dataset.id=c.id;
+    const nm=document.createElement('div');
+    nm.className='color-name'+(c.id===activeColor.id?' on':'');
+    nm.textContent=c.name;
+    wrap.appendChild(dot); wrap.appendChild(nm);
+    wrap.onclick=()=>{
       activeColor=c;
       document.querySelectorAll('.cb').forEach(b=>b.classList.toggle('on',b.dataset.id===c.id));
-      if(!selected.size) return;
+      document.querySelectorAll('.color-name').forEach(b=>b.classList.toggle('on',b.closest('.cb-wrap')?.dataset.id===c.id));
+      if(!selected.size)return;
       saveHistory();
       [...selected].forEach(i=>partColors[i]=c.hex);
       redrawAll(); updateSummary();
     };
-    const nm=document.createElement('div');
-    nm.className='color-name'; nm.textContent=c.name;
-    wrap.appendChild(btn); wrap.appendChild(nm);
     p.appendChild(wrap);
   });
 }
 
-// ── おすすめ配色 ──
 function buildGrads(){
   const row=document.getElementById('grad-row');
   GRADS.forEach(g=>{
     const btn=document.createElement('button');
     btn.className='gb'; btn.textContent=g.name;
-    btn.onclick=()=>{
-      saveHistory();
-      for(let i=0;i<N;i++) partColors[i]=g.fn(i);
-      redrawAll(); updateSummary();
-    };
+    btn.onclick=()=>{saveHistory();for(let i=0;i<N;i++)partColors[i]=g.fn(i);redrawAll();updateSummary();};
     row.appendChild(btn);
   });
 }
 
-// ── サマリー ──
 function updateSummary(){
   const el=document.getElementById('summary');
   const counts={};
@@ -455,73 +374,53 @@ function updateSummary(){
   ).join('');
 }
 
-// ── リセット ──
 function resetAll(){
   saveHistory();
-  partColors=Array(N).fill('#c46030');
-  selected.clear();
+  partColors=Array(N).fill('#c46030'); selected.clear();
   document.getElementById('sel-info').textContent='パーツをタップ';
   buildStrapRows(); updateSummary();
 }
 
-// ── トースト ──
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-// ── 画像保存 ──
 function saveImage(){
   const cv=document.getElementById('save-canvas');
-  const dpr=2;
-  const cw=320;
-  const sPW=44, sPH=54, sOVL=18, sPAD=6;
+  const dpr=2, cw=320;
+  const sPW=44,sPH=54,sOVL=18,sPAD=6;
   const strapH=sPAD+N*sPH-(N-1)*sOVL+sPAD;
   const ch=56+14+strapH+20+40;
   cv.width=cw*dpr; cv.height=ch*dpr;
   const ctx=cv.getContext('2d');
   ctx.scale(dpr,dpr);
-
   ctx.fillStyle='#f0ede8'; ctx.fillRect(0,0,cw,ch);
-
-  // ヘッダ
   ctx.fillStyle='#111'; ctx.fillRect(0,0,cw,48);
   ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif'; ctx.textAlign='center';
   ctx.fillText('708works — FOLKLORE',cw/2,22);
   ctx.font='9px sans-serif'; ctx.fillStyle='rgba(255,255,255,.5)';
   ctx.fillText('COLOR ORDER SIMULATOR',cw/2,38);
-
-  // 後ろラベル
   ctx.fillStyle='#444'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
   ctx.fillText('▲ 後ろ（エンドピン側）',cw/2,62);
-
-  // パーツ
-  const scx=cw/2-22;
-  const sy0=70;
+  const scx=cw/2-22, sy0=70;
   for(let i=0;i<N;i++){
     const y=sy0+sPAD+i*(sPH-sOVL);
     const frontNum=N-i;
     drawDropSave(ctx,scx,y,partColors[i],sPW,sPH,i===0,i===N-1);
-    // 番号
     ctx.fillStyle='#bbb'; ctx.font='7px sans-serif'; ctx.textAlign='right';
     ctx.fillText(`P${frontNum}`,scx+sPW/2+16,y+sPH*.52+3);
-    // 色名
     const cname=COLORS.find(c=>c.hex===partColors[i])?.name||'';
     ctx.fillStyle='#333'; ctx.font='10px sans-serif'; ctx.textAlign='left';
     ctx.fillText(cname,scx+sPW/2+20,y+sPH*.52+3);
   }
-
-  // 前ラベル
   const endY=sy0+sPAD+N*sPH-(N-1)*sOVL+sPAD+10;
   ctx.fillStyle='#444'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
   ctx.fillText('▼ 前（ボディ上部側）',cw/2,endY);
-
-  // フッター
   ctx.fillStyle='rgba(0,0,0,.1)'; ctx.fillRect(0,ch-28,cw,28);
   ctx.fillStyle='#888'; ctx.font='9px sans-serif'; ctx.textAlign='center';
   ctx.fillText('shop.708works.jp',cw/2,ch-10);
-
   const a=document.createElement('a');
   a.download='folklore-color-order.png';
   a.href=cv.toDataURL('image/png');
@@ -556,7 +455,6 @@ function drawDropSave(ctx,cx,y,color,pw,ph,isEndPin,isBodyPin){
   ctx.restore();
 }
 
-// ── 注文 ──
 function goOrder(){
   const colorData=partColors.slice().reverse().map((hex,i)=>{
     const name=COLORS.find(c=>c.hex===hex)?.name||hex;
@@ -581,10 +479,7 @@ function goOrder(){
   window.location.href=`https://shop.708works.jp/cart/${VARIANT_ID}:1?properties=${encoded}`;
 }
 
-// ── 初期化 ──
-window.addEventListener('load',()=>{
-  buildPalette(); buildGrads(); updateSummary(); buildStrapRows();
-});
+window.addEventListener('load',()=>{buildPalette();buildGrads();updateSummary();buildStrapRows();});
 window.addEventListener('resize',()=>buildStrapRows());
 </script>
 </body>
