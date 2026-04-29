@@ -775,12 +775,21 @@ async function proceedToCart(){
 // 初期化
 // ============================================================================
 
-window.addEventListener('load', () => {
-  buildPalette();
-  buildGrads();
-  updateSummary();
-  buildStrapRows();
-  updatePriceDisplay();
-});
+// 初期化済みフラグ（重複実行防止）
+if (typeof window.folkloreInitialized === 'undefined') {
+  window.folkloreInitialized = false;
+}
 
-window.addEventListener('resize', () => buildStrapRows());
+if (!window.folkloreInitialized) {
+  window.addEventListener('load', () => {
+    buildPalette();
+    buildGrads();
+    updateSummary();
+    buildStrapRows();
+    updatePriceDisplay();
+  });
+
+  window.addEventListener('resize', () => buildStrapRows());
+  
+  window.folkloreInitialized = true;
+}
