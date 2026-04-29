@@ -89,15 +89,15 @@ const PW=40,PH=50,OVL=16,PAD=6,LABEL_W=72;
 // 初期化
 // ============================================================================
 
-window.addEventListener('load',()=>{
-  buildPalette();
-  buildGrads();
-  updateSummary();
-  buildStrapRows();
-  updatePriceDisplay();
-});
+// window.addEventListener('load',()=>{
+//   buildPalette();
+//   buildGrads();
+//   updateSummary();
+//   buildStrapRows();
+//   updatePriceDisplay();
+// });
 
-window.addEventListener('resize',()=>buildStrapRows());
+// window.addEventListener('resize',()=>buildStrapRows());
 
 // ============================================================================
 // 価格表示
