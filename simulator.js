@@ -86,26 +86,63 @@ let lastUploadedImage = null;
 const PW=40,PH=50,OVL=16,PAD=6,LABEL_W=72;
 
 // ============================================================================
-// 初期化
+// 初期化（重複実行防止）
 // ============================================================================
 
-window.addEventListener('load',()=>{
+if (typeof window.folkloreInitialized === 'undefined') {
+  window.folkloreInitialized = false;
+}
+
+if (!window.folkloreInitialized) {
+  // DOMContentLoadedとloadの両方で対応（より確実に）
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeSimulator);
+  } else {
+    // 既にDOMが読み込まれている場合は即実行
+    initializeSimulator();
+  }
+  
+  window.folkloreInitialized = true;
+}
+
+function initializeSimulator() {
+  // DOM要素の存在を確認
+  const paletteEl = document.getElementById('palette');
+  const gradRowEl = document.getElementById('grad-row');
+  
+  if (!paletteEl || !gradRowEl) {
+    console.warn('FOLKLORE: Required elements not found, retrying...');
+    setTimeout(initializeSimulator, 100);
+    return;
+  }
+  
+  console.log('FOLKLORE: Initializing simulator...');
+  
   buildPalette();
   buildGrads();
   updateSummary();
   buildStrapRows();
   updatePriceDisplay();
-});
+  updateCountDisplay();
+  
+  console.log('FOLKLORE: Initialization complete');
+}
 
-window.addEventListener('resize',()=>buildStrapRows());
+window.addEventListener('resize', () => {
+  if (window.folkloreInitialized) {
+    buildStrapRows();
+  }
+});
 
 // ============================================================================
 // 価格表示
 // ============================================================================
 
 function updatePriceDisplay(){
+  const el = document.getElementById('price-display');
+  if (!el) return;
   const price = PRICE_MAP[N];
-  document.getElementById('price-display').textContent = `¥${price.toLocaleString()}（税込）`;
+  el.textContent = `¥${price.toLocaleString()}（税込）`;
 }
 
 // ============================================================================
@@ -115,7 +152,8 @@ function updatePriceDisplay(){
 function saveHistory(){
   history.push({colors:[...partColors],n:N});
   if(history.length>30) history.shift();
-  document.getElementById('btn-undo').disabled=false;
+  const btn = document.getElementById('btn-undo');
+  if (btn) btn.disabled=false;
 }
 
 function undo(){
@@ -125,9 +163,11 @@ function undo(){
   selected.clear();
   updateCountDisplay();
   updatePriceDisplay();
-  document.getElementById('sel-info').textContent='パーツをタップ';
+  const selInfo = document.getElementById('sel-info');
+  if (selInfo) selInfo.textContent='パーツをタップ';
   buildStrapRows(); updateSummary();
-  if(!history.length) document.getElementById('btn-undo').disabled=true;
+  const btn = document.getElementById('btn-undo');
+  if(!history.length && btn) btn.disabled=true;
 }
 
 // ============================================================================
@@ -135,10 +175,14 @@ function undo(){
 // ============================================================================
 
 function updateCountDisplay(){
-  document.getElementById('cnt-disp').textContent=N+'個';
+  const cntDisp = document.getElementById('cnt-disp');
+  const cntSub = document.getElementById('cnt-sub');
+  if (!cntDisp || !cntSub) return;
+  
+  cntDisp.textContent=N+'個';
   const diff=N-20, len=1150+diff*60;
   const txt=diff===0?'標準':diff>0?`標準より${diff}個多い`:`標準より${Math.abs(diff)}個少ない`;
-  document.getElementById('cnt-sub').textContent=`${txt}（全長 約${len}mm）`;
+  cntSub.textContent=`${txt}（全長 約${len}mm）`;
 }
 
 function changeCount(d){
@@ -147,7 +191,8 @@ function changeCount(d){
   if(d>0) for(let k=0;k<d;k++) partColors.push('#c46030');
   else partColors=partColors.slice(0,N);
   selected.clear();
-  document.getElementById('sel-info').textContent='パーツをタップ';
+  const selInfo = document.getElementById('sel-info');
+  if (selInfo) selInfo.textContent='パーツをタップ';
   updateCountDisplay();
   updatePriceDisplay();
   buildStrapRows();
@@ -161,6 +206,11 @@ function changeCount(d){
 function buildStrapRows(){
   const scroll=document.getElementById('strap-scroll');
   const col=document.getElementById('strap-col');
+  if (!scroll || !col) {
+    console.warn('FOLKLORE: strap-scroll or strap-col element not found');
+    return;
+  }
+  
   col.style.width=(PW+10+LABEL_W)+'px';
   scroll.innerHTML='';
   const totalH=PAD+N*PH-(N-1)*OVL+PAD;
@@ -279,19 +329,23 @@ function handleTap(i){
 function setMode(m){
   mode=m; rangeStart=null;
   document.querySelectorAll('.mbt').forEach(b=>b.classList.remove('on'));
-  document.getElementById('m-'+m).classList.add('on');
+  const modeBtn = document.getElementById('m-'+m);
+  if (modeBtn) modeBtn.classList.add('on');
   if(m==='all'){
     selected.clear(); for(let i=0;i<N;i++) selected.add(i);
-    document.getElementById('sel-info').innerHTML=`全 <b>${N}枚</b>`;
+    const selInfo = document.getElementById('sel-info');
+    if (selInfo) selInfo.innerHTML=`全 <b>${N}枚</b>`;
   }else{
     selected.clear();
-    document.getElementById('sel-info').textContent='パーツをタップ';
+    const selInfo = document.getElementById('sel-info');
+    if (selInfo) selInfo.textContent='パーツをタップ';
   }
   redrawAll();
 }
 
 function updateSelInfo(){
   const el=document.getElementById('sel-info');
+  if (!el) return;
   if(!selected.size){el.textContent='パーツをタップ';return;}
   const arr=[...selected].sort((a,b)=>a-b);
   const front=i=>N-i;
@@ -305,6 +359,13 @@ function updateSelInfo(){
 
 function buildPalette(){
   const p=document.getElementById('palette');
+  if (!p) {
+    console.warn('FOLKLORE: palette element not found');
+    return;
+  }
+  
+  p.innerHTML = ''; // 既存の内容をクリア
+  
   COLORS.forEach(c=>{
     const wrap=document.createElement('div');
     wrap.className='cb-wrap';
@@ -328,6 +389,8 @@ function buildPalette(){
     };
     p.appendChild(wrap);
   });
+  
+  console.log('FOLKLORE: Palette built with', COLORS.length, 'colors');
 }
 
 // ============================================================================
@@ -336,12 +399,21 @@ function buildPalette(){
 
 function buildGrads(){
   const row=document.getElementById('grad-row');
+  if (!row) {
+    console.warn('FOLKLORE: grad-row element not found');
+    return;
+  }
+  
+  row.innerHTML = ''; // 既存の内容をクリア
+  
   GRADS.forEach(g=>{
     const btn=document.createElement('button');
     btn.className='gb'; btn.textContent=g.name;
     btn.onclick=()=>{saveHistory();for(let i=0;i<N;i++)partColors[i]=g.fn(i);redrawAll();updateSummary();};
     row.appendChild(btn);
   });
+  
+  console.log('FOLKLORE: Gradients built with', GRADS.length, 'presets');
 }
 
 // ============================================================================
@@ -350,6 +422,7 @@ function buildGrads(){
 
 function updateSummary(){
   const el=document.getElementById('summary');
+  if (!el) return;
   const counts={};
   partColors.forEach(h=>{counts[h]=(counts[h]||0)+1;});
   const nameOf=h=>COLORS.find(c=>c.hex===h)?.name||h;
@@ -365,7 +438,8 @@ function updateSummary(){
 function resetAll(){
   saveHistory();
   partColors=Array(N).fill('#c46030'); selected.clear();
-  document.getElementById('sel-info').textContent='パーツをタップ';
+  const selInfo = document.getElementById('sel-info');
+  if (selInfo) selInfo.textContent='パーツをタップ';
   buildStrapRows(); updateSummary();
 }
 
@@ -375,6 +449,7 @@ function resetAll(){
 
 function showToast(msg){
   const t=document.getElementById('toast');
+  if (!t) return;
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2200);
 }
@@ -384,12 +459,15 @@ function showToast(msg){
 // ============================================================================
 
 function showLoading(text='処理中...'){
-  document.getElementById('loading-text').textContent=text;
-  document.getElementById('loading-overlay').classList.add('show');
+  const loadingText = document.getElementById('loading-text');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingText) loadingText.textContent=text;
+  if (loadingOverlay) loadingOverlay.classList.add('show');
 }
 
 function hideLoading(){
-  document.getElementById('loading-overlay').classList.remove('show');
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) loadingOverlay.classList.remove('show');
 }
 
 // ============================================================================
@@ -398,124 +476,34 @@ function hideLoading(){
 
 async function saveImage(){
   const cv=document.getElementById('save-canvas');
-  const dpr=2, cw=320;
-  const sPW=44,sPH=54,sOVL=18,sPAD=6;
-  const strapH=sPAD+N*sPH-(N-1)*sOVL+sPAD;
-  const ch=56+14+strapH+20+40;
-  cv.width=cw*dpr; cv.height=ch*dpr;
-  const ctx=cv.getContext('2d');
-  ctx.scale(dpr,dpr);
-  ctx.fillStyle='#f0ede8'; ctx.fillRect(0,0,cw,ch);
-  ctx.fillStyle='#111'; ctx.fillRect(0,0,cw,48);
-  ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('708works — FOLKLORE',cw/2,22);
-  ctx.font='9px sans-serif'; ctx.fillStyle='rgba(255,255,255,.5)';
-  ctx.fillText('COLOR ORDER SIMULATOR',cw/2,38);
-  ctx.fillStyle='#444'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('▲ 後ろ（エンドピン側）',cw/2,62);
-  const scx=cw/2-22, sy0=70;
-  for(let i=0;i<N;i++){
-    const y=sy0+sPAD+i*(sPH-sOVL);
-    const frontNum=N-i;
-    drawDropSave(ctx,scx,y,partColors[i],sPW,sPH,i===0,i===N-1);
-    if(frontNum===3){
-      const logoColor = isLightColor(partColors[i])
-        ? 'rgba(0,0,0,0.25)'
-        : 'rgba(255,255,255,0.35)';
-      drawLogoMark(ctx, scx, y+sPH*0.55, 0.12, logoColor);
-    }
-    ctx.fillStyle='#bbb'; ctx.font='7px sans-serif'; ctx.textAlign='right';
-    ctx.fillText(`P${frontNum}`,scx+sPW/2+16,y+sPH*.52+3);
-    const cname=COLORS.find(c=>c.hex===partColors[i])?.name||'';
-    ctx.fillStyle='#333'; ctx.font='10px sans-serif'; ctx.textAlign='left';
-    ctx.fillText(cname,scx+sPW/2+20,y+sPH*.52+3);
+  if (!cv) return;
+  showLoading('画像を生成中...');
+  try{
+    const canvas = buildSaveCanvas();
+    const blob = await new Promise(r => canvas.toBlob(r,'image/png'));
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `folklore-strap-${N}parts-${Date.now()}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    hideLoading();
+    showToast('画像を保存しました');
+  }catch(e){
+    console.error(e);
+    hideLoading();
+    showToast('保存に失敗しました');
   }
-  const endY=sy0+sPAD+N*sPH-(N-1)*sOVL+sPAD+10;
-  ctx.fillStyle='#444'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('▼ 前（ボディ上部側）',cw/2,endY);
-  ctx.fillStyle='rgba(0,0,0,.1)'; ctx.fillRect(0,ch-28,cw,28);
-  ctx.fillStyle='#888'; ctx.font='9px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('shop.708works.jp',cw/2,ch-10);
-
-  const blob = await new Promise(r=>cv.toBlob(r,'image/png'));
-  const file = new File([blob],'folklore-color-order.png',{type:'image/png'});
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    try{
-      await navigator.share({files:[file], title:'FOLKLORE カラーオーダー'});
-      return;
-    }catch(e){
-      if(e.name==='AbortError') return;
-    }
-  }
-  const a=document.createElement('a');
-  a.download='folklore-color-order.png';
-  a.href=cv.toDataURL('image/png');
-  a.click();
-  showToast('画像を保存しました');
-}
-
-function isLightColor(hex){
-  const r=parseInt(hex.slice(1,3),16);
-  const g=parseInt(hex.slice(3,5),16);
-  const b=parseInt(hex.slice(5,7),16);
-  return (r*299+g*587+b*114)/1000 > 128;
-}
-
-function drawLogoMark(ctx, cx, cy, scale, color){
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.scale(scale, scale);
-  ctx.translate(-200, -200);
-  ctx.fillStyle = color;
-  const path = new Path2D("M243.84,150.57c13.39-13.62,36-36.45,67.9-68.57-1.36-.23-2.72-.59-4.05-1.11-.18-.07-.36-.12-.53-.19-.78-.33-1.52-.71-2.24-1.12-.43-.25-.83-.53-1.23-.81-.26-.17-.53-.34-.77-.52-.5-.38-.97-.79-1.43-1.2-.12-.11-.25-.21-.37-.32-.46-.44-.91-.92-1.33-1.4-2.47-2.82-4.17-6.24-4.88-9.9-5.77,6.4-13.78,15.15-24.05,26.27-5.46,5.89-8.82,9.5-10.03,10.84l1.16.97c7.75-8.19,12.53-13.01,14.33-14.47,1.8-1.45,3.2-1.75,4.21-.89l8.54,7.17-23.05,21.46c-11.34,10.54-21.72,20.24-31.21,29.16-.03,0-.05-.02-.08-.03-14.94-6.32-29.2-7.75-42.76-4.3-13.57,3.45-22.62,10.55-27.17,21.3-4.47,10.6-3.3,23.26,3.54,38.05-22.93,1.31-37.89,2.84-44.87,4.6-9,2.2-16.25,5.31-21.73,9.32-5.49,4.02-9.33,8.61-11.51,13.78-3.28,7.73-2.44,16.52,2.53,26.34,4.96,9.8,14.9,17.86,29.85,24.19,18.26,7.72,35.78,9.42,52.6,5.08,16.81-4.35,27.78-12.56,32.89-24.64,5.29-12.5,2.12-29.55-9.45-51.16,18.37.12,33.47-2.24,45.29-7.08,8.99-3.65,14.87-8.79,17.66-15.36,2.8-6.59,1.76-13.75-3.1-21.5-3.38-5.4-8.29-10.04-14.65-13.93v-.03ZM184.04,191.4c1.58-3.71,4.06-7.25,7.49-10.63,3.41-3.38,6.43-5.41,9.09-6.1,1.57-.41,2.99-.52,4.29-.41-8.6,8.25-15.93,15.38-21.96,21.38.08-1.28.44-2.68,1.09-4.24h0ZM232.08,155.2c-7.42,7.34-14.23,14.1-20.38,20.25-.71-.39-1.44-.76-2.23-1.1,6.26-6.18,13.19-12.96,20.78-20.33.63.38,1.24.78,1.84,1.18h0ZM184.27,200.31c-.05-.12-.11-.25-.16-.37,6.44-6.71,14.56-14.91,24.33-24.58.75.41,1.39.89,1.92,1.43-9.95,9.93-18.2,18.25-24.76,24.96-.49-.42-.94-.89-1.33-1.44ZM186.9,205.14c-.14,0-.27.03-.4.04-.04-.08-.07-.15-.11-.24.17.07.34.13.51.19h0ZM203,197.97c-3.64,3.25-6.96,5.1-9.98,5.58-.18.03-.35.03-.52.05,5.47-5.78,12.01-12.6,19.63-20.49-.16,1.18-.48,2.43-1.05,3.78-1.73,4.12-4.43,7.82-8.07,11.08h-.01ZM189.97,203.6c-.85-.1-1.67-.3-2.44-.63-.03,0-.05-.03-.07-.04,6.38-6.67,14.39-14.92,23.98-24.67.08.15.18.29.24.45.28.66.42,1.38.5,2.11-8.76,8.92-16.17,16.52-22.21,22.78ZM213.26,176.41c6.08-6.18,12.79-12.95,20.11-20.31.62.46,1.23.93,1.8,1.43-7.27,7.34-13.95,14.11-20.01,20.27-.58-.49-1.23-.94-1.91-1.38h0ZM271.48,121c-10.38,10.41-19.95,20.03-28.74,28.89-.66-.39-1.36-.75-2.05-1.12,10.91-10.89,28.11-27.93,51.59-51.1l1.3,1.15-22.1,22.18h0ZM290.88,96.58l.41.36-22.36,21.95c-10.72,10.52-20.57,20.22-29.6,29.15-.62-.32-1.27-.62-1.92-.92,11.16-10.7,28.99-27.54,53.48-50.54h0ZM180.37,163.83c3.14-7.36,9.11-12.26,17.84-14.7,8.74-2.44,17.74-1.67,26.98,2.3.86.37,1.69.77,2.5,1.17-7.92,7.48-15.14,14.33-21.64,20.55-2.46-.63-5.09-.89-7.93-.73-4.04.25-8.22,1.76-12.56,4.58-2.78,1.8-4.97,3.92-6.69,6.27-1.34-7.52-.86-14.01,1.49-19.46v.02ZM189.04,260.65c-1.81,5.77-5.61,10.86-11.41,15.34-5.79,4.45-12.47,7.19-20.04,8.23-7.57,1.03-14.88.43-21.92-1.79-9.7-3.06-17.01-8.26-21.93-15.59-4.92-7.35-6.18-14.82-3.76-22.43,2.52-8,8.13-14.82,16.84-20.44,8.3-5.37,22.54-10.25,42.71-14.66-7.66,8-14.34,15.38-20,22.12-3.18,3.79-5.66,7.09-7.47,9.98-1.81,2.86-2.49,4.49-2.03,4.89.53.45,2.18-.64,4.91-3.22,2.75-2.6,8.6-9.02,17.55-19.26,4.22-4.83,8.02-9.11,11.42-12.87.36.6.72,1.21,1.07,1.8-7.73,8.1-14.57,15.49-20.48,22.17-3.28,3.67-5.91,6.84-7.96,9.54-2.04,2.68-2.94,4.14-2.69,4.37.29.26,1.78-.94,4.45-3.58,2.67-2.65,8.57-9,17.71-19.08,3.76-4.14,7.16-7.86,10.25-11.22.38.65.73,1.28,1.09,1.92-7.23,7.68-13.68,14.71-19.3,21.04-3.27,3.69-5.93,6.85-8.01,9.52-2.08,2.65-3.01,4.09-2.79,4.27.25.22,1.69-1.02,4.34-3.69,2.63-2.66,8.52-9.05,17.65-19.14,3.33-3.68,6.39-7.05,9.19-10.11,5.39,9.65,8.82,17.27,10.26,22.86,1.91,7.41,2.04,13.75.35,19.05v-.02ZM243.59,184.13c-2.12,4.93-6.96,9.14-14.49,12.6-4.18,1.93-10.41,3.65-18.68,5.17,3.91-2.57,6.73-5.83,8.41-9.81,1.65-3.91,1.55-7.39-.3-10.48-.6-1-1.38-1.92-2.26-2.79,6.01-6.21,12.63-13.01,19.86-20.4,2.41,2.24,4.41,4.76,5.95,7.6,3.46,6.36,3.96,12.4,1.51,18.11h0Z");
-  ctx.fill(path);
-  ctx.restore();
-}
-
-function drawDropSave(ctx,cx,y,color,pw,ph,isEndPin,isBodyPin){
-  const hw=pw/2,top=y,bot=y+ph;
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(cx,top+1);
-  ctx.bezierCurveTo(cx+hw*.55,top+ph*.12,cx+hw,top+ph*.45,cx+hw,bot-hw*.85);
-  ctx.bezierCurveTo(cx+hw,bot,cx-hw,bot,cx-hw,bot-hw*.85);
-  ctx.bezierCurveTo(cx-hw,top+ph*.45,cx-hw*.55,top+ph*.12,cx,top+1);
-  ctx.closePath();
-  ctx.fillStyle=color; ctx.fill();
-  const g=ctx.createLinearGradient(cx,top,cx,bot);
-  g.addColorStop(0,'rgba(255,255,255,.22)'); g.addColorStop(1,'rgba(0,0,0,.15)');
-  ctx.fillStyle=g; ctx.fill();
-  ctx.strokeStyle='rgba(0,0,0,.35)'; ctx.lineWidth=.8; ctx.stroke();
-  if(isEndPin){
-    ctx.beginPath(); ctx.arc(cx,top+hw*.52,hw*.30,0,Math.PI*2);
-    ctx.fillStyle='#f0ede8'; ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.5)'; ctx.lineWidth=1; ctx.stroke();
-  }
-  if(isBodyPin){
-    ctx.beginPath(); ctx.arc(cx,bot-hw*.52,hw*.30,0,Math.PI*2);
-    ctx.fillStyle='#f0ede8'; ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.5)'; ctx.lineWidth=1; ctx.stroke();
-  }
-  ctx.restore();
 }
 
 // ============================================================================
-// カート追加（メイン処理）
+// オーダー処理
 // ============================================================================
 
 async function goOrder(){
-  const orderBtn = document.getElementById('btn-order');
-  orderBtn.disabled = true;
-  
+  showLoading('画像をアップロード中...');
   try {
-    showLoading('画像を生成中...');
-    
-    // 画像生成
-    const canvas = await generateOrderCanvas();
-    
-    showLoading('画像をアップロード中...');
-    
-    // R2にアップロード
+    const canvas = buildSaveCanvas();
     const uploadResult = await uploadOrderImage(canvas);
     
     if (!uploadResult) {
@@ -523,65 +511,163 @@ async function goOrder(){
     }
     
     lastUploadedImage = uploadResult;
-    
     hideLoading();
-    
-    // 確認モーダル表示
     showConfirmModal(uploadResult);
     
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Order error:', error);
     hideLoading();
     showToast('エラーが発生しました: ' + error.message);
-  } finally {
-    orderBtn.disabled = false;
   }
 }
 
-// ============================================================================
-// 画像生成
-// ============================================================================
+function drawLogoMark(ctx, cx, cy, scale, color) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.fillStyle = color;
+  ctx.font = 'bold 60px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('708', 0, 0);
+  ctx.restore();
+}
 
-async function generateOrderCanvas(){
-  const cv=document.getElementById('save-canvas');
-  const dpr=2, cw=320;
-  const sPW=44,sPH=54,sOVL=18,sPAD=6;
-  const strapH=sPAD+N*sPH-(N-1)*sOVL+sPAD;
-  const ch=56+14+strapH+20+40;
-  cv.width=cw*dpr; cv.height=ch*dpr;
-  const ctx=cv.getContext('2d');
-  ctx.scale(dpr,dpr);
-  ctx.fillStyle='#f0ede8'; ctx.fillRect(0,0,cw,ch);
-  ctx.fillStyle='#111'; ctx.fillRect(0,0,cw,48);
-  ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('708works — FOLKLORE',cw/2,22);
-  ctx.font='9px sans-serif'; ctx.fillStyle='rgba(255,255,255,.5)';
-  ctx.fillText('COLOR ORDER SIMULATOR',cw/2,38);
-  ctx.fillStyle='#444'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('▲ 後ろ（エンドピン側）',cw/2,62);
-  const scx=cw/2-22, sy0=70;
-  for(let i=0;i<N;i++){
-    const y=sy0+sPAD+i*(sPH-sOVL);
-    const frontNum=N-i;
-    drawDropSave(ctx,scx,y,partColors[i],sPW,sPH,i===0,i===N-1);
-    if(frontNum===3){
+function isLightColor(hex) {
+  const r = parseInt(hex.substr(1,2), 16);
+  const g = parseInt(hex.substr(3,2), 16);
+  const b = parseInt(hex.substr(5,2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 155;
+}
+
+function drawDropSave(ctx, cx, y, color, w, h, isEndPin, isBodyPin) {
+  const hw = w / 2;
+  const top = y;
+  const bot = y + h;
+  
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(cx, top + 1);
+  ctx.bezierCurveTo(cx + hw * .55, top + h * .12, cx + hw, top + h * .45, cx + hw, bot - hw * .85);
+  ctx.bezierCurveTo(cx + hw, bot, cx - hw, bot, cx - hw, bot - hw * .85);
+  ctx.bezierCurveTo(cx - hw, top + h * .45, cx - hw * .55, top + h * .12, cx, top + 1);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  
+  const g = ctx.createLinearGradient(cx, top, cx, bot);
+  g.addColorStop(0, 'rgba(255,255,255,.22)');
+  g.addColorStop(.4, 'rgba(255,255,255,.06)');
+  g.addColorStop(1, 'rgba(0,0,0,.15)');
+  ctx.fillStyle = g;
+  ctx.fill();
+  
+  ctx.strokeStyle = 'rgba(0,0,0,.4)';
+  ctx.lineWidth = 0.7;
+  ctx.stroke();
+  
+  if (isEndPin) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(cx, top + hw * .52, hw * .20, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.fill();
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(cx, top + hw * .52, hw * .20, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,0,0,.4)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+  }
+  
+  if (isBodyPin) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(cx, bot - hw * .52, hw * .20, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.fill();
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(cx, bot - hw * .52, hw * .20, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,0,0,.4)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+  }
+  
+  ctx.restore();
+}
+
+function buildSaveCanvas() {
+  const cv = document.createElement('canvas');
+  const cw = 600;
+  const sPW = 50, sPH = 62, sOVL = 20, sPAD = 8;
+  const totalH = sPAD + N * sPH - (N - 1) * sOVL + sPAD;
+  const ch = totalH + 150;
+  
+  cv.width = cw;
+  cv.height = ch;
+  
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#f0ede8';
+  ctx.fillRect(0, 0, cw, ch);
+  
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, cw, 50);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 20px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('FOLKLORE', cw / 2, 22);
+  ctx.fillStyle = '#666';
+  ctx.font = '11px sans-serif';
+  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 38);
+  
+  ctx.fillStyle = '#444';
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('▲ 後ろ（エンドピン側）', cw / 2, 62);
+  
+  const scx = cw / 2 - 22;
+  const sy0 = 70;
+  
+  for (let i = 0; i < N; i++) {
+    const y = sy0 + sPAD + i * (sPH - sOVL);
+    const frontNum = N - i;
+    drawDropSave(ctx, scx, y, partColors[i], sPW, sPH, i === 0, i === N - 1);
+    
+    if (frontNum === 3) {
       const logoColor = isLightColor(partColors[i])
         ? 'rgba(0,0,0,0.25)'
         : 'rgba(255,255,255,0.35)';
-      drawLogoMark(ctx, scx, y+sPH*0.55, 0.12, logoColor);
+      drawLogoMark(ctx, scx, y + sPH * 0.55, 0.12, logoColor);
     }
-    ctx.fillStyle='#bbb'; ctx.font='7px sans-serif'; ctx.textAlign='right';
-    ctx.fillText(`P${frontNum}`,scx+sPW/2+16,y+sPH*.52+3);
-    const cname=COLORS.find(c=>c.hex===partColors[i])?.name||'';
-    ctx.fillStyle='#333'; ctx.font='10px sans-serif'; ctx.textAlign='left';
-    ctx.fillText(cname,scx+sPW/2+20,y+sPH*.52+3);
+    
+    ctx.fillStyle = '#bbb';
+    ctx.font = '7px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(`P${frontNum}`, scx + sPW / 2 + 16, y + sPH * .52 + 3);
+    
+    const cname = COLORS.find(c => c.hex === partColors[i])?.name || '';
+    ctx.fillStyle = '#333';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(cname, scx + sPW / 2 + 20, y + sPH * .52 + 3);
   }
-  const endY=sy0+sPAD+N*sPH-(N-1)*sOVL+sPAD+10;
-  ctx.fillStyle='#444'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('▼ 前（ボディ上部側）',cw/2,endY);
-  ctx.fillStyle='rgba(0,0,0,.1)'; ctx.fillRect(0,ch-28,cw,28);
-  ctx.fillStyle='#888'; ctx.font='9px sans-serif'; ctx.textAlign='center';
-  ctx.fillText('shop.708works.jp',cw/2,ch-10);
+  
+  const endY = sy0 + sPAD + N * sPH - (N - 1) * sOVL + sPAD + 10;
+  ctx.fillStyle = '#444';
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('▼ 前（ボディ上部側）', cw / 2, endY);
+  
+  ctx.fillStyle = 'rgba(0,0,0,.1)';
+  ctx.fillRect(0, ch - 28, cw, 28);
+  ctx.fillStyle = '#888';
+  ctx.font = '9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('shop.708works.jp', cw / 2, ch - 10);
   
   return cv;
 }
@@ -634,6 +720,8 @@ function showConfirmModal(uploadResult){
   const modalImage = document.getElementById('modal-image');
   const modalInfo = document.getElementById('modal-info');
   
+  if (!modal || !modalImage || !modalInfo) return;
+  
   modalImage.src = uploadResult.imageUrl;
   
   const price = PRICE_MAP[N];
@@ -655,7 +743,8 @@ function showConfirmModal(uploadResult){
 }
 
 function closeModal(){
-  document.getElementById('confirm-modal').classList.remove('show');
+  const modal = document.getElementById('confirm-modal');
+  if (modal) modal.classList.remove('show');
 }
 
 function generateColorSummary(){
@@ -769,27 +858,4 @@ async function proceedToCart(){
     hideLoading();
     showToast('カート追加に失敗しました: ' + error.message);
   }
-}
-
-// ============================================================================
-// 初期化
-// ============================================================================
-
-// 初期化済みフラグ（重複実行防止）
-if (typeof window.folkloreInitialized === 'undefined') {
-  window.folkloreInitialized = false;
-}
-
-if (!window.folkloreInitialized) {
-  window.addEventListener('load', () => {
-    buildPalette();
-    buildGrads();
-    updateSummary();
-    buildStrapRows();
-    updatePriceDisplay();
-  });
-
-  window.addEventListener('resize', () => buildStrapRows());
-  
-  window.folkloreInitialized = true;
 }
