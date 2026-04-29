@@ -120,7 +120,7 @@ function initializeSimulator() {
   buildStrapRows();
   updatePriceDisplay();
   updateCountDisplay();
-  updateOrderButtonState(); // カートボタンを初期状態（無効）に
+  // カートボタンは常に有効（モーダルで制御）
   
   console.log('FOLKLORE: Initialization complete');
 }
@@ -345,7 +345,6 @@ function handleTap(i){
     updateSummary();
     // 色を変更したので画像保存フラグをリセット
     hasDownloadedImage = false;
-    updateOrderButtonState();
   }else if(mode==='range'){
     if(rangeStart===null){rangeStart=i;selected.clear();selected.add(i);}
     else{
@@ -562,9 +561,8 @@ async function saveImage(){
     
     // 画像保存済みフラグを立てる
     hasDownloadedImage = true;
-    updateOrderButtonState();
     
-    showToast('画像を保存しました。カートに入れるボタンが有効になりました。');
+    showToast('画像を保存しました');
   }catch(e){
     console.error(e);
     hideLoading();
@@ -572,15 +570,48 @@ async function saveImage(){
   }
 }
 
-// カートボタンの状態を更新
-function updateOrderButtonState() {
-  const btn = document.getElementById('btn-order');
+// モーダル内で画像を保存する専用関数
+async function saveImageInModal(){
+  try{
+    showLoading('画像を生成中...');
+    const canvas = buildSaveCanvas();
+    const blob = await new Promise(r => canvas.toBlob(r,'image/png'));
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `folklore-order-${N}parts-${Date.now()}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    hideLoading();
+    
+    // 画像保存済みフラグを立てる
+    hasDownloadedImage = true;
+    updateModalProceedButton();
+    
+    showToast('画像を保存しました。カートへ進めます。');
+  }catch(e){
+    console.error(e);
+    hideLoading();
+    showToast('保存に失敗しました');
+  }
+}
+
+// モーダル内の「カートへ進む」ボタンの状態を更新
+function updateModalProceedButton() {
+  const btn = document.querySelector('.modal-btn-primary');
+  const saveBtn = document.getElementById('modal-save-btn');
+  
   if (!btn) return;
   
   if (hasDownloadedImage) {
     btn.disabled = false;
     btn.style.opacity = '1';
     btn.style.cursor = 'pointer';
+    if (saveBtn) {
+      saveBtn.textContent = '✓ 画像保存済み';
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = '0.6';
+    }
   } else {
     btn.disabled = true;
     btn.style.opacity = '0.5';
@@ -593,12 +624,6 @@ function updateOrderButtonState() {
 // ============================================================================
 
 async function goOrder(){
-  // 画像保存チェック
-  if (!hasDownloadedImage) {
-    showToast('先に「画像を保存する」ボタンで画像を保存してください');
-    return;
-  }
-  
   showLoading('画像をアップロード中...');
   try {
     const canvas = buildSaveCanvas();
@@ -998,17 +1023,43 @@ function showConfirmModal(uploadResult){
     <p><strong>価格:</strong> ¥${price.toLocaleString()}（税込）</p>
     <p style="margin-top:12px;"><strong>カラー構成:</strong></p>
     <div style="font-size:12px;line-height:1.6;color:#888;margin-top:4px;">${colorSummary}</div>
-    <p style="margin-top:12px;font-size:11px;color:#999;">
-      ※ この内容で注文を確定する場合は「カートへ進む」をクリックしてください
-    </p>
+    
+    <div style="margin-top:20px;padding:16px;background:#fff3cd;border-radius:8px;border:1px solid #ffc107;">
+      <p style="margin:0 0 12px 0;font-size:13px;color:#856404;font-weight:600;">
+        ⚠️ カート追加前に必ず画像を保存してください
+      </p>
+      <p style="margin:0 0 12px 0;font-size:12px;color:#856404;line-height:1.5;">
+        注文後にカラー構成を確認できるよう、下のボタンで画像を保存してください。<br>
+        保存後、「カートへ進む」ボタンが有効になります。
+      </p>
+      <button id="modal-save-btn" onclick="saveImageInModal()" style="
+        width:100%;
+        padding:12px;
+        background:#28a745;
+        color:#fff;
+        border:none;
+        border-radius:6px;
+        font-size:14px;
+        font-weight:600;
+        cursor:pointer;
+        transition:all 0.2s;
+      " onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+        📥 画像を保存する
+      </button>
+    </div>
   `;
   
   modal.classList.add('show');
+  
+  // モーダル表示時にボタン状態を更新
+  setTimeout(() => updateModalProceedButton(), 100);
 }
 
 function closeModal(){
   const modal = document.getElementById('confirm-modal');
   if (modal) modal.classList.remove('show');
+  // モーダルを閉じたら画像保存フラグをリセット（次回のため）
+  hasDownloadedImage = false;
 }
 
 function generateColorSummary(){
