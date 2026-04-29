@@ -89,15 +89,15 @@ const PW=40,PH=50,OVL=16,PAD=6,LABEL_W=72;
 // 初期化
 // ============================================================================
 
-// window.addEventListener('load',()=>{
-//   buildPalette();
-//   buildGrads();
-//   updateSummary();
-//   buildStrapRows();
-//   updatePriceDisplay();
-// });
+window.addEventListener('load',()=>{
+  buildPalette();
+  buildGrads();
+  updateSummary();
+  buildStrapRows();
+  updatePriceDisplay();
+});
 
-// window.addEventListener('resize',()=>buildStrapRows());
+window.addEventListener('resize',()=>buildStrapRows());
 
 // ============================================================================
 // 価格表示
@@ -776,20 +776,20 @@ async function proceedToCart(){
 // ============================================================================
 
 // 初期化済みフラグ（重複実行防止）
-// if (typeof window.folkloreInitialized === 'undefined') {
-//   window.folkloreInitialized = false;
-// }
+if (typeof window.folkloreInitialized === 'undefined') {
+  window.folkloreInitialized = false;
+}
 
-// if (!window.folkloreInitialized) {
-//   window.addEventListener('load', () => {
-//     buildPalette();
-//     buildGrads();
-//     updateSummary();
-//     buildStrapRows();
-//     updatePriceDisplay();
-//   });
+if (!window.folkloreInitialized) {
+  window.addEventListener('load', () => {
+    buildPalette();
+    buildGrads();
+    updateSummary();
+    buildStrapRows();
+    updatePriceDisplay();
+  });
 
-//   window.addEventListener('resize', () => buildStrapRows());
+  window.addEventListener('resize', () => buildStrapRows());
   
-//   window.folkloreInitialized = true;
-// }
+  window.folkloreInitialized = true;
+}
