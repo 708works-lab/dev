@@ -385,7 +385,8 @@ function buildPalette(){
     
     const dot=document.createElement('div');
     dot.className='cb'+(c.id===activeColor.id?' on':'');
-    dot.style.background=c.hex;
+    // 背景色を確実に設定（インラインスタイルで）
+    dot.style.cssText = `background: ${c.hex} !important; width: 32px; height: 32px; border-radius: 50%; display: block; flex-shrink: 0; border: 3px solid ${c.id===activeColor.id?'#111':'transparent'};`;
     dot.dataset.id=c.id;
     
     const nm=document.createElement('div');
@@ -397,7 +398,13 @@ function buildPalette(){
     
     wrap.onclick=()=>{
       activeColor=c;
-      document.querySelectorAll('.cb').forEach(b=>b.classList.toggle('on',b.dataset.id===c.id));
+      document.querySelectorAll('.cb').forEach(b=>{
+        const isActive = b.dataset.id===c.id;
+        b.classList.toggle('on', isActive);
+        // スタイルを直接更新
+        const bgColor = COLORS.find(col => col.id === b.dataset.id)?.hex || '#ccc';
+        b.style.cssText = `background: ${bgColor} !important; width: 32px; height: 32px; border-radius: 50%; display: block; flex-shrink: 0; border: 3px solid ${isActive?'#111':'transparent'};`;
+      });
       document.querySelectorAll('.color-name').forEach(b=>b.classList.toggle('on',b.closest('.cb-wrap')?.dataset.id===c.id));
       if(!selected.size)return;
       saveHistory();
