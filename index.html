@@ -207,7 +207,7 @@ header p{font-size:11px;color:#666;letter-spacing:.15em;margin-top:1px;}
 // ============================================================================
 
 // Cloudflare Worker URL（あなたのWorker URLに置き換えてください）
-const WORKER_URL = 'https://folklore-image-upload.708works.workers.dev';
+const WORKER_URL = 'https://folklore-image-upload.708works.workers.dev/';
 
 // Shopify設定
 const SHOPIFY_DOMAIN = 'shop.708works.jp';
@@ -904,10 +904,16 @@ async function proceedToCart(){
       throw new Error('該当するバリエーションが見つかりません');
     }
     
-    // フォーム送信方式でカート追加（CORS回避）
+    // フォーム送信方式でカート追加（非表示iframe使用でCORS回避）
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.name = 'cart_iframe';
+    document.body.appendChild(iframe);
+    
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = 'https://shop.708works.jp/cart/add';
+    form.target = 'cart_iframe'; // iframeに送信
     
     // Variant ID
     const idInput = document.createElement('input');
@@ -948,14 +954,18 @@ async function proceedToCart(){
     });
     
     document.body.appendChild(form);
+    form.submit();
     
-    // カートに追加してカートページへ遷移
-    hideLoading();
-    showToast('カートに追加します...');
-    
+    // カート追加完了後、カートページへ遷移
     setTimeout(() => {
-      form.submit();
-    }, 500);
+      hideLoading();
+      showToast('カートに追加しました！');
+      
+      // カートページへ遷移
+      setTimeout(() => {
+        window.top.location.href = 'https://shop.708works.jp/cart';
+      }, 800);
+    }, 1000);
     
   } catch (error) {
     console.error('=== カート追加エラー ===');
