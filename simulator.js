@@ -770,3 +770,17 @@ async function proceedToCart(){
     showToast('カート追加に失敗しました: ' + error.message);
   }
 }
+
+// ============================================================================
+// 初期化
+// ============================================================================
+
+window.addEventListener('load', () => {
+  buildPalette();
+  buildGrads();
+  updateSummary();
+  buildStrapRows();
+  updatePriceDisplay();
+});
+
+window.addEventListener('resize', () => buildStrapRows());
