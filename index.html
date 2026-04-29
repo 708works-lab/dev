@@ -207,7 +207,7 @@ header p{font-size:11px;color:#666;letter-spacing:.15em;margin-top:1px;}
 // ============================================================================
 
 // Cloudflare Worker URL（あなたのWorker URLに置き換えてください）
-const WORKER_URL = 'https://folklore-image-upload.708works.workers.dev/';
+const WORKER_URL = 'https://folklore-image-upload.708works.workers.dev';
 
 // Shopify設定
 const SHOPIFY_DOMAIN = 'shop.708works.jp';
@@ -904,48 +904,58 @@ async function proceedToCart(){
       throw new Error('該当するバリエーションが見つかりません');
     }
     
-    // Shopify Cart API
-    const cartData = {
-      items: [{
-        id: parseInt(variantId), // 数値に変換
-        quantity: 1,
-        properties: {
-          '注文ID': lastUploadedImage.orderId,
-          'ウロコパーツ数': `${N}個`,
-          '全長': `約${1150 + (N - 20) * 60}mm`,
-          '価格': `¥${price.toLocaleString()}（税込）`,
-          'カラーオーダー': colorData,
-          'オーダー画像URL': lastUploadedImage.imageUrl
-        }
-      }]
+    // フォーム送信方式でカート追加（CORS回避）
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://shop.708works.jp/cart/add';
+    
+    // Variant ID
+    const idInput = document.createElement('input');
+    idInput.type = 'hidden';
+    idInput.name = 'id';
+    idInput.value = variantId;
+    form.appendChild(idInput);
+    
+    // Quantity
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'hidden';
+    qtyInput.name = 'quantity';
+    qtyInput.value = '1';
+    form.appendChild(qtyInput);
+    
+    // Properties
+    const properties = {
+      '注文ID': lastUploadedImage.orderId,
+      'ウロコパーツ数': `${N}個`,
+      '全長': `約${1150 + (N - 20) * 60}mm`,
+      '価格': `¥${price.toLocaleString()}（税込）`,
+      'カラーオーダー': colorData,
+      'オーダー画像URL': lastUploadedImage.imageUrl
     };
     
-    console.log('送信データ:', JSON.stringify(cartData, null, 2));
-    
-    const response = await fetch('/cart/add.js', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(cartData)
+    Object.entries(properties).forEach(([key, value]) => {
+      const propInput = document.createElement('input');
+      propInput.type = 'hidden';
+      propInput.name = `properties[${key}]`;
+      propInput.value = value;
+      form.appendChild(propInput);
     });
     
-    console.log('レスポンスステータス:', response.status);
+    console.log('送信データ（フォーム）:', {
+      id: variantId,
+      quantity: 1,
+      properties: properties
+    });
     
-    const result = await response.json();
-    console.log('レスポンスデータ:', result);
+    document.body.appendChild(form);
     
-    if (!response.ok || result.status === 'error') {
-      throw new Error(result.description || result.message || 'カート追加に失敗しました');
-    }
-    
+    // カートに追加してカートページへ遷移
     hideLoading();
-    showToast('カートに追加しました！');
+    showToast('カートに追加します...');
     
-    // 2秒後にカートページへリダイレクト
     setTimeout(() => {
-      window.location.href = '/cart';
-    }, 1500);
+      form.submit();
+    }, 500);
     
   } catch (error) {
     console.error('=== カート追加エラー ===');
