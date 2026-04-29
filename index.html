@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -904,68 +905,36 @@ async function proceedToCart(){
       throw new Error('該当するバリエーションが見つかりません');
     }
     
-    // フォーム送信方式でカート追加（非表示iframe使用でCORS回避）
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.name = 'cart_iframe';
-    document.body.appendChild(iframe);
+    // URLパラメータ方式でカート追加（CORS・iframe問題を完全回避）
+    const params = new URLSearchParams();
     
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'https://shop.708works.jp/cart/add';
-    form.target = 'cart_iframe'; // iframeに送信
+    // Line Item Properties
+    params.append('properties[注文ID]', lastUploadedImage.orderId);
+    params.append('properties[ウロコパーツ数]', `${N}個`);
+    params.append('properties[全長]', `約${1150 + (N - 20) * 60}mm`);
+    params.append('properties[価格]', `¥${price.toLocaleString()}（税込）`);
+    params.append('properties[カラーオーダー]', colorData);
+    params.append('properties[オーダー画像URL]', lastUploadedImage.imageUrl);
     
-    // Variant ID
-    const idInput = document.createElement('input');
-    idInput.type = 'hidden';
-    idInput.name = 'id';
-    idInput.value = variantId;
-    form.appendChild(idInput);
+    // カートURL構築
+    const cartUrl = `https://shop.708works.jp/cart/${variantId}:1?${params.toString()}`;
     
-    // Quantity
-    const qtyInput = document.createElement('input');
-    qtyInput.type = 'hidden';
-    qtyInput.name = 'quantity';
-    qtyInput.value = '1';
-    form.appendChild(qtyInput);
+    console.log('カートURL:', cartUrl);
     
-    // Properties
-    const properties = {
-      '注文ID': lastUploadedImage.orderId,
-      'ウロコパーツ数': `${N}個`,
-      '全長': `約${1150 + (N - 20) * 60}mm`,
-      '価格': `¥${price.toLocaleString()}（税込）`,
-      'カラーオーダー': colorData,
-      'オーダー画像URL': lastUploadedImage.imageUrl
-    };
+    hideLoading();
+    showToast('カートに追加します...');
     
-    Object.entries(properties).forEach(([key, value]) => {
-      const propInput = document.createElement('input');
-      propInput.type = 'hidden';
-      propInput.name = `properties[${key}]`;
-      propInput.value = value;
-      form.appendChild(propInput);
-    });
-    
-    console.log('送信データ（フォーム）:', {
-      id: variantId,
-      quantity: 1,
-      properties: properties
-    });
-    
-    document.body.appendChild(form);
-    form.submit();
-    
-    // カート追加完了後、カートページへ遷移
+    // 0.5秒後に遷移
     setTimeout(() => {
-      hideLoading();
-      showToast('カートに追加しました！');
-      
-      // カートページへ遷移
-      setTimeout(() => {
-        window.top.location.href = 'https://shop.708works.jp/cart';
-      }, 800);
-    }, 1000);
+      // トップレベルウィンドウで遷移（iframe内でも動作）
+      if (window.top !== window.self) {
+        // iframe内の場合
+        window.top.location.href = cartUrl;
+      } else {
+        // 通常の場合
+        window.location.href = cartUrl;
+      }
+    }, 500);
     
   } catch (error) {
     console.error('=== カート追加エラー ===');
