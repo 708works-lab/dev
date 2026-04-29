@@ -199,13 +199,13 @@
 }
 
 .folklore-simulator .cb-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px;
-  border-radius: 10px;
-  cursor: pointer;
-  min-width: 0;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  min-width: 0 !important;
 }
 
 .folklore-simulator .cb-wrap:active {
@@ -213,33 +213,36 @@
 }
 
 .folklore-simulator .cb {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  pointer-events: none;
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  border: 3px solid transparent !important;
+  pointer-events: none !important;
+  display: block !important;
+  box-sizing: border-box !important;
 }
 
 .folklore-simulator .cb.on {
-  border-color: #111;
-  box-shadow: 0 0 0 2px #fff inset;
+  border-color: #111 !important;
+  box-shadow: 0 0 0 2px #fff inset !important;
 }
 
 .folklore-simulator .color-name {
-  font-size: 12px;
-  color: #444;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  pointer-events: none;
-  min-width: 0;
-  flex: 1;
+  font-size: 12px !important;
+  color: #444 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  pointer-events: none !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+  display: block !important;
 }
 
 .folklore-simulator .color-name.on {
-  font-weight: 600;
-  color: #111;
+  font-weight: 600 !important;
+  color: #111 !important;
 }
 
 @media (max-width:360px) {
