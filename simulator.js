@@ -83,6 +83,7 @@ let selected=new Set(), mode='single', rangeStart=null;
 let activeColor=COLORS[12];
 let history=[];
 let lastUploadedImage = null;
+let hasDownloadedImage = false; // 画像保存済みフラグ
 const PW=40,PH=50,OVL=16,PAD=6,LABEL_W=72;
 
 // ============================================================================
@@ -119,6 +120,7 @@ function initializeSimulator() {
   buildStrapRows();
   updatePriceDisplay();
   updateCountDisplay();
+  updateOrderButtonState(); // カートボタンを初期状態（無効）に
   
   console.log('FOLKLORE: Initialization complete');
 }
@@ -339,7 +341,11 @@ function handleTap(i){
   if(mode==='single'){
     saveHistory();
     selected.clear(); selected.add(i);
-    partColors[i]=activeColor.hex; updateSummary();
+    partColors[i]=activeColor.hex; 
+    updateSummary();
+    // 色を変更したので画像保存フラグをリセット
+    hasDownloadedImage = false;
+    updateOrderButtonState();
   }else if(mode==='range'){
     if(rangeStart===null){rangeStart=i;selected.clear();selected.add(i);}
     else{
@@ -553,11 +559,32 @@ async function saveImage(){
     a.click();
     URL.revokeObjectURL(url);
     hideLoading();
-    showToast('画像を保存しました');
+    
+    // 画像保存済みフラグを立てる
+    hasDownloadedImage = true;
+    updateOrderButtonState();
+    
+    showToast('画像を保存しました。カートに入れるボタンが有効になりました。');
   }catch(e){
     console.error(e);
     hideLoading();
     showToast('保存に失敗しました');
+  }
+}
+
+// カートボタンの状態を更新
+function updateOrderButtonState() {
+  const btn = document.getElementById('btn-order');
+  if (!btn) return;
+  
+  if (hasDownloadedImage) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
   }
 }
 
@@ -566,24 +593,15 @@ async function saveImage(){
 // ============================================================================
 
 async function goOrder(){
+  // 画像保存チェック
+  if (!hasDownloadedImage) {
+    showToast('先に「画像を保存する」ボタンで画像を保存してください');
+    return;
+  }
+  
   showLoading('画像をアップロード中...');
   try {
     const canvas = buildSaveCanvas();
-    
-    // 画像を自動ダウンロード
-    try {
-      const blob = await new Promise(r => canvas.toBlob(r,'image/png'));
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `folklore-order-${N}parts-${Date.now()}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
-      console.log('注文画像を自動ダウンロードしました');
-    } catch(e) {
-      console.warn('自動ダウンロードに失敗:', e);
-    }
-    
     const uploadResult = await uploadOrderImage(canvas);
     
     if (!uploadResult) {
