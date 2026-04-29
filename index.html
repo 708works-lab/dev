@@ -893,14 +893,14 @@ async function proceedToCart(){
       return `P${String(i + 1).padStart(2, '0')}${pos}: ${name}`;
     }).join('\n');
     
-    // Shopify用：完全英語版
+    // Shopify用：完全英語版（改行なし、カンマ区切り）
     const colorDataEN = partColors.slice().reverse().map((hex, i) => {
       const name = COLORS.find(c => c.hex === hex)?.name || hex;
       let pos = '';
-      if (i === 0) pos = ' [Front/Body]';
-      else if (i === N - 1) pos = ' [Back/Endpin]';
-      return `P${String(i + 1).padStart(2, '0')}${pos}: ${name}`;
-    }).join('\n');
+      if (i === 0) pos = '[Front]';
+      else if (i === N - 1) pos = '[Back]';
+      return `P${String(i + 1).padStart(2, '0')}${pos}:${name}`;
+    }).join(', '); // カンマ区切り1行に
     
     const price = PRICE_MAP[N];
     const variantId = VARIANT_MAP[N];
@@ -921,7 +921,7 @@ async function proceedToCart(){
     params.append('properties[Order ID]', lastUploadedImage.orderId);
     params.append('properties[Parts]', `${N} pieces`);
     params.append('properties[Length]', `${1150 + (N - 20) * 60}mm`);
-    params.append('properties[Price]', `JPY ${price.toLocaleString()}`);
+    params.append('properties[Price]', `JPY ${price}`); // カンマ削除
     params.append('properties[Colors]', colorDataEN);
     params.append('properties[Image]', lastUploadedImage.imageUrl);
     
