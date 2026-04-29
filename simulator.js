@@ -86,38 +86,33 @@ let lastUploadedImage = null;
 const PW=40,PH=50,OVL=16,PAD=6,LABEL_W=72;
 
 // ============================================================================
-// 初期化（重複実行防止）
+// 初期化
 // ============================================================================
 
-if (typeof window.folkloreInitialized === 'undefined') {
-  window.folkloreInitialized = false;
-}
-
-if (!window.folkloreInitialized) {
-  // DOMContentLoadedとloadの両方で対応（より確実に）
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeSimulator);
-  } else {
-    // 既にDOMが読み込まれている場合は即実行
-    initializeSimulator();
+function initializeSimulator() {
+  // 既に初期化済みの場合はスキップ（windowオブジェクトで管理）
+  if (window.folkloreSimulatorInitialized) {
+    console.log('FOLKLORE: Already initialized, skipping...');
+    return;
   }
   
-  window.folkloreInitialized = true;
-}
-
-function initializeSimulator() {
   // DOM要素の存在を確認
   const paletteEl = document.getElementById('palette');
   const gradRowEl = document.getElementById('grad-row');
+  const strapScrollEl = document.getElementById('strap-scroll');
   
-  if (!paletteEl || !gradRowEl) {
-    console.warn('FOLKLORE: Required elements not found, retrying...');
+  if (!paletteEl || !gradRowEl || !strapScrollEl) {
+    console.warn('FOLKLORE: Required elements not found, retrying in 100ms...');
     setTimeout(initializeSimulator, 100);
     return;
   }
   
-  console.log('FOLKLORE: Initializing simulator...');
+  console.log('FOLKLORE: Starting initialization...');
   
+  // 初期化フラグを立てる
+  window.folkloreSimulatorInitialized = true;
+  
+  // 各要素を初期化
   buildPalette();
   buildGrads();
   updateSummary();
@@ -128,8 +123,17 @@ function initializeSimulator() {
   console.log('FOLKLORE: Initialization complete');
 }
 
+// DOM読み込み完了時に初期化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeSimulator);
+} else {
+  // 既にDOMが読み込まれている場合は即実行
+  initializeSimulator();
+}
+
+// リサイズ時の再描画
 window.addEventListener('resize', () => {
-  if (window.folkloreInitialized) {
+  if (window.folkloreSimulatorInitialized) {
     buildStrapRows();
   }
 });
@@ -364,20 +368,33 @@ function buildPalette(){
     return;
   }
   
-  p.innerHTML = ''; // 既存の内容をクリア
+  console.log('FOLKLORE: Building palette...');
+  console.log('FOLKLORE: Current palette children count:', p.children.length);
   
-  COLORS.forEach(c=>{
+  // 既存の内容を完全にクリア
+  while (p.firstChild) {
+    p.removeChild(p.firstChild);
+  }
+  
+  console.log('FOLKLORE: Palette cleared, building with', COLORS.length, 'colors');
+  
+  COLORS.forEach((c, index) => {
     const wrap=document.createElement('div');
     wrap.className='cb-wrap';
     wrap.dataset.id=c.id;
+    
     const dot=document.createElement('div');
     dot.className='cb'+(c.id===activeColor.id?' on':'');
     dot.style.background=c.hex;
     dot.dataset.id=c.id;
+    
     const nm=document.createElement('div');
     nm.className='color-name'+(c.id===activeColor.id?' on':'');
     nm.textContent=c.name;
-    wrap.appendChild(dot); wrap.appendChild(nm);
+    
+    wrap.appendChild(dot);
+    wrap.appendChild(nm);
+    
     wrap.onclick=()=>{
       activeColor=c;
       document.querySelectorAll('.cb').forEach(b=>b.classList.toggle('on',b.dataset.id===c.id));
@@ -387,10 +404,11 @@ function buildPalette(){
       [...selected].forEach(i=>partColors[i]=c.hex);
       redrawAll(); updateSummary();
     };
+    
     p.appendChild(wrap);
   });
   
-  console.log('FOLKLORE: Palette built with', COLORS.length, 'colors');
+  console.log('FOLKLORE: Palette built successfully, final children count:', p.children.length);
 }
 
 // ============================================================================
@@ -404,16 +422,30 @@ function buildGrads(){
     return;
   }
   
-  row.innerHTML = ''; // 既存の内容をクリア
+  console.log('FOLKLORE: Building gradients...');
+  console.log('FOLKLORE: Current gradient children count:', row.children.length);
+  
+  // 既存の内容を完全にクリア
+  while (row.firstChild) {
+    row.removeChild(row.firstChild);
+  }
+  
+  console.log('FOLKLORE: Gradients cleared, building with', GRADS.length, 'presets');
   
   GRADS.forEach(g=>{
     const btn=document.createElement('button');
-    btn.className='gb'; btn.textContent=g.name;
-    btn.onclick=()=>{saveHistory();for(let i=0;i<N;i++)partColors[i]=g.fn(i);redrawAll();updateSummary();};
+    btn.className='gb';
+    btn.textContent=g.name;
+    btn.onclick=()=>{
+      saveHistory();
+      for(let i=0;i<N;i++) partColors[i]=g.fn(i);
+      redrawAll();
+      updateSummary();
+    };
     row.appendChild(btn);
   });
   
-  console.log('FOLKLORE: Gradients built with', GRADS.length, 'presets');
+  console.log('FOLKLORE: Gradients built successfully, final children count:', row.children.length);
 }
 
 // ============================================================================
