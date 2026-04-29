@@ -770,4 +770,3 @@ async function proceedToCart(){
     showToast('カート追加に失敗しました: ' + error.message);
   }
 }
-
