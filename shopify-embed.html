@@ -1,16 +1,8 @@
-<!-- 
-  FOLKLORE Color Simulator - Shopify埋め込み用
-  
-  使い方：
-  1. Shopifyの「ページ」でこのHTMLを貼り付け
-  2. または、テーマの page.folklore.liquid として保存
--->
 
-<!-- CSS読み込み -->
+<!-- FOLKLORE Color Simulator - Shopify埋め込み用 -->
 <link rel="stylesheet" href="https://708works-lab.github.io/dev/simulator.css">
 
-<!-- アプリコンテナ -->
-<div id="folklore-app-container">
+<div class="folklore-simulator">
   <header>
     <h1>FOLKLORE</h1>
     <p>COLOR SIMULATOR &nbsp;|&nbsp; 708works</p>
@@ -79,7 +71,6 @@
     </div>
   </div>
 
-  <!-- 確認モーダル -->
   <div class="modal" id="confirm-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -95,7 +86,6 @@
     </div>
   </div>
 
-  <!-- ローディングオーバーレイ -->
   <div class="loading-overlay" id="loading-overlay">
     <div class="loading-content">
       <div class="loading-spinner"></div>
@@ -107,5 +97,4 @@
   <canvas id="save-canvas" style="display:none;"></canvas>
 </div>
 
-<!-- JavaScript読み込み -->
 <script src="https://708works-lab.github.io/dev/simulator.js"></script>
