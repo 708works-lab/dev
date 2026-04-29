@@ -886,10 +886,19 @@ async function proceedToCart(){
   showLoading('カートに追加中...');
   
   try {
-    // カラーデータ作成
-    const colorData = partColors.slice().reverse().map((hex, i) => {
+    // カラーデータ作成（英語版）
+    const colorDataJP = partColors.slice().reverse().map((hex, i) => {
       const name = COLORS.find(c => c.hex === hex)?.name || hex;
-      const pos = i === 0 ? '[前/ボディ上部側]' : i === N - 1 ? '[後ろ/エンドピン側]' : '';
+      const pos = i === 0 ? ' [前/ボディ上部側]' : i === N - 1 ? ' [後ろ/エンドピン側]' : '';
+      return `P${String(i + 1).padStart(2, '0')}${pos}: ${name}`;
+    }).join('\n');
+    
+    // Shopify用：完全英語版
+    const colorDataEN = partColors.slice().reverse().map((hex, i) => {
+      const name = COLORS.find(c => c.hex === hex)?.name || hex;
+      let pos = '';
+      if (i === 0) pos = ' [Front/Body]';
+      else if (i === N - 1) pos = ' [Back/Endpin]';
       return `P${String(i + 1).padStart(2, '0')}${pos}: ${name}`;
     }).join('\n');
     
@@ -908,13 +917,13 @@ async function proceedToCart(){
     // URLパラメータ方式でカート追加（CORS・iframe問題を完全回避）
     const params = new URLSearchParams();
     
-    // Line Item Properties（英語キー名に変更）
+    // Line Item Properties（完全英語化）
     params.append('properties[Order ID]', lastUploadedImage.orderId);
-    params.append('properties[Parts Count]', `${N}個`);
-    params.append('properties[Total Length]', `約${1150 + (N - 20) * 60}mm`);
-    params.append('properties[Price]', `¥${price.toLocaleString()}（税込）`);
-    params.append('properties[Color Order]', colorData);
-    params.append('properties[Image URL]', lastUploadedImage.imageUrl);
+    params.append('properties[Parts]', `${N} pieces`);
+    params.append('properties[Length]', `${1150 + (N - 20) * 60}mm`);
+    params.append('properties[Price]', `JPY ${price.toLocaleString()}`);
+    params.append('properties[Colors]', colorDataEN);
+    params.append('properties[Image]', lastUploadedImage.imageUrl);
     
     // カートURL構築
     const cartUrl = `https://shop.708works.jp/cart/${variantId}:1?${params.toString()}`;
