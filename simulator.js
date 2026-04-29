@@ -207,6 +207,15 @@ function changeCount(d){
 // ストラップ描画
 // ============================================================================
 
+// 色が明るいかどうかを判定
+function isLightColor(hex) {
+  const r = parseInt(hex.substr(1,2), 16);
+  const g = parseInt(hex.substr(3,2), 16);
+  const b = parseInt(hex.substr(5,2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 155;
+}
+
 function buildStrapRows(){
   const scroll=document.getElementById('strap-scroll');
   const col=document.getElementById('strap-col');
@@ -297,11 +306,28 @@ function drawDrop(ctx,cx,y,color,isSel,badge,isEndPin,isBodyPin){
     ctx.strokeStyle='rgba(0,0,0,.4)'; ctx.lineWidth=.7; ctx.stroke();
   }
   if(badge){
-    ctx.fillStyle='rgba(255,255,255,.80)';
-    ctx.font=`bold ${Math.max(5,PH*.11)}px sans-serif`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(badge,cx,top+PH*.58);
+    // ロゴマークを描画（保存画像と同じスタイル）
+    const logoColor = isLightColor(color) ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.35)';
+    drawLogoMarkSmall(ctx, cx, top+PH*.55, 0.08, logoColor);
   }
+  ctx.restore();
+}
+
+// 通常表示用の小さいロゴマーク
+function drawLogoMarkSmall(ctx, cx, cy, scale, color) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  
+  ctx.fillStyle = color;
+  ctx.font = 'bold 55px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('708', 0, -5);
+  
+  ctx.font = '14px sans-serif';
+  ctx.fillText('works', 0, 20);
+  
   ctx.restore();
 }
 
@@ -543,6 +569,21 @@ async function goOrder(){
   showLoading('画像をアップロード中...');
   try {
     const canvas = buildSaveCanvas();
+    
+    // 画像を自動ダウンロード
+    try {
+      const blob = await new Promise(r => canvas.toBlob(r,'image/png'));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `folklore-order-${N}parts-${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      console.log('注文画像を自動ダウンロードしました');
+    } catch(e) {
+      console.warn('自動ダウンロードに失敗:', e);
+    }
+    
     const uploadResult = await uploadOrderImage(canvas);
     
     if (!uploadResult) {
@@ -564,11 +605,177 @@ function drawLogoMark(ctx, cx, cy, scale, color) {
   ctx.save();
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
+  
+  // SVGのviewBox "0 0 400 400" を基準に、中心を(200,200)として描画
+  ctx.translate(-200, -200);
+  
   ctx.fillStyle = color;
-  ctx.font = 'bold 60px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('708', 0, 0);
+  ctx.beginPath();
+  
+  // 708works ロゴのSVGパス
+  ctx.moveTo(243.84,150.57);
+  ctx.bezierCurveTo(257.23,136.95,279.84,114.12,311.74,82);
+  ctx.bezierCurveTo(310.38,81.77,309.02,81.41,307.69,80.89);
+  ctx.bezierCurveTo(307.51,80.82,307.33,80.77,307.16,80.7);
+  ctx.bezierCurveTo(306.38,80.37,305.64,79.99,304.92,79.58);
+  ctx.bezierCurveTo(304.49,79.33,304.09,79.05,303.69,78.77);
+  ctx.bezierCurveTo(303.43,78.6,303.16,78.43,302.92,78.25);
+  ctx.bezierCurveTo(302.42,77.87,301.95,77.46,301.49,77.05);
+  ctx.bezierCurveTo(301.37,76.94,301.24,76.84,301.12,76.73);
+  ctx.bezierCurveTo(300.66,76.29,300.21,75.81,299.79,75.33);
+  ctx.bezierCurveTo(297.32,72.51,295.62,69.09,294.91,65.43);
+  ctx.bezierCurveTo(289.14,71.83,281.13,80.58,270.86,91.7);
+  ctx.bezierCurveTo(265.4,97.59,262.04,101.2,260.83,102.54);
+  ctx.lineTo(261.99,103.51);
+  ctx.bezierCurveTo(269.74,95.32,274.52,90.5,276.32,89.04);
+  ctx.bezierCurveTo(278.12,87.59,279.52,87.29,280.53,88.15);
+  ctx.lineTo(289.07,95.32);
+  ctx.lineTo(266.02,116.78);
+  ctx.bezierCurveTo(254.68,127.32,244.3,137.02,234.81,145.94);
+  ctx.bezierCurveTo(234.78,145.94,234.76,145.92,234.73,145.91);
+  ctx.bezierCurveTo(219.79,139.59,205.53,138.16,191.97,141.61);
+  ctx.bezierCurveTo(178.4,145.06,169.35,152.16,164.8,162.91);
+  ctx.bezierCurveTo(160.33,173.51,161.5,186.17,168.34,200.96);
+  ctx.bezierCurveTo(145.41,202.27,130.45,203.8,123.47,205.56);
+  ctx.bezierCurveTo(114.47,207.76,107.22,210.87,101.74,214.88);
+  ctx.bezierCurveTo(96.25,218.9,92.41,223.49,90.23,228.66);
+  ctx.bezierCurveTo(86.95,236.39,87.79,245.18,92.76,254.99);
+  ctx.bezierCurveTo(97.72,264.79,107.66,272.85,122.61,279.18);
+  ctx.bezierCurveTo(140.87,286.9,158.39,288.6,175.21,284.26);
+  ctx.bezierCurveTo(192.02,279.91,202.99,271.7,208.1,259.62);
+  ctx.bezierCurveTo(213.39,247.12,210.22,230.07,198.65,208.46);
+  ctx.bezierCurveTo(217.02,208.58,232.12,206.22,243.94,201.38);
+  ctx.bezierCurveTo(252.93,197.73,258.81,192.59,261.6,186.02);
+  ctx.bezierCurveTo(264.4,179.43,263.36,172.27,258.5,164.52);
+  ctx.bezierCurveTo(255.12,159.12,250.21,154.48,243.85,150.55);
+  ctx.lineTo(243.85,150.52);
+  ctx.lineTo(243.84,150.52);
+  ctx.closePath();
+  
+  ctx.moveTo(184.04,191.4);
+  ctx.bezierCurveTo(185.62,187.69,188.1,184.15,191.53,180.77);
+  ctx.bezierCurveTo(194.94,177.39,197.96,175.36,200.62,174.67);
+  ctx.bezierCurveTo(202.19,174.26,203.61,174.15,204.91,174.26);
+  ctx.bezierCurveTo(196.31,182.51,189.98,189.64,183.95,195.64);
+  ctx.bezierCurveTo(184.03,194.36,184.39,192.96,185.04,191.4);
+  ctx.closePath();
+  
+  ctx.moveTo(232.08,155.2);
+  ctx.bezierCurveTo(224.66,162.54,217.85,169.3,211.7,175.45);
+  ctx.bezierCurveTo(210.99,175.06,210.26,174.69,209.47,174.35);
+  ctx.bezierCurveTo(215.73,168.17,222.66,161.39,230.25,154.02);
+  ctx.bezierCurveTo(230.88,154.4,231.49,154.8,232.09,155.2);
+  ctx.closePath();
+  
+  ctx.moveTo(184.27,200.31);
+  ctx.bezierCurveTo(184.22,200.19,184.16,200.06,184.11,199.94);
+  ctx.bezierCurveTo(190.55,193.23,198.67,185.03,208.44,175.36);
+  ctx.bezierCurveTo(209.19,175.77,209.83,176.25,210.36,176.79);
+  ctx.bezierCurveTo(200.41,186.72,192.16,195.04,185.6,201.75);
+  ctx.bezierCurveTo(185.11,201.33,184.66,200.86,184.27,200.31);
+  ctx.closePath();
+  
+  ctx.moveTo(186.9,205.14);
+  ctx.bezierCurveTo(186.76,205.14,186.63,205.17,186.5,205.18);
+  ctx.bezierCurveTo(186.46,205.1,186.43,205.03,186.39,204.94);
+  ctx.bezierCurveTo(186.56,205.01,186.73,205.07,186.9,205.13);
+  ctx.closePath();
+  
+  ctx.moveTo(203,197.97);
+  ctx.bezierCurveTo(199.36,201.22,196.04,203.07,193.02,203.55);
+  ctx.bezierCurveTo(192.84,203.58,192.67,203.58,192.5,203.6);
+  ctx.bezierCurveTo(197.97,197.82,204.51,191,212.13,183.11);
+  ctx.bezierCurveTo(211.97,184.29,211.65,185.54,211.08,186.89);
+  ctx.bezierCurveTo(209.35,191.01,206.65,194.71,203.01,197.97);
+  ctx.closePath();
+  
+  ctx.moveTo(189.97,203.6);
+  ctx.bezierCurveTo(189.12,203.5,188.3,203.3,187.53,202.97);
+  ctx.bezierCurveTo(187.5,202.97,187.48,202.94,187.46,202.93);
+  ctx.bezierCurveTo(193.84,196.26,201.85,188.01,211.44,178.26);
+  ctx.bezierCurveTo(211.52,178.41,211.62,178.55,211.68,178.71);
+  ctx.bezierCurveTo(211.96,179.37,212.1,180.09,212.18,180.82);
+  ctx.bezierCurveTo(203.42,189.74,196.01,197.34,189.97,203.6);
+  ctx.closePath();
+  
+  ctx.moveTo(213.26,176.41);
+  ctx.bezierCurveTo(219.34,170.23,226.05,163.46,233.37,156.1);
+  ctx.bezierCurveTo(233.99,156.56,234.6,157.03,235.17,157.53);
+  ctx.bezierCurveTo(227.9,164.87,221.22,171.64,215.16,177.8);
+  ctx.bezierCurveTo(214.58,177.31,213.93,176.86,213.25,176.42);
+  ctx.closePath();
+  
+  ctx.moveTo(271.48,121);
+  ctx.bezierCurveTo(261.1,131.41,251.53,141.03,242.74,149.89);
+  ctx.bezierCurveTo(242.08,149.5,241.38,149.14,240.69,148.77);
+  ctx.bezierCurveTo(251.6,137.88,268.8,120.84,292.28,97.67);
+  ctx.lineTo(293.58,98.82);
+  ctx.lineTo(271.48,121);
+  ctx.closePath();
+  
+  ctx.moveTo(290.88,96.58);
+  ctx.lineTo(291.29,96.94);
+  ctx.lineTo(268.93,118.89);
+  ctx.bezierCurveTo(258.21,129.41,248.36,139.11,239.33,148.04);
+  ctx.bezierCurveTo(238.71,147.72,238.06,147.42,237.41,147.12);
+  ctx.bezierCurveTo(248.57,136.42,266.4,119.58,290.89,96.58);
+  ctx.closePath();
+  
+  ctx.moveTo(180.37,163.83);
+  ctx.bezierCurveTo(183.51,156.47,189.48,151.57,198.21,149.13);
+  ctx.bezierCurveTo(206.95,146.69,215.95,147.46,225.19,151.43);
+  ctx.bezierCurveTo(226.05,151.8,226.88,152.2,227.69,152.6);
+  ctx.bezierCurveTo(219.77,160.08,212.55,166.93,206.05,173.15);
+  ctx.bezierCurveTo(203.59,172.52,200.96,172.26,198.12,172.42);
+  ctx.bezierCurveTo(194.08,172.67,189.9,174.18,185.56,177);
+  ctx.bezierCurveTo(182.78,178.8,180.59,180.92,178.87,183.27);
+  ctx.bezierCurveTo(177.53,175.75,178.01,169.26,180.36,163.85);
+  ctx.closePath();
+  
+  ctx.moveTo(189.04,260.65);
+  ctx.bezierCurveTo(187.23,266.42,183.43,271.51,177.63,275.99);
+  ctx.bezierCurveTo(171.84,280.44,165.16,283.18,157.59,284.22);
+  ctx.bezierCurveTo(150.02,285.25,142.71,284.65,135.67,282.43);
+  ctx.bezierCurveTo(125.97,279.37,118.66,274.17,113.74,266.84);
+  ctx.bezierCurveTo(108.82,259.49,107.56,252.02,109.98,244.41);
+  ctx.bezierCurveTo(112.5,236.41,118.11,229.59,126.82,223.97);
+  ctx.bezierCurveTo(135.12,218.6,149.36,213.72,169.53,209.31);
+  ctx.bezierCurveTo(161.87,217.31,155.19,224.69,149.53,231.43);
+  ctx.bezierCurveTo(146.35,235.22,143.87,238.52,142.06,241.41);
+  ctx.bezierCurveTo(140.25,244.27,139.57,245.9,140.03,246.3);
+  ctx.bezierCurveTo(140.56,246.75,142.21,245.66,144.94,243.08);
+  ctx.bezierCurveTo(147.69,240.48,153.54,234.06,162.49,223.82);
+  ctx.bezierCurveTo(166.71,218.99,170.51,214.71,173.91,210.95);
+  ctx.bezierCurveTo(174.27,211.55,174.63,212.16,174.98,212.75);
+  ctx.bezierCurveTo(167.25,220.85,160.41,228.24,154.5,234.92);
+  ctx.bezierCurveTo(151.22,238.59,148.59,241.76,146.54,244.46);
+  ctx.bezierCurveTo(144.5,247.14,143.6,248.6,143.85,248.83);
+  ctx.bezierCurveTo(144.14,249.09,145.63,247.89,148.3,245.25);
+  ctx.bezierCurveTo(150.97,242.6,156.87,236.25,166.01,226.17);
+  ctx.bezierCurveTo(169.77,222.03,173.17,218.31,176.26,214.95);
+  ctx.bezierCurveTo(176.64,215.6,176.99,216.23,177.35,216.87);
+  ctx.bezierCurveTo(170.12,224.55,163.67,231.58,158.05,237.91);
+  ctx.bezierCurveTo(154.78,241.6,152.12,244.76,150.04,247.43);
+  ctx.bezierCurveTo(147.96,250.08,147.03,251.52,147.25,251.7);
+  ctx.bezierCurveTo(147.5,251.92,148.94,250.68,151.59,248.01);
+  ctx.bezierCurveTo(154.22,245.35,160.11,238.96,169.24,228.87);
+  ctx.bezierCurveTo(172.57,225.19,175.63,221.82,178.43,218.76);
+  ctx.bezierCurveTo(183.82,228.41,187.25,236.03,188.69,241.62);
+  ctx.bezierCurveTo(190.6,249.03,190.73,255.37,189.04,260.67);
+  ctx.closePath();
+  
+  ctx.moveTo(243.59,184.13);
+  ctx.bezierCurveTo(241.47,189.06,236.63,193.27,229.10,196.73);
+  ctx.bezierCurveTo(224.92,198.66,218.69,200.38,210.42,201.9);
+  ctx.bezierCurveTo(214.33,199.33,217.15,196.07,218.83,192.09);
+  ctx.bezierCurveTo(220.48,188.18,220.38,184.7,218.53,181.61);
+  ctx.bezierCurveTo(217.93,180.61,217.15,179.69,216.27,178.82);
+  ctx.bezierCurveTo(222.28,172.61,228.9,165.81,236.13,158.42);
+  ctx.bezierCurveTo(238.54,160.66,240.54,163.18,242.08,166.02);
+  ctx.bezierCurveTo(245.54,172.38,246.04,178.42,243.59,184.13);
+  ctx.closePath();
+  
+  ctx.fill();
   ctx.restore();
 }
 
