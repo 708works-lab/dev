@@ -1156,15 +1156,36 @@ async function proceedToCart(){
       properties: props
     });
     
-    document.body.appendChild(form);
+    // デバッグ用：送信データを確認
+    const debugInfo = `
+カート追加情報:
+━━━━━━━━━━━━
+ウロコ数: ${N}個
+Variant ID: ${variantId}
+価格: ¥${price.toLocaleString()}
+
+カラー情報:
+${colorDataEN}
+
+注文ID: ${lastUploadedImage.orderId}
+画像URL: ${lastUploadedImage.imageUrl}
+━━━━━━━━━━━━
+このデータでカートに追加します。
+    `.trim();
     
-    hideLoading();
-    showToast('カートに追加します...');
-    
-    // フォーム送信
-    setTimeout(() => {
-      form.submit();
-    }, 500);
+    if (confirm(debugInfo + '\n\nOKを押すとカートに追加されます。')) {
+      document.body.appendChild(form);
+      hideLoading();
+      showToast('カートに追加します...');
+      
+      // フォーム送信
+      setTimeout(() => {
+        form.submit();
+      }, 500);
+    } else {
+      hideLoading();
+      return;
+    }
     
   } catch (error) {
     console.error('=== カート追加エラー ===');
