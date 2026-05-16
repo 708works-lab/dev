@@ -1156,36 +1156,101 @@ async function proceedToCart(){
       properties: props
     });
     
-    // デバッグ用：送信データを確認
-    const debugInfo = `
-カート追加情報:
-━━━━━━━━━━━━
-ウロコ数: ${N}個
-Variant ID: ${variantId}
-価格: ¥${price.toLocaleString()}
-
-カラー情報:
-${colorDataEN}
-
-注文ID: ${lastUploadedImage.orderId}
-画像URL: ${lastUploadedImage.imageUrl}
-━━━━━━━━━━━━
-このデータでカートに追加します。
-    `.trim();
+    // デバッグモーダルを表示
+    const debugModal = document.createElement('div');
+    debugModal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    `;
     
-    if (confirm(debugInfo + '\n\nOKを押すとカートに追加されます。')) {
-      document.body.appendChild(form);
+    const debugContent = document.createElement('div');
+    debugContent.style.cssText = `
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+    `;
+    
+    debugContent.innerHTML = `
+      <h3 style="margin: 0 0 16px 0; color: #111;">🔍 カート追加データ確認</h3>
+      
+      <div style="background: #f5f5f5; padding: 16px; border-radius: 8px; margin-bottom: 16px; font-family: monospace; font-size: 12px; line-height: 1.8;">
+        <strong>Variant ID:</strong> ${variantId}<br>
+        <strong>ウロコ数:</strong> ${N}個<br>
+        <strong>価格:</strong> ¥${price.toLocaleString()}<br>
+        <strong>注文ID:</strong> ${lastUploadedImage.orderId}<br>
+        <strong>画像URL:</strong> ${lastUploadedImage.imageUrl}<br><br>
+        
+        <strong style="color: #d32f2f;">【カラー情報】</strong><br>
+        <div style="background: #fff; padding: 12px; border-radius: 4px; margin-top: 8px; white-space: pre-wrap; word-break: break-all;">
+${colorDataEN}
+        </div>
+      </div>
+      
+      <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+        <p style="margin: 0; font-size: 13px; color: #856404;">
+          ⚠️ 上記のカラー情報が正しく表示されていることを確認してください。<br>
+          表示されている場合は「カートに追加」ボタンを押してください。
+        </p>
+      </div>
+      
+      <div style="display: flex; gap: 8px;">
+        <button id="debug-cancel" style="
+          flex: 1;
+          padding: 14px;
+          background: #f0f0f0;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          cursor: pointer;
+          font-weight: 600;
+        ">キャンセル</button>
+        
+        <button id="debug-proceed" style="
+          flex: 2;
+          padding: 14px;
+          background: #28a745;
+          color: #fff;
+          border: none;
+          border-radius: 8px;
+          font-size: 14px;
+          cursor: pointer;
+          font-weight: 600;
+        ">カートに追加する</button>
+      </div>
+    `;
+    
+    debugModal.appendChild(debugContent);
+    document.body.appendChild(debugModal);
+    
+    // キャンセルボタン
+    document.getElementById('debug-cancel').onclick = () => {
+      debugModal.remove();
       hideLoading();
+    };
+    
+    // 追加ボタン
+    document.getElementById('debug-proceed').onclick = () => {
+      debugModal.remove();
+      document.body.appendChild(form);
       showToast('カートに追加します...');
       
-      // フォーム送信
       setTimeout(() => {
         form.submit();
-      }, 500);
-    } else {
-      hideLoading();
-      return;
-    }
+      }, 300);
+    };
     
   } catch (error) {
     console.error('=== カート追加エラー ===');
