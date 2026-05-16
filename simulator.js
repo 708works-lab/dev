@@ -1133,13 +1133,13 @@ async function proceedToCart(){
     inputQty.value = '1';
     form.appendChild(inputQty);
     
-    // Properties - シンプルに最小限のみ
+    // Properties - アンダースコアなしで表示されるように
     const props = {
-      '_Order': lastUploadedImage.orderId,
-      '_Parts': `${N}pcs`,
-      '_Length': `${1150 + (N - 20) * 60}mm`,
-      '_Colors': colorDataEN,
-      '_Image': lastUploadedImage.imageUrl
+      'Order ID': lastUploadedImage.orderId,
+      'Parts': `${N}pcs`,
+      'Length': `${1150 + (N - 20) * 60}mm`,
+      'Colors': colorDataEN,
+      'Image URL': lastUploadedImage.imageUrl
     };
     
     Object.entries(props).forEach(([key, value]) => {
