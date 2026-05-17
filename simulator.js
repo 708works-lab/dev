@@ -6,7 +6,7 @@
 const WORKER_URL = 'https://folklore-image-upload.708works.workers.dev';
 
 // Shopify設定
-const SHOPIFY_DOMAIN = 'shop.708works.jp';
+const SHOPIFY_DOMAIN = '708works.jp';
 
 // ウロコ数とVariant IDのマッピング
 const VARIANT_MAP = {
@@ -956,7 +956,7 @@ function buildSaveCanvas() {
   ctx.fillStyle = '#888';
   ctx.font = '9px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('shop.708works.jp', cw / 2, ch - 10);
+  ctx.fillText('708works.jp', cw / 2, ch - 10);
   
   return cv;
 }
