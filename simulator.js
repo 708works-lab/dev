@@ -1116,7 +1116,7 @@ async function proceedToCart(){
     // 最終手段：FormDataでPOST送信（非表示iframe経由）
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = 'https://shop.708works.jp/cart/add';
+    form.action = 'https://708works.jp/cart/add';
     form.style.display = 'none';
     
     // ID
