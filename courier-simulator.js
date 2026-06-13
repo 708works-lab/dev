@@ -169,15 +169,19 @@ function applyCourierColors() {
   });
   wrap.querySelectorAll('[data-zone="front"]').forEach(el => {
     el.setAttribute('fill', courierColors.front);
-    el.setAttribute('stroke', 'none');
+    el.setAttribute('stroke', leatherStroke(courierColors.front));
+    el.setAttribute('stroke-width', '1.5');
+    el.setAttribute('stroke-opacity', '1');
   });
   wrap.querySelectorAll('[data-zone="rear"]').forEach(el => {
     el.setAttribute('fill', courierColors.rear);
-    el.setAttribute('stroke', 'none');
+    el.setAttribute('stroke', leatherStroke(courierColors.rear));
+    el.setAttribute('stroke-width', '1.5');
+    el.setAttribute('stroke-opacity', '1');
   });
 
   const logo = wrap.querySelector('#logo');
-  if (logo) logo.setAttribute('fill', engravingColor(courierColors.front));
+  if (logo) logo.setAttribute('fill', engravingColor(courierColors.rear));
 
   highlightActiveZone();
 }
@@ -194,11 +198,14 @@ function highlightActiveZone() {
     const isActive = highlightZones.includes(zone);
     wrap.querySelectorAll(`[data-zone="${zone}"]`).forEach(el => {
       if (isActive) {
-        el.setAttribute('stroke', '#c8c8c8');
+        el.setAttribute('stroke', activeStroke(zone));
         el.setAttribute('stroke-width', '6');
-        el.setAttribute('stroke-opacity', '0.55');
+        el.setAttribute('stroke-opacity', '0.65');
       } else {
-        el.setAttribute('stroke', zone === 'belt' ? 'rgba(0,0,0,0.2)' : 'none');
+        const s = zone === 'belt' ? 'rgba(0,0,0,0.2)'
+                : zone === 'front' ? leatherStroke(courierColors.front)
+                : leatherStroke(courierColors.rear);
+        el.setAttribute('stroke', s);
         el.setAttribute('stroke-width', '1.5');
         el.setAttribute('stroke-opacity', '1');
       }
@@ -390,6 +397,22 @@ function colorName(hex, zone) {
 // ============================================================================
 // カラーユーティリティ
 // ============================================================================
+
+function leatherStroke(hex) {
+  const h = hex.replace('#','');
+  const lum = (parseInt(h.slice(0,2),16)*0.299 + parseInt(h.slice(2,4),16)*0.587 + parseInt(h.slice(4,6),16)*0.114) / 255;
+  return lum > 0.6 ? 'rgba(0,0,0,0.22)' : 'none';
+}
+
+function activeStroke(zone) {
+  const color = zone === 'front' ? courierColors.front
+               : zone === 'rear' ? courierColors.rear
+               : courierColors.belt;
+  const h = color.replace('#','');
+  const lum = (parseInt(h.slice(0,2),16)*0.299 + parseInt(h.slice(2,4),16)*0.587 + parseInt(h.slice(4,6),16)*0.114) / 255;
+  if (zone === 'belt') return '#888888';
+  return lum > 0.55 ? '#555555' : '#d8d8d8';
+}
 
 function darkenHex(hex, factor) {
   const h = hex.replace('#','');
