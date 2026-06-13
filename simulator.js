@@ -743,7 +743,7 @@ async function saveImage(){
   if (!cv) return;
   showLoading('画像を生成中...');
   try{
-    const canvas = buildSaveCanvas();
+    const canvas = await buildSaveCanvas();
     const blob = await new Promise(r => canvas.toBlob(r,'image/png'));
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -768,7 +768,7 @@ async function saveImage(){
 async function saveImageInModal(){
   try{
     showLoading('画像を生成中...');
-    const canvas = buildSaveCanvas();
+    const canvas = await buildSaveCanvas();
     const blob = await new Promise(r => canvas.toBlob(r,'image/png'));
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -820,7 +820,7 @@ function updateModalProceedButton() {
 async function goOrder(){
   showLoading('画像をアップロード中...');
   try {
-    const canvas = buildSaveCanvas();
+    const canvas = await buildSaveCanvas();
     const uploadResult = await uploadOrderImage(canvas);
     
     if (!uploadResult) {
@@ -1083,75 +1083,116 @@ function drawDropSave(ctx, cx, y, color, w, h, isEndPin, isBodyPin) {
   ctx.restore();
 }
 
-function buildSaveCanvas() {
+async function buildSaveCanvas() {
   const cv = document.createElement('canvas');
   const cw = 600;
-  const sPW = 50, sPH = 62, sOVL = 20, sPAD = 8;
-  const totalH = sPAD + N * sPH - (N - 1) * sOVL + sPAD;
-  const ch = totalH + 150;
-  
+
+  // SVG描画サイズ（プレビューより少し大きく）
+  const svgSaveW = 60;
+  const scale = svgSaveW / SVG_VW;
+
+  // buildStrapSVGと同じviewBox高さ計算
+  const shiftFixed = (N - 20) * PIECE_PITCH;
+  const vbTop = SVG_VTOP - 5;
+  const vbBottom = SVG_VTOP + 19 * PIECE_PITCH + shiftFixed + 90;
+  const vbH = vbBottom - vbTop;
+  const svgSaveH = Math.round(vbH * scale);
+
+  const headerH = 50;
+  const topLabelH = 25;
+  const bottomLabelH = 25;
+  const footerH = 28;
+  const svgX = 10;
+  const svgY0 = headerH + topLabelH;
+  const ch = svgY0 + svgSaveH + bottomLabelH + footerH + 10;
+
   cv.width = cw;
   cv.height = ch;
-  
+
   const ctx = cv.getContext('2d');
   ctx.fillStyle = '#f0ede8';
   ctx.fillRect(0, 0, cw, ch);
-  
+
+  // ヘッダー
   ctx.fillStyle = '#111';
-  ctx.fillRect(0, 0, cw, 50);
+  ctx.fillRect(0, 0, cw, headerH);
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 20px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('FOLKLORE', cw / 2, 22);
+  ctx.fillText('FOLKLORE', cw / 2, 28);
   ctx.fillStyle = '#666';
   ctx.font = '11px sans-serif';
-  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 38);
-  
+  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 42);
+
+  // 上部ラベル
   ctx.fillStyle = '#444';
   ctx.font = 'bold 9px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('▲ 後ろ（エンドピン側）', cw / 2, 62);
-  
-  const scx = cw / 2 - 22;
-  const sy0 = 70;
-  
-  for (let i = 0; i < N; i++) {
-    const y = sy0 + sPAD + i * (sPH - sOVL);
+  ctx.fillText('▲ 後ろ（エンドピン側）', svgX + svgSaveW / 2, svgY0 - 6);
+
+  // SVGをシリアライズしてCanvasに描画
+  const svgEl = document.getElementById('folklore-strap-svg');
+  if (svgEl) {
+    const cloned = svgEl.cloneNode(true);
+    cloned.setAttribute('width', svgSaveW);
+    cloned.setAttribute('height', svgSaveH);
+    cloned.style.margin = '0';
+    const svgStr = new XMLSerializer().serializeToString(cloned);
+    // iOS Safari互換: data URIを使用
+    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+    await new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => { ctx.drawImage(img, svgX, svgY0, svgSaveW, svgSaveH); resolve(); };
+      img.onerror = resolve;
+      img.src = dataUri;
+    });
+  }
+
+  // 下部ラベル
+  ctx.fillStyle = '#444';
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('▼ 前（ボディ上部側）', svgX + svgSaveW / 2, svgY0 + svgSaveH + 14);
+
+  // 各ピースのカラーラベル（SVG右側に配置）
+  const labelX = svgX + svgSaveW + 18;
+  const order = getDisplayOrder(N);
+  order.forEach((pn, i) => {
+    // ピース中心のY座標（viewBox内のpiece位置から計算）
+    const pieceY = svgY0 + (5 + (i + 0.5) * PIECE_PITCH) * scale;
+    const color = partColors[i];
     const frontNum = N - i;
-    drawDropSave(ctx, scx, y, partColors[i], sPW, sPH, i === 0, i === N - 1);
-    
-    if (frontNum === 3) {
-      const logoColor = isLightColor(partColors[i])
-        ? 'rgba(0,0,0,0.25)'
-        : 'rgba(255,255,255,0.35)';
-      drawLogoMark(ctx, scx, y + sPH * 0.55, 0.12, logoColor);
-    }
-    
-    ctx.fillStyle = '#bbb';
-    ctx.font = '7px sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(`P${frontNum}`, scx + sPW / 2 + 16, y + sPH * .52 + 3);
-    
-    const cname = COLORS.find(c => c.hex === partColors[i])?.name || '';
+    const cname = COLORS.find(c => c.hex === color)?.name || '';
+
+    // カラースウォッチ
+    ctx.beginPath();
+    ctx.arc(labelX + 6, pieceY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+
+    // P番号
+    ctx.fillStyle = '#aaa';
+    ctx.font = '8px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`P${String(frontNum).padStart(2, '0')}`, labelX + 16, pieceY - 2);
+
+    // カラー名
     ctx.fillStyle = '#333';
     ctx.font = '10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(cname, scx + sPW / 2 + 20, y + sPH * .52 + 3);
-  }
-  
-  const endY = sy0 + sPAD + N * sPH - (N - 1) * sOVL + sPAD + 10;
-  ctx.fillStyle = '#444';
-  ctx.font = 'bold 9px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('▼ 前（ボディ上部側）', cw / 2, endY);
-  
+    ctx.fillText(cname, labelX + 16, pieceY + 10);
+  });
+
+  // フッター
   ctx.fillStyle = 'rgba(0,0,0,.1)';
-  ctx.fillRect(0, ch - 28, cw, 28);
+  ctx.fillRect(0, ch - footerH, cw, footerH);
   ctx.fillStyle = '#888';
   ctx.font = '9px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('708works.jp', cw / 2, ch - 10);
-  
+
   return cv;
 }
 
