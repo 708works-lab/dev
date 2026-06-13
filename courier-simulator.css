@@ -18,54 +18,53 @@
   font-size: 11px; color: #666; letter-spacing: .15em; margin-top: 1px;
 }
 
-/* アプリ全体 */
+/* アプリ全体：左＝コントロール、右＝プレビュー */
 .courier-simulator .app {
   width: 100%; max-width: 520px; margin: 0 auto;
-  display: flex; flex-direction: column; gap: 0;
-}
-
-/* ━━━ ストラッププレビュー（全幅・大型） ━━━ */
-.courier-simulator .strap-preview-area {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
-  padding: 10px 10px 6px;
-  gap: 6px;
-  background: #e8e4de;
-  border-bottom: 1px solid #d8d4ce;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 8px 4px;
 }
-.courier-simulator .dir-tag-h {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
+
+/* ━━━ 左：コントロールカラム ━━━ */
+.courier-simulator .ctrl-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* ━━━ 右：プレビューカラム ━━━ */
+.courier-simulator .preview-col {
+  flex: 0 0 42%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 前／後ろ タグ（SVGの上下） */
+.courier-simulator .dir-tag-v {
+  width: 100%;
   text-align: center;
-  padding: 8px 4px;
+  padding: 5px 4px;
   border-radius: 6px;
   background: #333; color: #fff;
   font-size: 10px; font-weight: 500;
   line-height: 1.2;
-  flex-shrink: 0;
 }
-.courier-simulator .dir-tag-h small {
-  display: block; font-size: 8px; color: #aaa; font-weight: 400; margin-top: 3px;
+.courier-simulator .dir-tag-v small {
+  display: block; font-size: 8px; color: #aaa; font-weight: 400; margin-top: 2px;
 }
+
 .courier-simulator .strap-wrap {
-  flex: 1;
-  max-width: 220px;
-  margin: 0 auto;
+  width: 100%;
 }
 .courier-simulator .strap-wrap svg {
   width: 100%; height: auto; display: block;
-}
-
-/* ━━━ コントロールエリア ━━━ */
-.courier-simulator .controls-area {
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-  padding: 10px 10px 4px;
-}
-.courier-simulator .ctrl-col {
-  flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0;
 }
 
 /* 共通ラベル */

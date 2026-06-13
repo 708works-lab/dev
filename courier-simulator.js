@@ -36,17 +36,11 @@ const COURIER_LEATHER_COLORS = [
   {id:'black',   name:'Black',     hex:'#1a1a1a'},
 ];
 
-// ナイロンベルト専用カラー（9色）
+// ナイロンベルト専用カラー（3色）
 const COURIER_BELT_COLORS = [
-  {id:'black',   name:'Black',   hex:'#1a1a1a'},
-  {id:'choco',   name:'Choco',   hex:'#4a2018'},
-  {id:'brown',   name:'Brown',   hex:'#9e3820'},
-  {id:'camel',   name:'Camel',   hex:'#c46030'},
-  {id:'tan',     name:'Tan',     hex:'#d4742a'},
-  {id:'natural', name:'Natural', hex:'#e8c4a0'},
-  {id:'olive',   name:'Olive',   hex:'#7a7848'},
-  {id:'navy',    name:'Navy',    hex:'#1e2540'},
-  {id:'grey',    name:'Grey',    hex:'#9090a0'},
+  {id:'black', name:'Black', hex:'#1a1a1a'},
+  {id:'brown', name:'Brown', hex:'#b07840'},
+  {id:'ivory', name:'Ivory', hex:'#f0ece0'},
 ];
 
 // ゾーン定義（通常モード：2ゾーン、分離モード：3ゾーン）
@@ -61,7 +55,7 @@ const ZONE_LABEL = {
 // 状態
 // ============================================================================
 
-let courierColors = { front:'#1a1a1a', belt:'#9e3820', rear:'#1a1a1a' };
+let courierColors = { front:'#1a1a1a', belt:'#1a1a1a', rear:'#1a1a1a' };
 let courierLinked      = true;   // 前後同色モード
 let courierActiveZone  = 'leather'; // 'leather' | 'front' | 'belt' | 'rear'
 let courierSelectedLen = 'standard';
@@ -169,13 +163,17 @@ function applyCourierColors() {
 
   wrap.querySelectorAll('[data-zone="belt"]').forEach(el => {
     el.setAttribute('fill', courierColors.belt);
-    el.setAttribute('stroke', darkenHex(courierColors.belt, 0.55));
+    el.setAttribute('stroke', 'rgba(0,0,0,0.2)');
+    el.setAttribute('stroke-width', '1.5');
+    el.setAttribute('stroke-opacity', '1');
   });
   wrap.querySelectorAll('[data-zone="front"]').forEach(el => {
     el.setAttribute('fill', courierColors.front);
+    el.setAttribute('stroke', 'none');
   });
   wrap.querySelectorAll('[data-zone="rear"]').forEach(el => {
     el.setAttribute('fill', courierColors.rear);
+    el.setAttribute('stroke', 'none');
   });
 
   const logo = wrap.querySelector('#logo');
@@ -196,14 +194,13 @@ function highlightActiveZone() {
     const isActive = highlightZones.includes(zone);
     wrap.querySelectorAll(`[data-zone="${zone}"]`).forEach(el => {
       if (isActive) {
-        el.setAttribute('stroke-width', '5');
-        el.setAttribute('stroke', '#f0c040');
-        el.setAttribute('stroke-opacity', '0.9');
+        el.setAttribute('stroke', '#c8c8c8');
+        el.setAttribute('stroke-width', '6');
+        el.setAttribute('stroke-opacity', '0.55');
       } else {
-        el.removeAttribute('stroke-width');
-        el.removeAttribute('stroke-opacity');
-        el.setAttribute('stroke', zone === 'belt'
-          ? darkenHex(courierColors.belt, 0.55) : '#000000');
+        el.setAttribute('stroke', zone === 'belt' ? 'rgba(0,0,0,0.2)' : 'none');
+        el.setAttribute('stroke-width', '1.5');
+        el.setAttribute('stroke-opacity', '1');
       }
     });
   });

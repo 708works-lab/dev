@@ -9,64 +9,60 @@
   </header>
   <div class="app">
 
-    <!-- ストラップ大型プレビュー（全幅） -->
-    <div class="strap-preview-area">
-      <div class="dir-tag-h">前<small>ボディ上部側</small></div>
+    <!-- 左：コントロール（ゾーン・長さ・パレット・サマリー） -->
+    <div class="ctrl-left">
+      <div class="box-label">パーツを選択</div>
+      <div id="courier-zones" class="courier-zones"></div>
+
+      <div class="box-label" style="margin-top:8px;">長さを選択</div>
+      <div id="courier-lengths" class="courier-lengths"></div>
+
+      <div class="box-label" id="courier-palette-label" style="margin-top:8px;">カラー（革パーツ）</div>
+      <div class="belt-note" id="courier-belt-note" style="display:none;">
+        ※ ナイロンと革は染料が異なるため仕上がりが若干異なります
+      </div>
+      <div class="pal-box">
+        <div class="palette" id="courier-palette"></div>
+      </div>
+      <div class="sum-box">
+        <div class="box-label">配色サマリー</div>
+        <div id="courier-summary"></div>
+      </div>
+    </div>
+
+    <!-- 右：ストラッププレビュー（前・SVG・後ろ） -->
+    <div class="preview-col">
+      <div class="dir-tag-v">前<small>ボディ上部側</small></div>
       <div id="courier-strap-wrap" class="strap-wrap"></div>
-      <div class="dir-tag-h">後ろ<small>エンドピン側</small></div>
+      <div class="dir-tag-v">後ろ<small>エンドピン側</small></div>
     </div>
 
-    <div class="controls-area">
-      <!-- 左：ゾーン選択 + 長さ -->
-      <div class="ctrl-col">
-        <div class="box-label">パーツを選択</div>
-        <div id="courier-zones" class="courier-zones"></div>
+  </div>
 
-        <div class="box-label" style="margin-top:10px;">長さを選択</div>
-        <div id="courier-lengths" class="courier-lengths"></div>
-      </div>
+  <!-- 画像保存 -->
+  <div class="share-area">
+    <button class="sbtn" onclick="courierSaveImage()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      画像を保存する
+    </button>
+  </div>
 
-      <!-- 右：パレット + サマリー -->
-      <div class="ctrl-col">
-        <div class="box-label" id="courier-palette-label">カラー（革パーツ）</div>
-        <div class="belt-note" id="courier-belt-note" style="display:none;">
-          ※ ナイロンと革は染料が異なるため仕上がりが若干異なります
-        </div>
-        <div class="pal-box">
-          <div class="palette" id="courier-palette"></div>
-        </div>
-        <div class="sum-box">
-          <div class="box-label">配色サマリー</div>
-          <div id="courier-summary"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 画像保存 -->
-    <div class="share-area">
-      <button class="sbtn" onclick="courierSaveImage()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        画像を保存する
-      </button>
-    </div>
-
-    <!-- 下部ボタンバー -->
-    <div class="bottom-bar">
-      <button class="btn-reset" onclick="courierReset()">リセット</button>
-      <button class="btn-undo" id="courier-btn-undo" onclick="courierUndo()" disabled>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
-        </svg>戻る
-      </button>
-      <button class="btn-order" onclick="courierGoOrder()">
-        この配色でカートに入れる →
-        <div class="price-display" id="courier-price-display"></div>
-      </button>
-    </div>
+  <!-- 下部ボタンバー -->
+  <div class="bottom-bar">
+    <button class="btn-reset" onclick="courierReset()">リセット</button>
+    <button class="btn-undo" id="courier-btn-undo" onclick="courierUndo()" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+      </svg>戻る
+    </button>
+    <button class="btn-order" onclick="courierGoOrder()">
+      この配色でカートに入れる →
+      <div class="price-display" id="courier-price-display"></div>
+    </button>
   </div>
 
   <!-- 注文確認モーダル -->
