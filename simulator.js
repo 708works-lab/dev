@@ -93,6 +93,19 @@ const SVG_ID_TO_PIECE={
   '_x35_':5,'_x34_':4,'_x33_':3,'_x32_':2,'_x31_':1
 };
 
+// 表示順序: [20(rear), ...variable..., 9..2(fixed front), 1(front)]
+// N>20の場合: [20, extraN-20,...,extra1, 19,...,10, 9..2, 1]
+function getDisplayOrder(n){
+  const extra=Math.max(0,n-20);
+  const order=[20];
+  for(let k=extra;k>=1;k--) order.push('extra'+k);
+  const varStart=Math.max(10,30-n);
+  for(let p=19;p>=varStart;p--) order.push(p);
+  for(let p=9;p>=2;p--) order.push(p);
+  order.push(1);
+  return order;
+}
+
 // ============================================================================
 // 初期化
 // ============================================================================
@@ -200,12 +213,20 @@ function updateCountDisplay(){
 
 function changeCount(d){
   const nx=N+d; if(nx<10||nx>30)return;
-  saveHistory(); N=nx;
-  if(d>0) for(let k=0;k<d;k++) partColors.push('#c46030');
-  else partColors=partColors.slice(0,N);
+  saveHistory();
+  const N_old=N; N=nx;
+  if(d>0){
+    // 新ピースを正しい位置に挿入（N>20では最上部variable寄り, N<=20では最下部variable）
+    const insertIdx=N_old<20 ? N-10 : N-20;
+    partColors.splice(insertIdx,0,'#c46030');
+  }else{
+    // 削除: N<=20なら最下部variable, N>20なら最上部extra
+    const removeIdx=N_old<=20 ? N_old-10 : N_old-20;
+    partColors.splice(removeIdx,1);
+  }
   selected.clear();
-  const selInfo = document.getElementById('sel-info');
-  if (selInfo) selInfo.textContent='パーツをタップ';
+  const selInfo=document.getElementById('sel-info');
+  if(selInfo) selInfo.textContent='パーツをタップ';
   updateCountDisplay();
   updatePriceDisplay();
   buildStrapRows();
@@ -226,7 +247,7 @@ function isLightColor(hex) {
 }
 
 function buildStrapRows(){
-  if(N<=20){ buildStrapSVG(); } else { buildStrapCanvas(); }
+  buildStrapSVG();
 }
 
 function buildStrapSVG(){
@@ -234,32 +255,80 @@ function buildStrapSVG(){
   const col=document.getElementById('strap-col');
   if(!scroll||!col) return;
 
-  // 元のcanvasピース（PW=40px）と同サイズ感になるよう固定幅
   const dispW=PW+10; // 50px
   col.style.width=(dispW+LABEL_W)+'px';
 
-  // N枚分だけ表示するviewBox計算
-  const hiddenCount=20-N;
-  const vbY=SVG_VTOP+hiddenCount*PIECE_PITCH;
-  const vbH=N*PIECE_PITCH+90;
+  const extraCount=Math.max(0,N-20);
+  // フロント固定セクション(1-9)とextra variableセクションのシフト量
+  // N<20: 負値(上方向), N=20: 0, N>20: 正値(下方向)
+  const shiftFixed=(N-20)*PIECE_PITCH;
+
+  // viewBox: rearピース20の上端から、piece1下端まで
+  const vbTop=SVG_VTOP-5;
+  const vbBottom=SVG_VTOP+19*PIECE_PITCH+shiftFixed+90;
+  const vbH=vbBottom-vbTop;
   const dispH=Math.round(vbH*(dispW/SVG_VW));
 
   scroll.innerHTML=`<svg id="folklore-strap-svg"
-    viewBox="${SVG_VLEFT} ${vbY.toFixed(1)} ${SVG_VW} ${vbH.toFixed(1)}"
+    viewBox="${SVG_VLEFT} ${vbTop.toFixed(1)} ${SVG_VW} ${vbH.toFixed(1)}"
     width="${dispW}" height="${dispH}"
     style="display:block;cursor:pointer;touch-action:none;flex-shrink:0;"
     xmlns="http://www.w3.org/2000/svg">${FOLKLORE_SVG_INNER}</svg>`;
 
   const svg=document.getElementById('folklore-strap-svg');
 
+  // data-piece属性を設定
   Object.entries(SVG_ID_TO_PIECE).forEach(([id,pn])=>{
     const g=svg.querySelector(`#${id}`);
+    if(g) g.setAttribute('data-piece',pn);
+  });
+
+  // variable SVGピース(10-19)の表示/非表示 + N>20時の下方シフト
+  for(let p=10;p<=19;p++){
+    const g=svg.querySelector(`[data-piece="${p}"]`);
+    if(!g) continue;
+    if(N>=30-p){ // このピースを表示する条件
+      g.style.display='';
+      if(extraCount>0){
+        g.setAttribute('transform',`translate(0,${shiftFixed.toFixed(3)})`);
+      }else{
+        g.removeAttribute('transform');
+      }
+    }else{
+      g.style.display='none';
+    }
+  }
+
+  // フロント固定セクション(1-9)をshiftFixed分シフト
+  for(let p=1;p<=9;p++){
+    const g=svg.querySelector(`[data-piece="${p}"]`);
+    if(!g) continue;
+    g.setAttribute('transform',`translate(0,${shiftFixed.toFixed(3)})`);
+  }
+
+  // N>20: extraピースをpiece12をクローンして配置
+  // piece12の元のY = SVG_VTOP + (20-12)*PITCH = SVG_VTOP + 8*PITCH
+  const PIECE12_ORIG_Y=SVG_VTOP+8*PIECE_PITCH;
+  for(let k=1;k<=extraCount;k++){
+    // extraKはpiece20の直下からk番目 (piece20=index0, extraK=indexK)
+    const targetY=SVG_VTOP+k*PIECE_PITCH;
+    const ty=targetY-PIECE12_ORIG_Y;
+    const piece12=svg.querySelector('[data-piece="12"]');
+    if(!piece12) continue;
+    const extraG=document.createElementNS('http://www.w3.org/2000/svg','g');
+    extraG.setAttribute('data-piece',`extra${k}`);
+    extraG.setAttribute('transform',`translate(0,${ty.toFixed(3)})`);
+    Array.from(piece12.children).forEach(child=>{
+      extraG.appendChild(child.cloneNode(true));
+    });
+    svg.appendChild(extraG);
+  }
+
+  // クリック/タッチイベントをdisplay orderで設定
+  const order=getDisplayOrder(N);
+  order.forEach((pn,jsIdx)=>{
+    const g=svg.querySelector(`[data-piece="${pn}"]`);
     if(!g) return;
-    g.setAttribute('data-piece',pn);
-    // N枚を超えるピース（rear側）は非表示
-    if(pn>N){ g.style.display='none'; return; }
-    // クリック/タッチ
-    const jsIdx=N-pn;
     g.addEventListener('click',()=>handleTap(jsIdx));
     g.addEventListener('touchend',e=>{e.preventDefault();handleTap(jsIdx);},{passive:false});
   });
@@ -308,10 +377,20 @@ function redrawAll(){
 }
 
 function redrawSVG(){
-  for(let i=0;i<N;i++){
-    const pn=N-i; // SVGピース番号
-    setSvgPieceColor(pn, partColors[i], selected.has(i));
-  }
+  const svg=document.getElementById('folklore-strap-svg');
+  if(!svg) return;
+  const order=getDisplayOrder(N);
+  order.forEach((pn,i)=>{
+    const g=svg.querySelector(`[data-piece="${pn}"]`);
+    if(!g) return;
+    g.querySelectorAll('path').forEach(p=>{
+      if(p.id==='logo') return;
+      p.setAttribute('fill',partColors[i]);
+      p.setAttribute('stroke',selected.has(i)?'#ffd700':'#000');
+      p.setAttribute('stroke-width',selected.has(i)?'3.5':'0.5');
+      p.setAttribute('stroke-miterlimit','10');
+    });
+  });
 }
 
 function setSvgPieceColor(svgPn, color, isSel){
