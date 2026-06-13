@@ -234,7 +234,7 @@ function buildStrapSVG(){
   const col=document.getElementById('strap-col');
   if(!scroll||!col) return;
   col.style.width='100%';
-  scroll.style.overflow='visible';
+  scroll.style.overflow='';
 
   // N枚分だけ表示するviewBox計算
   const hiddenCount=20-N;
