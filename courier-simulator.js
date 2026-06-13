@@ -294,6 +294,7 @@ function buildCourierPalette() {
   const palette = document.getElementById('courier-palette');
   if (!palette) return;
   palette.innerHTML = '';
+  palette.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;';
 
   const colors  = courierActiveZone === 'belt' ? COURIER_BELT_COLORS : COURIER_LEATHER_COLORS;
   const current = courierActiveZone === 'leather' ? courierColors.front
@@ -303,7 +304,19 @@ function buildCourierPalette() {
   colors.forEach(c => {
     const sw = document.createElement('div');
     sw.className = 'courier-swatch' + (c.hex === current ? ' selected' : '');
-    sw.style.background = c.hex;
+    const sel = c.hex === current;
+    sw.style.cssText = [
+      `background:${c.hex}`,
+      'width:22px',
+      'height:22px',
+      'border-radius:50%',
+      'cursor:pointer',
+      'display:block',
+      'flex-shrink:0',
+      'box-sizing:border-box',
+      sel ? 'border:2.5px solid #111;box-shadow:0 0 0 2px #fff,0 0 0 4px #111'
+          : 'border:1.5px solid rgba(0,0,0,.12)',
+    ].join(';');
     sw.title = c.name;
     sw.onclick = () => setCourierColor(c.hex);
     palette.appendChild(sw);
