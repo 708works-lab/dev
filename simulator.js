@@ -1102,7 +1102,9 @@ async function buildSaveCanvas() {
   const topLabelH = 25;
   const bottomLabelH = 25;
   const footerH = 28;
-  const svgX = 10;
+  // SVG+ラベルブロックをキャンバス中央に配置
+  // 想定コンテンツ幅: SVG(60) + gap(18) + swatch(12) + gap(4) + Pnum(22) + gap(4) + name(80) = 200px
+  const svgX = Math.round((cw - 200) / 2); // ≈200
   const svgY0 = headerH + topLabelH;
   const ch = svgY0 + svgSaveH + bottomLabelH + footerH + 10;
 
@@ -1128,7 +1130,7 @@ async function buildSaveCanvas() {
   ctx.fillStyle = '#444';
   ctx.font = 'bold 9px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('▲ 後ろ（エンドピン側）', svgX + svgSaveW / 2, svgY0 - 6);
+  ctx.fillText('▲ 後ろ（エンドピン側）', cw / 2, svgY0 - 6);
 
   // SVGをシリアライズしてCanvasに描画
   const svgEl = document.getElementById('folklore-strap-svg');
@@ -1152,7 +1154,7 @@ async function buildSaveCanvas() {
   ctx.fillStyle = '#444';
   ctx.font = 'bold 9px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('▼ 前（ボディ上部側）', svgX + svgSaveW / 2, svgY0 + svgSaveH + 14);
+  ctx.fillText('▼ 前（ボディ上部側）', cw / 2, svgY0 + svgSaveH + 14);
 
   // 各ピースのカラーラベル（SVG右側に配置）
   const labelX = svgX + svgSaveW + 18;
