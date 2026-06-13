@@ -95,10 +95,11 @@ const SVG_ID_TO_PIECE={
 
 // 表示順序: [20(rear), ...variable..., 9..2(fixed front), 1(front)]
 // N>20の場合: [20, extraN-20,...,extra1, 19,...,10, 9..2, 1]
+// extra1=rear直下(index1), extra2=その下(index2), ... extraK=piece19直上(indexK)
 function getDisplayOrder(n){
   const extra=Math.max(0,n-20);
   const order=[20];
-  for(let k=extra;k>=1;k--) order.push('extra'+k);
+  for(let k=1;k<=extra;k++) order.push('extra'+k);
   const varStart=Math.max(10,30-n);
   for(let p=19;p>=varStart;p--) order.push(p);
   for(let p=9;p>=2;p--) order.push(p);
@@ -309,19 +310,23 @@ function buildStrapSVG(){
   // N>20: extraピースをpiece12をクローンして配置
   // piece12の元のY = SVG_VTOP + (20-12)*PITCH = SVG_VTOP + 8*PITCH
   const PIECE12_ORIG_Y=SVG_VTOP+8*PIECE_PITCH;
+  const piece12ref=svg.querySelector('[data-piece="12"]');
+  // piece19を基準にinsertBefore → DOM順: piece20→extra1→...→extraK→piece19
+  // これによりpiece19がextraKより前面に描画される（魚鱗の重なり順）
+  const piece19ref=svg.querySelector('[data-piece="19"]');
   for(let k=1;k<=extraCount;k++){
-    // extraKはpiece20の直下からk番目 (piece20=index0, extraK=indexK)
+    if(!piece12ref) continue;
     const targetY=SVG_VTOP+k*PIECE_PITCH;
     const ty=targetY-PIECE12_ORIG_Y;
-    const piece12=svg.querySelector('[data-piece="12"]');
-    if(!piece12) continue;
     const extraG=document.createElementNS('http://www.w3.org/2000/svg','g');
     extraG.setAttribute('data-piece',`extra${k}`);
     extraG.setAttribute('transform',`translate(0,${ty.toFixed(3)})`);
-    Array.from(piece12.children).forEach(child=>{
+    Array.from(piece12ref.children).forEach(child=>{
       extraG.appendChild(child.cloneNode(true));
     });
-    svg.appendChild(extraG);
+    // piece19の直前に挿入（piece19が常にextraの前面に来るよう）
+    if(piece19ref) svg.insertBefore(extraG, piece19ref);
+    else svg.appendChild(extraG);
   }
 
   // クリック/タッチイベントをdisplay orderで設定
