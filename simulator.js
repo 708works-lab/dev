@@ -233,17 +233,21 @@ function buildStrapSVG(){
   const scroll=document.getElementById('strap-scroll');
   const col=document.getElementById('strap-col');
   if(!scroll||!col) return;
-  col.style.width='100%';
-  scroll.style.overflow='';
+
+  // 元のcanvasピース（PW=40px）と同サイズ感になるよう固定幅
+  const dispW=PW+10; // 50px
+  col.style.width=(dispW+LABEL_W)+'px';
 
   // N枚分だけ表示するviewBox計算
   const hiddenCount=20-N;
   const vbY=SVG_VTOP+hiddenCount*PIECE_PITCH;
   const vbH=N*PIECE_PITCH+90;
+  const dispH=Math.round(vbH*(dispW/SVG_VW));
 
   scroll.innerHTML=`<svg id="folklore-strap-svg"
     viewBox="${SVG_VLEFT} ${vbY.toFixed(1)} ${SVG_VW} ${vbH.toFixed(1)}"
-    width="100%" style="display:block;cursor:pointer;touch-action:none;"
+    width="${dispW}" height="${dispH}"
+    style="display:block;cursor:pointer;touch-action:none;flex-shrink:0;"
     xmlns="http://www.w3.org/2000/svg">${FOLKLORE_SVG_INNER}</svg>`;
 
   const svg=document.getElementById('folklore-strap-svg');
