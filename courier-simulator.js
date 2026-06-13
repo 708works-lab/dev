@@ -284,8 +284,6 @@ function selectCourierZone(zone) {
 function updateCourierPaletteLabel() {
   const label = document.getElementById('courier-palette-label');
   if (label) label.textContent = 'カラー（' + ZONE_LABEL[courierActiveZone] + '）';
-  const note = document.getElementById('courier-belt-note');
-  if (note) note.style.display = courierActiveZone === 'belt' ? 'block' : 'none';
 }
 
 // ============================================================================
