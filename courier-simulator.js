@@ -578,8 +578,7 @@ async function courierProceedToCart() {
     const i = document.createElement('input');
     i.type='hidden'; i.name=k; i.value=v; form.appendChild(i);
   });
-  {'Order ID': courierLastUploadedImage.orderId, 'Colors': colorDataEN, 'Image URL': courierLastUploadedImage.imageUrl}
-  ;Object.entries({'Order ID': courierLastUploadedImage.orderId, 'Colors': colorDataEN, 'Image URL': courierLastUploadedImage.imageUrl})
+  Object.entries({'Order ID': courierLastUploadedImage.orderId, 'Colors': colorDataEN, 'Image URL': courierLastUploadedImage.imageUrl})
     .forEach(([k,v]) => {
       const i = document.createElement('input');
       i.type='hidden'; i.name=`properties[${k}]`; i.value=v; form.appendChild(i);
