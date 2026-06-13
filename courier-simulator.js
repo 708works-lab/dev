@@ -104,6 +104,18 @@ function loadCourierSVG() {
         svg.style.height = 'auto';
         svg.removeAttribute('width');
         svg.removeAttribute('height');
+        // FOLKLOREと同方向に：エンドピン側(rear)を上、ボディ上部側(front)を下に表示
+        svg.style.transform = 'rotate(180deg)';
+        // ロゴはカウンター回転で正位置に保つ（ロゴ中心座標: x≈300 y≈140）
+        const logo = svg.querySelector('#logo');
+        if (logo) {
+          let cx = 300, cy = 140;
+          try {
+            const bb = logo.getBBox();
+            if (bb.width > 0) { cx = bb.x + bb.width / 2; cy = bb.y + bb.height / 2; }
+          } catch(e) {}
+          logo.setAttribute('transform', `rotate(180, ${cx.toFixed(1)}, ${cy.toFixed(1)})`);
+        }
         injectBeltTexture(svg);
       }
       applyCourierColors();
@@ -181,7 +193,7 @@ function applyCourierColors() {
   });
 
   const logo = wrap.querySelector('#logo');
-  if (logo) logo.setAttribute('fill', engravingColor(courierColors.rear));
+  if (logo) logo.setAttribute('fill', engravingColor(courierColors.front));
 
   highlightActiveZone();
 }
