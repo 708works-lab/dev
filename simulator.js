@@ -85,7 +85,7 @@ let history=[];
 let lastUploadedImage = null;
 let hasDownloadedImage = false; // 画像保存済みフラグ
 const PW=40,PH=50,OVL=16,PAD=6,LABEL_W=72;
-const PIECE_PITCH=52.593, SVG_VTOP=265, SVG_VLEFT=207, SVG_VW=72;
+const PIECE_PITCH=52.593, SVG_VTOP=265, SVG_VLEFT=211, SVG_VW=72;
 const SVG_ID_TO_PIECE={
   '_x32_0':20,'_x31_9':19,'_x31_8':18,'_x31_7':17,'_x31_6':16,
   '_x31_5':15,'_x31_4':14,'_x31_3':13,'_x31_2':12,'_x31_1':11,
@@ -257,7 +257,7 @@ function buildStrapSVG(){
   if(!scroll||!col) return;
 
   const dispW=PW+10; // 50px
-  col.style.width=(dispW+LABEL_W)+'px';
+  col.style.width=(dispW+30)+'px'; // 80px (SVGを中央寄せするための余白込み)
 
   const extraCount=Math.max(0,N-20);
   // フロント固定セクション(1-9)とextra variableセクションのシフト量
@@ -273,7 +273,7 @@ function buildStrapSVG(){
   scroll.innerHTML=`<svg id="folklore-strap-svg"
     viewBox="${SVG_VLEFT} ${vbTop.toFixed(1)} ${SVG_VW} ${vbH.toFixed(1)}"
     width="${dispW}" height="${dispH}"
-    style="display:block;cursor:pointer;touch-action:none;flex-shrink:0;"
+    style="display:block;margin:0 auto;cursor:pointer;touch-action:none;flex-shrink:0;"
     xmlns="http://www.w3.org/2000/svg">${FOLKLORE_SVG_INNER}</svg>`;
 
   const svg=document.getElementById('folklore-strap-svg');
@@ -384,6 +384,38 @@ function redrawAll(){
   if(document.getElementById('folklore-strap-svg')){ redrawSVG(); } else { redrawCanvas(); }
 }
 
+// 革の色から型押しロゴの色を計算（同系色・明度調整）
+function _hexToHsl(hex){
+  const r=parseInt(hex.slice(1,3),16)/255;
+  const g=parseInt(hex.slice(3,5),16)/255;
+  const b=parseInt(hex.slice(5,7),16)/255;
+  const max=Math.max(r,g,b),min=Math.min(r,g,b);
+  let h=0,s=0;
+  const l=(max+min)/2;
+  if(max!==min){
+    const d=max-min;
+    s=l>0.5?d/(2-max-min):d/(max+min);
+    if(max===r) h=(g-b)/d+(g<b?6:0);
+    else if(max===g) h=(b-r)/d+2;
+    else h=(r-g)/d+4;
+    h/=6;
+  }
+  return [h,s,l];
+}
+function _hslToHex(h,s,l){
+  const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};
+  let r,g,b;
+  if(s===0){r=g=b=l;}else{const q=l<0.5?l*(1+s):l+s-l*s;const p=2*l-q;r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3);}
+  const toHex=v=>Math.round(v*255).toString(16).padStart(2,'0');
+  return`#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+function getLogoColor(hex){
+  const [h,s,l]=_hexToHsl(hex);
+  // 型押しイメージ: 革色と同じ色相で明度を大きく変化させて視認性を確保
+  const newL=l>0.40 ? Math.max(0.05,l-0.30) : Math.min(0.90,l+0.30);
+  return _hslToHex(h,s,newL);
+}
+
 function redrawSVG(){
   const svg=document.getElementById('folklore-strap-svg');
   if(!svg) return;
@@ -391,8 +423,9 @@ function redrawSVG(){
   order.forEach((pn,i)=>{
     const g=svg.querySelector(`[data-piece="${pn}"]`);
     if(!g) return;
+    const logoCol=getLogoColor(partColors[i]);
     g.querySelectorAll('path').forEach(p=>{
-      if(p.id==='logo') return;
+      if(p.id==='logo'){p.setAttribute('fill',logoCol);return;}
       p.setAttribute('fill',partColors[i]);
       p.setAttribute('stroke',selected.has(i)?'#ffd700':'#000');
       p.setAttribute('stroke-width',selected.has(i)?'3.5':'0.5');
