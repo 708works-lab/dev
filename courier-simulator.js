@@ -56,9 +56,10 @@ const ZONE_LABEL = {
 // ============================================================================
 
 let courierColors = { front:'#1a1a1a', belt:'#1a1a1a', rear:'#1a1a1a' };
-let courierLinked      = true;   // 前後同色モード
-let courierActiveZone  = 'leather'; // 'leather' | 'front' | 'belt' | 'rear'
+let courierLinked      = true;
+let courierActiveZone  = 'leather';
 let courierSelectedLen = 'standard';
+let courierImageSaved  = false;
 let courierHistory     = [];
 let courierLastUploadedImage = null;
 
@@ -78,6 +79,7 @@ function initCourierSimulator() {
   updateCourierSummary();
   buildLengthSelector();
   updateCourierPriceDisplay();
+  updateCartButtonState();
   loadCourierSVG();
 }
 
@@ -333,9 +335,11 @@ function setCourierColor(hex) {
   } else {
     courierColors[courierActiveZone] = hex;
   }
+  courierImageSaved = false;
   buildCourierZoneButtons();
   buildCourierPalette();
   updateCourierSummary();
+  updateCartButtonState();
   applyCourierColors();
 }
 
@@ -458,10 +462,12 @@ function courierUndo() {
   courierColors = {front: prev.front, belt: prev.belt, rear: prev.rear};
   courierLinked = prev._linked;
   if (courierLinked && courierActiveZone !== 'belt') courierActiveZone = 'leather';
+  courierImageSaved = false;
   buildCourierZoneButtons();
   buildCourierPalette();
   updateCourierPaletteLabel();
   updateCourierSummary();
+  updateCartButtonState();
   applyCourierColors();
   const btn = document.getElementById('courier-btn-undo');
   if (btn) btn.disabled = courierHistory.length === 0;
@@ -472,10 +478,12 @@ function courierReset() {
   courierColors  = {front:'#1a1a1a', belt:'#9e3820', rear:'#1a1a1a'};
   courierLinked  = true;
   courierActiveZone = 'leather';
+  courierImageSaved = false;
   buildCourierZoneButtons();
   buildCourierPalette();
   updateCourierPaletteLabel();
   updateCourierSummary();
+  updateCartButtonState();
   applyCourierColors();
 }
 
@@ -491,7 +499,9 @@ async function courierSaveImage() {
   link.download = `courier-color-${Date.now()}.png`;
   link.href     = canvas.toDataURL('image/png');
   link.click();
-  showCourierToast('画像を保存しました');
+  courierImageSaved = true;
+  updateCartButtonState();
+  showCourierToast('画像を保存しました ✓　カートに進めます');
 }
 
 async function svgToCanvas(svgEl, scale = 1) {
@@ -519,7 +529,33 @@ async function svgToCanvas(svgEl, scale = 1) {
 // カート注文
 // ============================================================================
 
+function updateCartButtonState() {
+  const cartBtn = document.querySelector('.courier-simulator .btn-order');
+  const saveBtn = document.querySelector('.courier-simulator .sbtn');
+  const svgDl   = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+  const svgOk   = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  if (cartBtn) {
+    Object.assign(cartBtn.style, courierImageSaved
+      ? { opacity:'1', cursor:'pointer' }
+      : { opacity:'0.38', cursor:'not-allowed' });
+  }
+  if (saveBtn) {
+    saveBtn.innerHTML = courierImageSaved
+      ? `${svgOk} 保存済み`
+      : `${svgDl} 画像を保存する`;
+    Object.assign(saveBtn.style, courierImageSaved
+      ? { background:'#edf7ee', borderColor:'#5cb86a', color:'#2e7d32' }
+      : { background:'', borderColor:'', color:'' });
+  }
+}
+
 async function courierGoOrder() {
+  if (!courierImageSaved) {
+    showCourierToast('先に「画像を保存する」を押してください');
+    const saveBtn = document.querySelector('.courier-simulator .sbtn');
+    if (saveBtn) { saveBtn.classList.add('c-shake'); setTimeout(() => saveBtn.classList.remove('c-shake'), 500); }
+    return;
+  }
   const loadEl = document.getElementById('courier-loading-overlay');
   if (loadEl) loadEl.classList.add('show');
   try {
@@ -579,10 +615,7 @@ function showCourierConfirmModal(result) {
         <span></span>
         <span>${len?.label}（${len?.desc}）</span>
       </div>
-    </div>
-    <p style="font-size:11px;color:#888;margin-top:8px;">
-      ※ ナイロンベルトは革と染料が異なるため、仕上がりの色味が若干異なる場合があります
-    </p>`;
+    </div>`;
   modal.classList.add('show');
 }
 

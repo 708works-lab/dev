@@ -267,3 +267,12 @@
   transition: all .3s; z-index: 10000; pointer-events: none;
 }
 .courier-simulator .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@keyframes c-shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-5px); }
+  40%      { transform: translateX(5px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+.courier-simulator .c-shake { animation: c-shake .45s ease; }
