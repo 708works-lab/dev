@@ -106,15 +106,12 @@ function loadCourierSVG() {
         svg.removeAttribute('height');
         // FOLKLOREと同方向に：エンドピン側(rear)を上、ボディ上部側(front)を下に表示
         svg.style.transform = 'rotate(180deg)';
-        // ロゴはカウンター回転で正位置に保つ（ロゴ中心座標: x≈300 y≈140）
+        // ロゴはCSS transform-box:fill-box で要素中心を基準に180度カウンター回転
         const logo = svg.querySelector('#logo');
         if (logo) {
-          let cx = 300, cy = 140;
-          try {
-            const bb = logo.getBBox();
-            if (bb.width > 0) { cx = bb.x + bb.width / 2; cy = bb.y + bb.height / 2; }
-          } catch(e) {}
-          logo.setAttribute('transform', `rotate(180, ${cx.toFixed(1)}, ${cy.toFixed(1)})`);
+          logo.style.transformBox    = 'fill-box';
+          logo.style.transformOrigin = 'center';
+          logo.style.transform       = 'rotate(180deg)';
         }
         injectBeltTexture(svg);
       }
@@ -236,7 +233,7 @@ function buildCourierZoneButtons() {
 
   const zones = courierLinked
     ? ['leather', 'belt']
-    : ['front', 'belt', 'rear'];
+    : ['rear', 'belt', 'front'];
 
   zones.forEach(zone => {
     const btn = document.createElement('button');
