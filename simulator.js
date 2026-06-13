@@ -311,8 +311,8 @@ function buildStrapSVG(){
   // piece12の元のY = SVG_VTOP + (20-12)*PITCH = SVG_VTOP + 8*PITCH
   const PIECE12_ORIG_Y=SVG_VTOP+8*PIECE_PITCH;
   const piece12ref=svg.querySelector('[data-piece="12"]');
-  // piece19を基準にinsertBefore → DOM順: piece20→extra1→...→extraK→piece19
-  // これによりpiece19がextraKより前面に描画される（魚鱗の重なり順）
+  // piece19を基準にinsertBefore（parentNode経由）→ DOM順: piece20→extra1→...→extraK→piece19
+  // piece19はsvgの直接の子ではなく<g id="middle">の子なので、parentNodeを使う
   const piece19ref=svg.querySelector('[data-piece="19"]');
   for(let k=1;k<=extraCount;k++){
     if(!piece12ref) continue;
@@ -324,9 +324,12 @@ function buildStrapSVG(){
     Array.from(piece12ref.children).forEach(child=>{
       extraG.appendChild(child.cloneNode(true));
     });
-    // piece19の直前に挿入（piece19が常にextraの前面に来るよう）
-    if(piece19ref) svg.insertBefore(extraG, piece19ref);
-    else svg.appendChild(extraG);
+    // piece19の親(middleグループ)内でpiece19の直前に挿入
+    if(piece19ref && piece19ref.parentNode){
+      piece19ref.parentNode.insertBefore(extraG, piece19ref);
+    }else{
+      (svg.querySelector('#middle')||svg).appendChild(extraG);
+    }
   }
 
   // クリック/タッチイベントをdisplay orderで設定
