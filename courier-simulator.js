@@ -530,14 +530,21 @@ async function svgToCanvas(svgEl, scale = 1) {
 // ============================================================================
 
 function updateCartButtonState() {
-  const cartBtn = document.querySelector('.courier-simulator .btn-order');
-  const saveBtn = document.querySelector('.courier-simulator .sbtn');
-  const svgDl   = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
-  const svgOk   = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  const cartBtn  = document.querySelector('.courier-simulator .btn-order');
+  const cartLabel= document.getElementById('courier-cart-label');
+  const saveBtn  = document.querySelector('.courier-simulator .sbtn');
+  const svgDl = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+  const svgOk = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  if (cartLabel) {
+    cartLabel.textContent = courierImageSaved
+      ? 'この配色で注文する →'
+      : '先に画像を保存してください →';
+  }
   if (cartBtn) {
     Object.assign(cartBtn.style, courierImageSaved
-      ? { opacity:'1', cursor:'pointer' }
-      : { opacity:'0.38', cursor:'not-allowed' });
+      ? { opacity:'1', cursor:'pointer', background:'#111', color:'#fff' }
+      : { opacity:'1', cursor:'not-allowed', background:'#bbb', color:'#fff' });
   }
   if (saveBtn) {
     saveBtn.innerHTML = courierImageSaved
