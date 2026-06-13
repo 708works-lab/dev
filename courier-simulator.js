@@ -51,6 +51,27 @@ const COURIER_ZONES = ['front', 'belt', 'rear'];
 const COURIER_ZONE_LABELS = { front: '前端（革）', belt: 'ベルト', rear: '後端（革）' };
 
 // ============================================================================
+// ユーティリティ
+// ============================================================================
+
+function courierRoundRect(ctx, x, y, w, h, r) {
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, w, h, r);
+  } else {
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+}
+
+// ============================================================================
 // グローバル変数
 // ============================================================================
 
@@ -367,7 +388,7 @@ function drawCourierBuckle(ctx, cx, y, w, h) {
 
   // 外枠
   ctx.beginPath();
-  ctx.roundRect(cx - hw, y, w, h, 3);
+  courierRoundRect(ctx, cx - hw, y, w, h, 3);
   ctx.fillStyle = '#8a8a8a';
   ctx.fill();
 
@@ -382,7 +403,7 @@ function drawCourierBuckle(ctx, cx, y, w, h) {
   // 内側の穴（D-ring風）
   const gap = 8;
   ctx.beginPath();
-  ctx.roundRect(cx - hw + gap, y + 5, w - gap * 2, h - 10, 2);
+  courierRoundRect(ctx, cx - hw + gap, y + 5, w - gap * 2, h - 10, 2);
   ctx.fillStyle = 'rgba(0,0,0,.6)';
   ctx.fill();
 
@@ -397,45 +418,23 @@ function drawCourierBuckle(ctx, cx, y, w, h) {
 // ============================================================================
 
 function drawCourierLogoMark(ctx, cx, cy, scale, baseColor) {
-  // 明るい背景色なら暗いロゴ、暗い背景色なら明るいロゴ
   const hex = baseColor.replace('#', '');
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
   const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
-  const logoColor = lum > 0.45 ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.3)';
+  const logoColor = lum > 0.45 ? 'rgba(0,0,0,.25)' : 'rgba(255,255,255,.35)';
 
   ctx.save();
   ctx.translate(cx, cy);
   ctx.scale(scale, scale);
   ctx.fillStyle = logoColor;
-
-  // 簡略化した 708 ロゴ（細い "8" 字をイメージした円弧2つ）
-  ctx.beginPath();
-  ctx.arc(-18, -8, 12, 0, Math.PI * 2);
-  ctx.arc(-18, 8, 12, 0, Math.PI * 2);
-  ctx.arc(18, -8, 12, 0, Math.PI * 2);
-  ctx.arc(18, 8, 12, 0, Math.PI * 2);
-  ctx.closePath();
-  ctx.globalAlpha = 0;  // ロゴは非表示（穴加工のみで表現）
-
-  // 実際は穴加工でシンプルに表現
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.beginPath();
-  ctx.arc(0, 0, 6, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(0,0,0,.5)';
-  ctx.fill();
-  ctx.restore();
-
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.scale(scale, scale);
-  ctx.beginPath();
-  ctx.arc(0, 0, 6, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(0,0,0,.25)';
-  ctx.lineWidth = 1 / scale;
-  ctx.stroke();
+  ctx.font = 'bold 55px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('708', 0, -5);
+  ctx.font = '14px sans-serif';
+  ctx.fillText('works', 0, 20);
   ctx.restore();
 }
 
