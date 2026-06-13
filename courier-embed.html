@@ -1,0 +1,98 @@
+
+<!-- COURIER Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/simulator.css">
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/courier-simulator.css">
+
+<div class="courier-simulator">
+  <header>
+    <h1>COURIER</h1>
+    <p>COLOR SIMULATOR &nbsp;|&nbsp; 708works</p>
+  </header>
+  <div class="app">
+    <div class="top-area">
+      <div class="ctrl-col">
+        <!-- ゾーン選択 -->
+        <div class="box-label">パーツを選択</div>
+        <div id="courier-zones" class="courier-zones"></div>
+
+        <!-- カラーパレット -->
+        <div class="box-label" id="courier-palette-label">カラー（前端革）</div>
+        <div class="belt-note" id="courier-belt-note" style="display:none;">
+          ※ ナイロンベルトは革と染料が異なり、仕上がりの色味が若干異なる場合があります
+        </div>
+        <div class="pal-box">
+          <div class="palette" id="courier-palette"></div>
+        </div>
+
+        <!-- カラーサマリー -->
+        <div class="sum-box">
+          <div class="box-label">配色サマリー</div>
+          <div id="courier-summary"></div>
+        </div>
+      </div>
+
+      <!-- ストラッププレビュー -->
+      <div class="strap-col courier-strap-col">
+        <div class="dir-tag">前<small>ボディ上部側</small></div>
+        <div class="strap-scroll" style="overflow:visible;">
+          <canvas id="courier-strap-canvas"></canvas>
+        </div>
+        <div class="dir-tag">後ろ<small>エンドピン側</small></div>
+      </div>
+    </div>
+
+    <!-- 画像保存ボタン -->
+    <div class="share-area">
+      <button class="sbtn" onclick="courierSaveImage()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        画像を保存する
+      </button>
+    </div>
+
+    <!-- 下部ボタンバー -->
+    <div class="bottom-bar">
+      <button class="btn-reset" onclick="courierReset()">リセット</button>
+      <button class="btn-undo" id="courier-btn-undo" onclick="courierUndo()" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+        </svg>戻る
+      </button>
+      <button class="btn-order" onclick="courierGoOrder()">
+        この配色でカートに入れる →
+        <div class="price-display" id="courier-price-display"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- 注文確認モーダル -->
+  <div class="modal" id="courier-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeCourierModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="courier-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="courier-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeCourierModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="courierProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-overlay" id="courier-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="courier-toast" class="toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/courier-simulator.js"></script>
