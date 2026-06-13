@@ -104,15 +104,6 @@ function loadCourierSVG() {
         svg.style.height = 'auto';
         svg.removeAttribute('width');
         svg.removeAttribute('height');
-        // FOLKLOREと同方向に：エンドピン側(rear)を上、ボディ上部側(front)を下に表示
-        svg.style.transform = 'rotate(180deg)';
-        // ロゴはCSS transform-box:fill-box で要素中心を基準に180度カウンター回転
-        const logo = svg.querySelector('#logo');
-        if (logo) {
-          logo.style.transformBox    = 'fill-box';
-          logo.style.transformOrigin = 'center';
-          logo.style.transform       = 'rotate(180deg)';
-        }
         injectBeltTexture(svg);
       }
       applyCourierColors();
