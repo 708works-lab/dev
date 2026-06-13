@@ -66,7 +66,19 @@
 }
 
 .courier-simulator .courier-strap-col {
-  width: 96px;
+  width: 110px;
+}
+
+.courier-simulator .strap-wrap {
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+.courier-simulator .strap-wrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .courier-simulator .dir-tag {

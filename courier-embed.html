@@ -10,14 +10,15 @@
   <div class="app">
     <div class="top-area">
       <div class="ctrl-col">
+
         <!-- ゾーン選択 -->
         <div class="box-label">パーツを選択</div>
         <div id="courier-zones" class="courier-zones"></div>
 
         <!-- カラーパレット -->
-        <div class="box-label" id="courier-palette-label">カラー（前端革）</div>
+        <div class="box-label" id="courier-palette-label">カラー（前端 革）</div>
         <div class="belt-note" id="courier-belt-note" style="display:none;">
-          ※ ナイロンベルトは革と染料が異なり、仕上がりの色味が若干異なる場合があります
+          ※ ナイロンと革は染料が異なるため、仕上がりの色味が若干異なる場合があります
         </div>
         <div class="pal-box">
           <div class="palette" id="courier-palette"></div>
@@ -28,22 +29,21 @@
           <div class="box-label">配色サマリー</div>
           <div id="courier-summary"></div>
         </div>
+
       </div>
 
-      <!-- ストラッププレビュー -->
+      <!-- ストラッププレビュー（SVG） -->
       <div class="strap-col courier-strap-col">
         <div class="dir-tag">前<small>ボディ上部側</small></div>
-        <div class="strap-scroll" style="overflow:visible;">
-          <canvas id="courier-strap-canvas"></canvas>
-        </div>
+        <div id="courier-strap-wrap" class="strap-wrap"></div>
         <div class="dir-tag">後ろ<small>エンドピン側</small></div>
       </div>
     </div>
 
-    <!-- 画像保存ボタン -->
+    <!-- 画像保存 -->
     <div class="share-area">
       <button class="sbtn" onclick="courierSaveImage()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
