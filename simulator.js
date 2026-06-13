@@ -1102,9 +1102,8 @@ async function buildSaveCanvas() {
   const topLabelH = 25;
   const bottomLabelH = 25;
   const footerH = 28;
-  // SVG+ラベルブロックをキャンバス中央に配置
-  // 想定コンテンツ幅: SVG(60) + gap(18) + swatch(12) + gap(4) + Pnum(22) + gap(4) + name(80) = 200px
-  const svgX = Math.round((cw - 200) / 2); // ≈200
+  // ウロコ画像をキャンバス中央に、ラベルは右側に配置
+  const svgX = Math.round(cw / 2 - svgSaveW / 2); // SVG中心 = cw/2
   const svgY0 = headerH + topLabelH;
   const ch = svgY0 + svgSaveH + bottomLabelH + footerH + 10;
 
