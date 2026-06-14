@@ -46,7 +46,9 @@ function buildXml(reviews) {
 
   const reviewsXml = eligible.map(r => {
     const isAnon = !r.reviewer?.name || /anonymous/i.test(r.reviewer.name);
-    const name   = isAnon ? 'Anonymous' : esc(r.reviewer.name);
+    const rawName = r.reviewer?.name?.trim() ?? '';
+    // プライバシー保護: 最初の1文字のみ表示し残りをマスク ("田中 太郎" → "田***")
+    const name = isAnon ? 'Anonymous' : esc([...rawName][0] + '***');
     const ts     = new Date(r.created_at).toISOString().replace(/\.\d{3}Z$/, 'Z');
     const handle = r.product_handle || '';
     const prodUrl = `${STORE_URL}/products/${handle}`;
