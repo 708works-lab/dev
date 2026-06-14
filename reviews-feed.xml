@@ -1,0 +1,1618 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="http://www.google.com/shopping/reviews/schema/product/2.3/product_reviews.xsd">
+  <version>2.3</version>
+  <aggregator>
+    <name>Judge.me</name>
+  </aggregator>
+  <publisher>
+    <name>708works</name>
+    <favicon>https://708works.jp/favicon.ico</favicon>
+  </publisher>
+  <reviews>
+    <review>
+      <review_id>1208522966</review_id>
+      <reviewer>
+        <name>成亨 中村</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-06-05T10:51:45Z</review_timestamp>
+      <title>秀逸</title>
+      <content>秀逸</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1205402014</review_id>
+      <reviewer>
+        <name>竹田信弘 竹田信弘</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-06-03T09:15:51Z</review_timestamp>
+      <title>シートベルト地および自在に長さを変えられる機能性と、革工芸品としてのデザイン性がとても素晴らしいです</title>
+      <content>シートベルト地および自在に長さを変えられる機能性と、革工芸品としてのデザイン性がとても素晴らしいです。肩にかけた時に、ふんわりと革の匂いがすると、本物を使っているという安心感や満足感があります。</content>
+      <review_url type="singleton">https://708works.jp/products/judgeme-shop-reviews</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>judgeme-shop-reviews</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Judge.me Shop Reviews</product_name>
+          <product_url>https://708works.jp/products/judgeme-shop-reviews</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1200811609</review_id>
+      <reviewer>
+        <name>ひとみ 半沢</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-05-30T08:51:43Z</review_timestamp>
+      <title>ギターストラップ</title>
+      <content>いつも使っているミニバックのストラップをギターストラップに付け替えました。さげているだけてテンションがあがります。カッコいいです。アタッチメントは、ストラップと馴染む黒にしました。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-bag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-bag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-bag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1194643216</review_id>
+      <reviewer>
+        <name>仁彦 中谷</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-05-24T11:51:47Z</review_timestamp>
+      <title>とっても簡単。ギターストラップも色々付けたくなります。ありがとうございました！</title>
+      <content>とっても簡単。ギターストラップも色々付けたくなります。ありがとうございました！</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1180253359</review_id>
+      <reviewer>
+        <name>忠史 村田</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-05-11T05:04:40Z</review_timestamp>
+      <title>レザーのデザインも良く使い勝手も良かったです！
+また、利用することも考えています。</title>
+      <content>レザーのデザインも良く使い勝手も良かったです！
+また、利用することも考えています。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-bag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-bag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-bag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1155179004</review_id>
+      <reviewer>
+        <name>芳崇 旭</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-04-19T09:48:59Z</review_timestamp>
+      <title>カメラストラップはあまりかっこいいものがなく、ギターが好きなこともあってギターストラップをカメラスト</title>
+      <content>カメラストラップはあまりかっこいいものがなく、ギターが好きなこともあってギターストラップをカメラストラップにする方法がないか探していました。それがまさに叶う商品でした。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1146417353</review_id>
+      <reviewer>
+        <name>隆史 前田</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-04-11T05:48:29Z</review_timestamp>
+      
+      <content>知り合いから聞き購入しました。とても使いやすいです</content>
+      <review_url type="singleton">https://708works.jp/products/onstage</review_url>
+      <ratings>
+        <overall min="1" max="5">4</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>onstage</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Onstage｜ギターストラップ取付用アタッチメント【ストラップピンが1つしか無いギター・ウクレレに最適】</product_name>
+          <product_url>https://708works.jp/products/onstage</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1145072260</review_id>
+      <reviewer>
+        <name>康之 山添</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-04-10T03:27:30Z</review_timestamp>
+      <title>迅速丁寧なご対応に感謝致します。</title>
+      <content>色の組み合わせの相談から、イメージの製作迄、とても丁寧にかつ、迅速にご対応頂きました。
+発送もとても丁寧に梱包されており、ギターを弾くのがより楽しくなります。
+安い買い物では無いので何本も購入というわけにはいきませんが、また他のギターにも合うようなものを将来買い足していければ良いなと思っています。
+ありがとうございました。</content>
+      <review_url type="singleton">https://708works.jp/products/folklore</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>folklore</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore フォークロア｜ウロコのようなギターストラップ</product_name>
+          <product_url>https://708works.jp/products/folklore</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1138245221</review_id>
+      <reviewer>
+        <name>橋洋 髙</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-04-04T06:12:47Z</review_timestamp>
+      <title>面白いです。</title>
+      <content>面白いです。</content>
+      <review_url type="singleton">https://708works.jp/products/courier</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>courier</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Courier クーリエ｜片手で長さを調整できるギターストラップ</product_name>
+          <product_url>https://708works.jp/products/courier</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1121114661</review_id>
+      <reviewer>
+        <name>俊秀 上島</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-03-24T15:25:00Z</review_timestamp>
+      <title>改良希望</title>
+      <content>フィット感は抜群だが、皮が傷つきやすい。留め具が金属なのは、見栄えはいいが、カメラに傷がつかないか気をつかう。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">2</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1058221121</review_id>
+      <reviewer>
+        <name>貴弘 生駒</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-02-07T04:44:18Z</review_timestamp>
+      <title>３本目です</title>
+      <content>３本目のギター用に購入しました。今回はサウンドホールにピックアップのコントローラーを装着しているため、切れ込み部分をその部分に当てる想定でロゴの位置も調整していただきました。きめ細かい調整をしていただいて満足です。</content>
+      <review_url type="singleton">https://708works.jp/products/template-11769-dropdown-2</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-11769-dropdown-2</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>名入れ刻印を希望しますか？</product_name>
+          <product_url>https://708works.jp/products/template-11769-dropdown-2</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1038868951</review_id>
+      <reviewer>
+        <name>祥光 大内</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-01-16T01:05:20Z</review_timestamp>
+      <title>工具無しで簡単取り付け！</title>
+      <content>特に工具も必要なく取り付けができる為、誰でも簡単に好みのストラップをカバンに付ける事が出来ます。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-bag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-bag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-bag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1034944315</review_id>
+      <reviewer>
+        <name>MISATO NAKANISHI</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-01-12T01:06:21Z</review_timestamp>
+      <title>最適な位置探しに便利です。</title>
+      <content>初めてエレキを弾くのですが、どの位置が弾きやすいのかよくわからなくて。こちらのストラップは簡単に位置を調節できるので、すごく便利です。</content>
+      <review_url type="singleton">https://708works.jp/products/courier</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>courier</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Courier クーリエ｜片手で長さを調整できるギターストラップ</product_name>
+          <product_url>https://708works.jp/products/courier</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1000770179</review_id>
+      <reviewer>
+        <name>貴弘 生駒</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-11-30T01:31:44Z</review_timestamp>
+      <title>ギターがインテリアになりますね</title>
+      <content>ギターがインテリアになります。雰囲気が出ます。
+色がたくさんあるので選ぶのが難しいです。オレンジで大丈夫かと思いましたが、実際の色は渋めで正解でした。
+なお、サウンドホールにピックアップが付いている場合は、切り込み部分はネック下ではなくピックアップ部分にしないと装着できません。通常のアコギであればネック下は切り込みがなくても入るので問題なかったです。</content>
+      <review_url type="singleton">https://708works.jp/products/soundhole-cover-ag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>soundhole-cover-ag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>サウンドホールカバー｜アコースティックギター用【本革製】</product_name>
+          <product_url>https://708works.jp/products/soundhole-cover-ag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>958382909</review_id>
+      <reviewer>
+        <name>優子 大瀬</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-10-09T09:19:15Z</review_timestamp>
+      <title>素敵な品物と対応に感謝です！</title>
+      <content>娘のバンドステージに合わせて、購入しました。
+納期を考えずに注文してしまい、ステージに間に合わないかも、、、と思っていましたが、迅速に対応くださり、思っていたより、かなり早く届き、娘もとても喜んでくれました！
+
+品物も思っていた以上に素敵で、バンド演奏のモチベーションがかなり上がっているようです！
+
+ありがとうございました！</content>
+      <review_url type="singleton">https://708works.jp/products/triad</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>triad</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Triad トライアド｜程よい主張の三つ編みギターストラップ</product_name>
+          <product_url>https://708works.jp/products/triad</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>954674103</review_id>
+      <reviewer>
+        <name>保江 武田</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-10-05T07:21:36Z</review_timestamp>
+      <title>滅茶苦茶かわいいストラップをありがとうございました！</title>
+      <content>滅茶苦茶かわいいストラップをありがとうございました！素材的に、耐久性は大丈夫なのかなと少し心配はしていたのですが、全くそんな必要がないくらいしっかりしています。
+見た目ももちろん可愛くて、爽やかな感じ‥こんなストラップあるんですね！と早速評判です！かけ心地もしっかりしていて、面積が大きいからか割と安定感があり重くもないので重宝しそうです。
+これだけ色があると他のものも欲しくなってしまいますね。商品の到着までしばらくかかるかな〜と思いきや、すぐに発送してくださり、そのスピードにもびっくりしました。また色違いが欲しくなったらよろしくお願いします！
+ストラップが触れる部分に肌が露出していると、全く滑らない(=ずらしたくてもずれない）ので、当たる部分に布はあった方が弾きやすいかと思います！</content>
+      <review_url type="singleton">https://708works.jp/products/folklole-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>folklole-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
+          <product_url>https://708works.jp/products/folklole-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>938723671</review_id>
+      <reviewer>
+        <name>淳 八尋</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-09-16T03:20:29Z</review_timestamp>
+      <title>組み合わせて使ってます</title>
+      <content>名前が長くて他の人に勧める時紹介しづらいですが、まさに欲しかったアタッチメントです。
+すでにSNSでも写真付きで紹介してますが、マルチクリップとカラビナ、この製品を組み合わせて、好きなFenderのギターストラップと組み合わせることで、トートバッグをショルダーバッグに変身させることができました。
+ギターストラップは幅が広いので、背負ってても肩に食い込まず、快適です。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-bag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-bag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-bag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>933264858</review_id>
+      <reviewer>
+        <name>MARI ISHIDOSHIRO</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-09-09T12:37:48Z</review_timestamp>
+      <title>装置も簡単</title>
+      <content>装置も簡単で、理想の形に仕上がりました！</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>909780991</review_id>
+      <reviewer>
+        <name>淳史 加藤</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-08-12T14:57:07Z</review_timestamp>
+      <title>お盆前に迅速なご対応に感謝！！</title>
+      <content>推しのベースストラップ(ギターストラップ)を双眼鏡とカメラストラップとして使いたくて、良い方法は無いかと探していてこちらの製品を見つけました。
+双眼鏡やカメラにちょうど良いナイロンコードが取り付けられているので、ジャストフィットです。
+リベットと取り付けネジはサテンゴールドで上品な仕上げ。皮も上質な質感で満足です。
+素敵な製品を開発していただき感謝です。
+ねじ止め剤の使用が推奨されているので、ねじ止め剤を購入して装着しようと思っております。
+ストラップは通常のギターストラップですので問題なくピッタリ取り付けできそうです。
+お盆休み前の発注でしたのでお盆明けの到着かと思っておりましたが注文日から4日後に受け取れました。
+推しのLiveに持参するための購入でしたので、迅速なご対応に感謝です。余裕を持って取り付けできます。
+もう一本推しストラップ購入してもうワンセット作っちゃいたいくらいです。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>895033330</review_id>
+      <reviewer>
+        <name>寛 佐藤</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-07-28T00:21:34Z</review_timestamp>
+      <title>短くする時は簡単に素早く出来ますが緩める時がコツがいるようです。
+概ね使いやすく良い買い物ができまし</title>
+      <content>短くする時は簡単に素早く出来ますが緩める時がコツがいるようです。
+概ね使いやすく良い買い物ができました。</content>
+      <review_url type="singleton">https://708works.jp/products/template-11769-dropdown-2</review_url>
+      <ratings>
+        <overall min="1" max="5">4</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-11769-dropdown-2</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>名入れ刻印を希望しますか？</product_name>
+          <product_url>https://708works.jp/products/template-11769-dropdown-2</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>878118591</review_id>
+      <reviewer>
+        <name>加与子 堀田</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-07-08T00:00:24Z</review_timestamp>
+      <title>素敵でした♪</title>
+      <content>迅速な対応、お届けありがとうございました‼︎音楽仲間へのプレゼントに購入しました。まだ渡せていないのですがきっと喜んでもらえると思います♪</content>
+      <review_url type="singleton">https://708works.jp/products/nametag-ag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>nametag-ag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>ギター型ネームタグ AG ver. ｜名入れサービス無料</product_name>
+          <product_url>https://708works.jp/products/nametag-ag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>877299542</review_id>
+      <reviewer>
+        <name>寛子 加藤</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-07-07T06:08:30Z</review_timestamp>
+      <title>初めてのストラップは、こちらの708worksさんと決めてました。片手で調整が素晴らしい。オーナーも</title>
+      <content>初めてのストラップは、こちらの708worksさんと決めてました。片手で調整が素晴らしい。オーナーも親身になって、色合い等相談受けて下さいました。</content>
+      <review_url type="singleton">https://708works.jp/products/duet-cw73r</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>duet-cw73r</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>duet - CW73R デュエット｜無段階で調整できる“いいとこどり”ウロコギターストラップ</product_name>
+          <product_url>https://708works.jp/products/duet-cw73r</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>863775740</review_id>
+      <reviewer>
+        <name>KOHEI</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-06-22T05:34:12Z</review_timestamp>
+      <title>お気に入りです</title>
+      <content>推しのギターストラップを使いたいという願望があったのですが、ギターはやったことがなく、趣味のカメラに活かせることが出来ました。
+色もたくさんあり、とても良いです。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>854175921</review_id>
+      <reviewer>
+        <name>直樹 加藤</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-06-10T01:59:29Z</review_timestamp>
+      <title>期待にドンピシャ</title>
+      <content>ライブのセットリストで一曲はギターを高く構えたいけど、他は普通。「途中で長さ変えるのはテンポが悪いなあ」と思い、簡単に長さを変えられるアイテムないかな？と探したところcourierに辿り着きました。
+まさにこれが欲しかった！！</content>
+      <review_url type="singleton">https://708works.jp/products/courier</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>courier</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Courier クーリエ｜片手で長さを調整できるギターストラップ</product_name>
+          <product_url>https://708works.jp/products/courier</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>853071912</review_id>
+      <reviewer>
+        <name>尚子 時田</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-06-08T04:20:57Z</review_timestamp>
+      
+      <content>長さを普通を選んでもかなり長いので、短めを選べると嬉しいです。
+商品は、とても可愛くて、しっかりしていますので、良かったです。</content>
+      <review_url type="singleton">https://708works.jp/products/folklole-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">4</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>folklole-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
+          <product_url>https://708works.jp/products/folklole-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>847929068</review_id>
+      <reviewer>
+        <name>輝 石橋</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-06-02T03:32:21Z</review_timestamp>
+      <title>色合いもよく実用性もよかったです</title>
+      <content>使いやすく、おしゃれでよかったです！</content>
+      <review_url type="singleton">https://708works.jp/products/template-11769-dropdown-2</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-11769-dropdown-2</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>名入れ刻印を希望しますか？</product_name>
+          <product_url>https://708works.jp/products/template-11769-dropdown-2</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>839733434</review_id>
+      <reviewer>
+        <name>純平 千葉</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-05-22T05:08:44Z</review_timestamp>
+      
+      <content>とてもよかったです！</content>
+      <review_url type="singleton">https://708works.jp/products/template-12255-dropdown-1</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-12255-dropdown-1</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>ご希望の配色をお選びください</product_name>
+          <product_url>https://708works.jp/products/template-12255-dropdown-1</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>829675726</review_id>
+      <reviewer>
+        <name>みゆき 難波</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-05-11T08:14:19Z</review_timestamp>
+      
+      <content>とても素敵に仕上がりました。</content>
+      <review_url type="singleton">https://708works.jp/products/wellington-ukulele</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>wellington-ukulele</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Wellington for ukulele ウェリントン｜ウロコのようなウクレレストラップ</product_name>
+          <product_url>https://708works.jp/products/wellington-ukulele</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>808366989</review_id>
+      <reviewer>
+        <name>寛 佐藤</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-04-17T01:14:14Z</review_timestamp>
+      <title>長さ調整</title>
+      <content>使用感は問題なく、目立つので評判も上々ですが
+ギターによって長さ調整するので、それがが面倒。
+何か工夫していただくとよりイイかと思ってます。</content>
+      <review_url type="singleton">https://708works.jp/products/parts-folklore-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">4</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>parts-folklore-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore Clear ver.フォークロア｜延長用パーツ</product_name>
+          <product_url>https://708works.jp/products/parts-folklore-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>799551425</review_id>
+      <reviewer>
+        <name>哲史 青山</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-04-06T17:31:18Z</review_timestamp>
+      <title>とても気にいっています！</title>
+      <content>ギターのサウンドホールカバーはよく見かけますがウクレレ用がありません。革でできているので丈夫ですし、装着もとても簡単。名入れも可能との事で好きな言葉を入れてもらいました。ウクレレと共に末永く使ってゆきたいです。</content>
+      <review_url type="singleton">https://708works.jp/products/soundhole-cover-uk</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>soundhole-cover-uk</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>サウンドホールカバー｜ウクレレ用【本革製】</product_name>
+          <product_url>https://708works.jp/products/soundhole-cover-uk</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>788780477</review_id>
+      <reviewer>
+        <name>根本 充</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-03-24T23:01:14Z</review_timestamp>
+      <title>画期的！</title>
+      <content>二本目買いました。一本目を買って使ってみてとても使いやすいと感じました。微妙な調整ができるのが良いですね。色のバリエーションがもっとあれば良いと思います。</content>
+      <review_url type="singleton">https://708works.jp/products/courier-tweed</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>courier-tweed</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Courier Tweed ver. クーリエ｜片手で長さを調整できるギターストラップ</product_name>
+          <product_url>https://708works.jp/products/courier-tweed</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>787783585</review_id>
+      <reviewer>
+        <name>貴陽介 中村</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-03-23T15:31:15Z</review_timestamp>
+      <title>唯一無二！</title>
+      <content>他にはない唯一無二のストラップです。
+グレッチカントリージェントルマンに使用しており、割と重いギターですが、肩が痛いこともなく掛け心地もよいです！</content>
+      <review_url type="singleton">https://708works.jp/products/parts-folklore-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>parts-folklore-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore Clear ver.フォークロア｜延長用パーツ</product_name>
+          <product_url>https://708works.jp/products/parts-folklore-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>778953722</review_id>
+      <reviewer>
+        <name>寛 佐藤</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-03-13T00:58:52Z</review_timestamp>
+      <title>良い買い物でした。</title>
+      <content>予算の都合上クリアカラーを購入しました。持った瞬間…重たく感じましたが使ってみたら全体に分散されるのか軽くてイイ感じです。ただ、素材がビニルなので滑る感じです。次回は革製を！！</content>
+      <review_url type="singleton">https://708works.jp/products/folklole-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">4</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>folklole-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
+          <product_url>https://708works.jp/products/folklole-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>770354484</review_id>
+      <reviewer>
+        <name>光右 延藤</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-03-01T02:55:44Z</review_timestamp>
+      <title>元バンドマン</title>
+      <content>バンドをやってた頃には使おうとも思わなかったフェンダーのモノグラムストラップ(オールブラック)をカメラ用に初めて買いました。それくらい新鮮でした。フジの少しレトロなデザインによく合います。Leicaにはロープストラップが合う様に、自分の中でしっくりきました。全てこちらのアタッチメントのお陰です。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>767626544</review_id>
+      <reviewer>
+        <name>康宏 浜本</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-02-25T23:02:17Z</review_timestamp>
+      <title>しっかりしたつくり</title>
+      <content>つくりはしっかりして安心してカメラを使用できます。ギターストラップに止めるネジがデザイン的に片側にマイナススリットがありますが反対側も押さえながら締められると安心感さらに上がりそうです。革部分以外のカマラ取り付け部分はもう少し長いといいかも、ただし唯一無二の商品で素晴らしい！</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>765429351</review_id>
+      <reviewer>
+        <name>繁之 田中</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-02-22T10:17:30Z</review_timestamp>
+      
+      <content>よき</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>760939159</review_id>
+      <reviewer>
+        <name>美沙子 杉原</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-02-16T04:08:04Z</review_timestamp>
+      <title>自宅の練習に丁度いいです。</title>
+      <content>楽器が鳴るけどいい具合に消音され、ストロークといった音が気になる練習が楽しくできます。もちろん指弾きも楽しく練習できます。
+
+窮屈にハマるのを恐れて穴ピッタリより1mm小さく注文しました。ピッタリの大きさでもよかったなと思いました。</content>
+      <review_url type="singleton">https://708works.jp/products/soundhole-cover-uk</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>soundhole-cover-uk</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>サウンドホールカバー｜ウクレレ用【本革製】</product_name>
+          <product_url>https://708works.jp/products/soundhole-cover-uk</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>758456839</review_id>
+      <reviewer>
+        <name>遼河 佐藤</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-02-12T14:15:33Z</review_timestamp>
+      <title>つくるときから楽しい！</title>
+      <content>齢70になる母と一緒に創りました。
+とても良い思い出になりました。
+本当にありがとうございます。</content>
+      <review_url type="singleton">https://708works.jp/products/leathercraft-bracelet01</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>leathercraft-bracelet01</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>レザークラフトキット｜ブレスレット</product_name>
+          <product_url>https://708works.jp/products/leathercraft-bracelet01</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>736095339</review_id>
+      <reviewer>
+        <name>雅弘 三木</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-01-14T02:16:19Z</review_timestamp>
+      <title>安定感のあるストラップが出来ました</title>
+      <content>カメラストラップを他の人が使っていない物にしたくて、色々と模索している時にこちらに出会いました。通常のカメラストラップよりも太いので、安定していますし、まず他の人と被らないのが、気に入っています。気分に合わせて色を変えたりしたいと思い、レザーは黒色にしました。╰(*´︶`*)╯♡</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>735745524</review_id>
+      <reviewer>
+        <name>麻由美 豊島</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-01-13T12:25:13Z</review_timestamp>
+      <title>良かった！</title>
+      <content>趣味としてですが長く使うものなので、自分だけのもの、がとても嬉しかったです。</content>
+      <review_url type="singleton">https://708works.jp/products/template-11769-dropdown-2</review_url>
+      <ratings>
+        <overall min="1" max="5">4</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-11769-dropdown-2</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>名入れ刻印を希望しますか？</product_name>
+          <product_url>https://708works.jp/products/template-11769-dropdown-2</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>732615540</review_id>
+      <reviewer>
+        <name>雅弘 三木</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-01-08T21:46:58Z</review_timestamp>
+      <title>探していた商品でした</title>
+      <content>トートバッグにストラップを付けたいと考えてましたが、しっくり来るものがありませんでした。そんな時に、こちらの商品を見つけて、即購入しました。カメラのストラップとバッグのストラップ共に愛用しています。
+他とは、違う感じになるので、凄く気に入っています。素敵な商品を作ってくれてありがとうございます。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-bag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-bag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-bag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>719936346</review_id>
+      <reviewer>
+        <name>孝 池野</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-12-19T06:54:06Z</review_timestamp>
+      <title>長めでもかなり短く調整できる</title>
+      <content>長めにしたので短いセッティングはできないと思っていたがかなり調整範囲が広く取られているので、どんな種類のギターにも使えると思いました</content>
+      <review_url type="singleton">https://708works.jp/products/option-set-746452-dropdown-3</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>option-set-746452-dropdown-3</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>サイズを選ぶ(調整可能範囲)</product_name>
+          <product_url>https://708works.jp/products/option-set-746452-dropdown-3</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>712916220</review_id>
+      <reviewer>
+        <name>裕貴 中井</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-12-10T13:28:43Z</review_timestamp>
+      
+      <content>最高😀</content>
+      <review_url type="singleton">https://708works.jp/products/folklole-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>folklole-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
+          <product_url>https://708works.jp/products/folklole-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>704695956</review_id>
+      <reviewer>
+        <name>namisuke</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-11-28T11:03:46Z</review_timestamp>
+      <title>いいアイデア！</title>
+      <content>あったら良いながまんま叶うアイテムでした。派手可愛なギターストラップとお気に入りのカメラでテンションが上がります^^</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>704498274</review_id>
+      <reviewer>
+        <name>伸一 中川</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-11-28T06:30:24Z</review_timestamp>
+      <title>めちゃめちゃいいです❗️</title>
+      <content>妻は音楽家(鍵盤楽器ですが)で、
+いままでバッグに付けていたただの黒ナイロンベルトのショルダーベルトから、
+このアタッチメントを使ってFenderのギターストラップに交換して賞賛の嵐でした。
+SNSに書いたところ、ギタリスト連中は速攻で反応していました。
+次、カメラストラップを考えています。
+※新聞社出身なもので。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-bag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-bag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-bag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689163906</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-09-15T15:00:00Z</review_timestamp>
+      <title>もう1 本用にまたリピートしたいと思います。</title>
+      <content>無事に受け取り装着しました。ピッタリはまりました。古いヴィンテージギターなのでトップが焼けていてグリーンの色が映えてとても気に入りました。もう1 本用にまたリピートしたいと思います。</content>
+      <review_url type="singleton">https://708works.jp/products/soundhole-cover-ag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>soundhole-cover-ag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>サウンドホールカバー｜アコースティックギター用【本革製】</product_name>
+          <product_url>https://708works.jp/products/soundhole-cover-ag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164197</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-08-31T15:00:00Z</review_timestamp>
+      <title>年末辺りの質問に対して、その日のうちに親切で丁寧な対応をして頂き…</title>
+      <content>信頼出来るショップさんだと思い購入しました。その際には「年始を挟むので20日前後掛かる」という事をだったのですが、届いたのは1月8日。1週間足らずで手元に届いたので、迅速な作成、発送をしていただけたようで有難かったです。 ギターのストラップ自体が初なので他製品と比べた善し悪しなどは分かりませんが、革の頼もしさを感じる商品ですね。刻印も綺麗に入っていて満足です。 巾着袋も入っていたので、使わない時などはそれにしまえますし持ち運びにも便利です。</content>
+      <review_url type="singleton">https://708works.jp/products/triad</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>triad</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Triad トライアド｜程よい主張の三つ編みギターストラップ</product_name>
+          <product_url>https://708works.jp/products/triad</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689163905</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-08-14T15:00:00Z</review_timestamp>
+      <title>早速送って頂き、ありがとうございました。</title>
+      <content>先日誕生日プレゼントに贈ったところ、大変に大変に喜んでもらって嬉しかったです。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689163909</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-08-07T15:00:00Z</review_timestamp>
+      <title>立って演奏のためにストラップを探していました</title>
+      <content>ウクレレベース用に購入しました。いつも座って弾いているのであまりストラップは使っていなかったのですが、今度ウクピクに出る予定があり、立って演奏のためにストラップを探していました。オシャレで可愛くて軽くて使いやすいです！</content>
+      <review_url type="singleton">https://708works.jp/products/wellington-ukulele-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>wellington-ukulele-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Wellington for ukulele Clear ver. ウェリントン｜ウロコのようなウクレレストラップ</product_name>
+          <product_url>https://708works.jp/products/wellington-ukulele-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164195</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-06-01T15:00:00Z</review_timestamp>
+      <title>想定より素晴らしい商品でした！</title>
+      <content>どんなものでも人と被りたくない性格なので色々とベルトを探していたのですが、そうなってくると色や見た目が悪目立ちするものばかりで、「そうじゃないんだよなぁ」と。 そうした時に、ちょうど708worksさんから出品の通知があり、これは運命だと思い購入しました。 独創的な形ですが決して悪目立ちするものではなく程よい主張でめちゃくちゃ気に入っています。 普通のベルトなら、長く余った部分はきちんとベルトループに通さなければ変な感じになると思うのですが、このベルトはウロコ型のおかげで、余った部分が緩やかなカーブを描いて下に垂れていってくれるのがイチオシポイントですね。敢えて長めに購入して、垂れさせるのもファッションとしてアリなのでは無いでしょうか</content>
+      <review_url type="singleton">https://708works.jp/products/folklole-belt</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>folklole-belt</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklole belt フォークロア｜ウロコベルト</product_name>
+          <product_url>https://708works.jp/products/folklole-belt</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164196</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-06-01T15:00:00Z</review_timestamp>
+      <title>丁寧なメッセージカードと共に届きました。</title>
+      <content>ありがとうございます!! 既にトライアドを購入済みでしたが、2本目のギターをオーダーしたのをきっかけに、それ用のストラップも欲しくなり別種のこちらを購入しました。 幅が広い分、トライアドよりも肩の負担が分散されている感覚があり安定感がありますね。 重めのギターやベースなどは、このウロコストラップの方が相性はいいかもしれません。 とはいえどちらもめちゃくちゃお洒落で、安い買い物では無いですが、その分愛着も湧くのでどちらもしっかりと使い込んでいこうと思います</content>
+      <review_url type="singleton">https://708works.jp/products/folklore</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>folklore</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore フォークロア｜ウロコのようなギターストラップ</product_name>
+          <product_url>https://708works.jp/products/folklore</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164194</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-05-12T15:00:00Z</review_timestamp>
+      <title>画像通りの素敵なお品物でした。</title>
+      <content>接続部(カメラ側)はネジ式なので便利ですが、 キツく締めておかないとかえって不安でもあります。 が、デザイン的にも満足です。</content>
+      <review_url type="singleton">https://708works.jp/products/kolmio-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>kolmio-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>kolmio for Camera コルミオ｜カメラストラップ</product_name>
+          <product_url>https://708works.jp/products/kolmio-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164212</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2023-08-28T15:00:00Z</review_timestamp>
+      <title>とても快適になりました。</title>
+      <content>バッグについているストラップが細めで肩が痛くなる事がありましたが、ギターストラップとこちらで購入したアタッチメントを使用したところ、とても快適になりました。 夫も欲しがり、すぐもう一つ購入させて頂きました。 ありがとうございます。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-bag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-bag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-bag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164198</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2023-05-11T15:00:00Z</review_timestamp>
+      <title>白すぎないホワイト系のストラップを探している方にオススメです。</title>
+      <content>アイボリー本体✕グレー革でオーダーしましたが、服装を選ばず、所有ギター（白、黒、チャコール、サーフグリーン）全てに合わせやすくて今後重宝しそうです。 特にサーフグリーンのギターは本体カラーに加えてピックガードの色がミントグリーンなこともあってか、しっくりくるストラップが少なかったのですが、優しいホワイト系のアイボリー✕グレーは最高な組み合わせでした。 日本人の肌色にも合うのではないかと思います。 708worksさんのストラップは使用感はもちろん色味が好きなものが多いため、また購入したいです。</content>
+      <review_url type="singleton">https://708works.jp/products/courier</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>courier</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Courier クーリエ｜片手で長さを調整できるギターストラップ</product_name>
+          <product_url>https://708works.jp/products/courier</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164213</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2023-04-06T15:00:00Z</review_timestamp>
+      <title>幅広なお陰で重いギターも軽く感じました。</title>
+      <content>滑りやすさ／滑りにくさも絶妙だし、色味も透明感があってポップな見た目のギター（サーフグリーンのストラト）との相性抜群でした！ パステル系や、コスメに使われるような可愛い色味なんかも増やして頂けたら嬉しいです。</content>
+      <review_url type="singleton">https://708works.jp/products/folklole-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>folklole-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
+          <product_url>https://708works.jp/products/folklole-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164216</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2023-03-13T15:00:00Z</review_timestamp>
+      <title>イメージ通りの音量低下が得られ、満足しています。</title>
+      <content>土曜日に注文して翌週月曜に到着しました。早々の発送有難うございます。 全くの初心者で、夜間練習するにあたり、サイレントウクレレを購入しようか迷っていましたが、イメージ通りの音量低下が得られ、満足しています。</content>
+      <review_url type="singleton">https://708works.jp/products/soundhole-cover-uk</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>soundhole-cover-uk</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>サウンドホールカバー｜ウクレレ用【本革製】</product_name>
+          <product_url>https://708works.jp/products/soundhole-cover-uk</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689163908</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2023-03-06T15:00:00Z</review_timestamp>
+      <title>想像以上にとても可愛いストラップでした。</title>
+      <content>大切に使わせて頂きます。 届けてくださるのも想像以上に早くて嬉しかったです。 ありがとうございました。 ウクレレのお尻側の装着部分の件で気になった事があります。 ピックアップを付けています。 装着は何とかできました。 ストラップ自体の装着部分、皮2枚で作られていてとても可愛いのですが、ピックアップの溝が深くない為、原型のまま皮2枚が装着できるように角度を変えたり、一枚ずつ入れてみたり、力を入れてみたり、引っ張ったりと、とても時間がかかり、装着が難しいなと感じました。 大変でしたが、この装着感が通常でこの状態が安定に繋がるのかなとも思いました。 しかし、ネック側の装着は、真逆に力も必要なく、スムーズに行きました。 お尻側、ピックアップ対応のスムーズに装着できる皮タイプもあればもっといいなと思いました。</content>
+      <review_url type="singleton">https://708works.jp/products/wellington-ukulele-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>wellington-ukulele-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Wellington for ukulele Clear ver. ウェリントン｜ウロコのようなウクレレストラップ</product_name>
+          <product_url>https://708works.jp/products/wellington-ukulele-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164214</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2023-03-06T15:00:00Z</review_timestamp>
+      <title>想像以上にとても可愛いストラップでした。</title>
+      <content>想像以上にとても可愛いストラップでした。 大切に使わせて頂きます。 届けてくださるのも想像以上に早くて嬉しかったです。 ありがとうございました。 ウクレレのお尻側の装着部分の件で気になった事があります。 ピックアップを付けています。 装着は何とかできました。 ストラップ自体の装着部分、皮2枚で作られていてとても可愛いのですが、ピックアップの溝が深くない為、原型のまま皮2枚が装着できるように角度を変えたり、一枚ずつ入れてみたり、力を入れてみたり、引っ張ったりと、とても時間がかかり、装着が難しいなと感じました。 大変でしたが、この装着感が通常でこの状態が安定に繋がるのかなとも思いました。 しかし、ネック側の装着は、真逆に力も必要なく、スムーズに行きました。 お尻側、ピックアップ対応のスムーズに装着できる皮タイプもあればもっといいなと思いました。</content>
+      <review_url type="singleton">https://708works.jp/products/wellington-ukulele-clear</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>wellington-ukulele-clear</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Wellington for ukulele Clear ver. ウェリントン｜ウロコのようなウクレレストラップ</product_name>
+          <product_url>https://708works.jp/products/wellington-ukulele-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164215</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2023-03-03T15:00:00Z</review_timestamp>
+      <title>プレゼントにしたのですが、とても喜んでいただけました</title>
+      <content>すごく簡単にレザークラフトが楽しめますし、4色選んだので並べ方で何通りも楽しめます！ プレゼントにしたのですが、とても喜んでいただけました</content>
+      <review_url type="singleton">https://708works.jp/products/leathercraft-bracelet01</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>leathercraft-bracelet01</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>レザークラフトキット｜ブレスレット</product_name>
+          <product_url>https://708works.jp/products/leathercraft-bracelet01</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164228</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2022-12-28T15:00:00Z</review_timestamp>
+      <title>ネーム入りという特別感がありとても喜んでもらえまし</title>
+      <content>納期のことで無理を聞いていただきありがとうございました。 プレゼントだったのですが、ネーム入りという特別感がありとても喜んでもらえました。</content>
+      <review_url type="singleton">https://708works.jp/products/nametag-ag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>nametag-ag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>ギター型ネームタグ AG ver. ｜名入れサービス無料</product_name>
+          <product_url>https://708works.jp/products/nametag-ag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164229</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2022-11-02T15:00:00Z</review_timestamp>
+      <title>想像の10倍くらい素敵なストラップ！</title>
+      <content>使用感もとても良いです</content>
+      <review_url type="singleton">https://708works.jp/products/wellington-ukulele</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>wellington-ukulele</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Wellington for ukulele ウェリントン｜ウロコのようなウクレレストラップ</product_name>
+          <product_url>https://708works.jp/products/wellington-ukulele</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164231</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2022-03-06T15:00:00Z</review_timestamp>
+      <title>本革で予想以上にしっかりした作りで満足です。</title>
+      <content>届きました。 本革で予想以上にしっかりした作りで満足です。 こちらの相談にも迅速に対応していただきありがとうございました。 大切に使わせていただきます。</content>
+      <review_url type="singleton">https://708works.jp/products/triad</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>triad</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Triad トライアド｜程よい主張の三つ編みギターストラップ</product_name>
+          <product_url>https://708works.jp/products/triad</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164230</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2022-02-23T15:00:00Z</review_timestamp>
+      <title>色も触り心地も良かったです！</title>
+      <content>大事に使わせていただきます。</content>
+      <review_url type="singleton">https://708works.jp/products/wellington-ukulele</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>wellington-ukulele</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Wellington for ukulele ウェリントン｜ウロコのようなウクレレストラップ</product_name>
+          <product_url>https://708works.jp/products/wellington-ukulele</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689163907</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2021-10-13T15:00:00Z</review_timestamp>
+      <title>アイデア商品に感謝です(≧▽≦)</title>
+      <content>この度は迅速なご対応、誠にありがとうございました♪ 大好きなFenderストラップを使うことができました！！ アイデア商品に感謝です(≧▽≦)</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>689164232</review_id>
+      <reviewer>
+        <name>Anonymous</name>
+        <is_anonymous>true</is_anonymous>
+      </reviewer>
+      <review_timestamp>2021-09-20T15:00:00Z</review_timestamp>
+      <title>とても素敵なストラップ！</title>
+      <content>とても素敵なストラップを、ありがとうございました。 是非また、利用させて頂きたいと強く思いました。</content>
+      <review_url type="singleton">https://708works.jp/products/folklore</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>folklore</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>folklore フォークロア｜ウロコのようなギターストラップ</product_name>
+          <product_url>https://708works.jp/products/folklore</product_url>
+        </product>
+      </products>
+    </review>
+  </reviews>
+</feed>
