@@ -654,6 +654,13 @@ async function courierProceedToCart() {
       const i = document.createElement('input');
       i.type='hidden'; i.name=`properties[${k}]`; i.value=v; form.appendChild(i);
     });
+  // シミュレーター経由ディスカウント適用
+  const inputReturn = document.createElement('input');
+  inputReturn.type = 'hidden';
+  inputReturn.name = 'return_to';
+  inputReturn.value = '/discount/SIMULATOR10?redirect=/cart';
+  form.appendChild(inputReturn);
+
   document.body.appendChild(form);
   form.submit();
 }
