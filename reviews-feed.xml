@@ -36,30 +36,6 @@
       </products>
     </review>
     <review>
-      <review_id>1205402014</review_id>
-      <reviewer>
-        <name>竹田信弘 竹田信弘</name>
-        <is_anonymous>false</is_anonymous>
-      </reviewer>
-      <review_timestamp>2026-06-03T09:15:51Z</review_timestamp>
-      <title>シートベルト地および自在に長さを変えられる機能性と、革工芸品としてのデザイン性がとても素晴らしいです</title>
-      <content>シートベルト地および自在に長さを変えられる機能性と、革工芸品としてのデザイン性がとても素晴らしいです。肩にかけた時に、ふんわりと革の匂いがすると、本物を使っているという安心感や満足感があります。</content>
-      <review_url type="singleton">https://708works.jp/products/judgeme-shop-reviews</review_url>
-      <ratings>
-        <overall min="1" max="5">5</overall>
-      </ratings>
-      <products>
-        <product>
-          <product_ids>
-            <skus><sku>judgeme-shop-reviews</sku></skus>
-            <brands><brand>708works</brand></brands>
-          </product_ids>
-          <product_name>Judge.me Shop Reviews</product_name>
-          <product_url>https://708works.jp/products/judgeme-shop-reviews</product_url>
-        </product>
-      </products>
-    </review>
-    <review>
       <review_id>1200811609</review_id>
       <reviewer>
         <name>ひとみ 半沢</name>
