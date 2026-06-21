@@ -36,11 +36,14 @@ const COURIER_LEATHER_COLORS = [
   {id:'black',   name:'Black',     hex:'#1a1a1a'},
 ];
 
-// ナイロンベルト専用カラー（3色）
+// ナイロンベルト専用カラー（6色）
 const COURIER_BELT_COLORS = [
-  {id:'black', name:'Black', hex:'#1a1a1a'},
-  {id:'brown', name:'Brown', hex:'#b07840'},
-  {id:'ivory', name:'Ivory', hex:'#f0ece0'},
+  {id:'black',     name:'Black',      hex:'#1a1a1a'},
+  {id:'brown',     name:'Brown',      hex:'#b07840'},
+  {id:'ivory',     name:'Ivory',      hex:'#f0ece0'},
+  {id:'mossgreen', name:'Moss Green', hex:'#5c6b3a'},
+  {id:'cobalt',    name:'Cobalt',     hex:'#2a5a8c'},
+  {id:'cream',     name:'Cream',      hex:'#e8dfc8'},
 ];
 
 // ゾーン定義（通常モード：2ゾーン、分離モード：3ゾーン）
