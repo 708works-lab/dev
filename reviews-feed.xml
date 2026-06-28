@@ -27,11 +27,35 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
           <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1205402014</review_id>
+      <reviewer>
+        <name>竹***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-06-03T09:15:51Z</review_timestamp>
+      <title>シートベルト地および自在に長さを変えられる機能性と、革工芸品としてのデザイン性がとても素晴らしいです</title>
+      <content>シートベルト地および自在に長さを変えられる機能性と、革工芸品としてのデザイン性がとても素晴らしいです。肩にかけた時に、ふんわりと革の匂いがすると、本物を使っているという安心感や満足感があります。</content>
+      <review_url type="singleton">https://708works.jp/products/judgeme-shop-reviews</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>judgeme-shop-reviews</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Judge.me Shop Reviews</product_name>
+          <product_url>https://708works.jp/products/judgeme-shop-reviews</product_url>
         </product>
       </products>
     </review>
@@ -51,7 +75,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-bag</mpn></mpns>
+            <skus><sku>backstage-bag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
@@ -75,7 +99,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -101,7 +125,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-bag</mpn></mpns>
+            <skus><sku>backstage-bag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
@@ -125,7 +149,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -149,7 +173,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>onstage</mpn></mpns>
+            <skus><sku>onstage</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Onstage｜ギターストラップ取付用アタッチメント【ストラップピンが1つしか無いギター・ウクレレに最適】</product_name>
@@ -176,7 +200,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>folklore</mpn></mpns>
+            <skus><sku>folklore</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore フォークロア｜ウロコのようなギターストラップ</product_name>
@@ -200,7 +224,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>courier</mpn></mpns>
+            <skus><sku>courier</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Courier クーリエ｜片手で長さを調整できるギターストラップ</product_name>
@@ -224,11 +248,35 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
           <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>1058221121</review_id>
+      <reviewer>
+        <name>貴***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-02-07T04:44:18Z</review_timestamp>
+      <title>３本目です</title>
+      <content>３本目のギター用に購入しました。今回はサウンドホールにピックアップのコントローラーを装着しているため、切れ込み部分をその部分に当てる想定でロゴの位置も調整していただきました。きめ細かい調整をしていただいて満足です。</content>
+      <review_url type="singleton">https://708works.jp/products/template-11769-dropdown-2</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-11769-dropdown-2</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>名入れ刻印を希望しますか？</product_name>
+          <product_url>https://708works.jp/products/template-11769-dropdown-2</product_url>
         </product>
       </products>
     </review>
@@ -248,7 +296,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-bag</mpn></mpns>
+            <skus><sku>backstage-bag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
@@ -272,7 +320,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>courier</mpn></mpns>
+            <skus><sku>courier</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Courier クーリエ｜片手で長さを調整できるギターストラップ</product_name>
@@ -298,7 +346,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>soundhole-cover-ag</mpn></mpns>
+            <skus><sku>soundhole-cover-ag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>サウンドホールカバー｜アコースティックギター用【本革製】</product_name>
@@ -327,7 +375,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>triad</mpn></mpns>
+            <skus><sku>triad</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Triad トライアド｜程よい主張の三つ編みギターストラップ</product_name>
@@ -354,7 +402,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>folklole-clear</mpn></mpns>
+            <skus><sku>folklole-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
@@ -380,7 +428,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-bag</mpn></mpns>
+            <skus><sku>backstage-bag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
@@ -404,7 +452,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -436,11 +484,37 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
           <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>895033330</review_id>
+      <reviewer>
+        <name>寛***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-07-28T00:21:34Z</review_timestamp>
+      <title>短くする時は簡単に素早く出来ますが緩める時がコツがいるようです。
+概ね使いやすく良い買い物ができまし</title>
+      <content>短くする時は簡単に素早く出来ますが緩める時がコツがいるようです。
+概ね使いやすく良い買い物ができました。</content>
+      <review_url type="singleton">https://708works.jp/products/template-11769-dropdown-2</review_url>
+      <ratings>
+        <overall min="1" max="5">4</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-11769-dropdown-2</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>名入れ刻印を希望しますか？</product_name>
+          <product_url>https://708works.jp/products/template-11769-dropdown-2</product_url>
         </product>
       </products>
     </review>
@@ -460,7 +534,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>nametag-ag</mpn></mpns>
+            <skus><sku>nametag-ag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>ギター型ネームタグ AG ver. ｜名入れサービス無料</product_name>
@@ -484,7 +558,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>duet-cw73r</mpn></mpns>
+            <skus><sku>duet-cw73r</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>duet - CW73R デュエット｜無段階で調整できる“いいとこどり”ウロコギターストラップ</product_name>
@@ -509,7 +583,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -534,7 +608,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>courier</mpn></mpns>
+            <skus><sku>courier</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Courier クーリエ｜片手で長さを調整できるギターストラップ</product_name>
@@ -559,11 +633,59 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>folklole-clear</mpn></mpns>
+            <skus><sku>folklole-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
           <product_url>https://708works.jp/products/folklole-clear</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>847929068</review_id>
+      <reviewer>
+        <name>輝***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-06-02T03:32:21Z</review_timestamp>
+      <title>色合いもよく実用性もよかったです</title>
+      <content>使いやすく、おしゃれでよかったです！</content>
+      <review_url type="singleton">https://708works.jp/products/template-11769-dropdown-2</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-11769-dropdown-2</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>名入れ刻印を希望しますか？</product_name>
+          <product_url>https://708works.jp/products/template-11769-dropdown-2</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>839733434</review_id>
+      <reviewer>
+        <name>純***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-05-22T05:08:44Z</review_timestamp>
+      
+      <content>とてもよかったです！</content>
+      <review_url type="singleton">https://708works.jp/products/template-12255-dropdown-1</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-12255-dropdown-1</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>ご希望の配色をお選びください</product_name>
+          <product_url>https://708works.jp/products/template-12255-dropdown-1</product_url>
         </product>
       </products>
     </review>
@@ -583,7 +705,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>wellington-ukulele</mpn></mpns>
+            <skus><sku>wellington-ukulele</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Wellington for ukulele ウェリントン｜ウロコのようなウクレレストラップ</product_name>
@@ -609,7 +731,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>parts-folklore-clear</mpn></mpns>
+            <skus><sku>parts-folklore-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore Clear ver.フォークロア｜延長用パーツ</product_name>
@@ -633,7 +755,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>soundhole-cover-uk</mpn></mpns>
+            <skus><sku>soundhole-cover-uk</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>サウンドホールカバー｜ウクレレ用【本革製】</product_name>
@@ -657,7 +779,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>courier-tweed</mpn></mpns>
+            <skus><sku>courier-tweed</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Courier Tweed ver. クーリエ｜片手で長さを調整できるギターストラップ</product_name>
@@ -682,7 +804,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>parts-folklore-clear</mpn></mpns>
+            <skus><sku>parts-folklore-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore Clear ver.フォークロア｜延長用パーツ</product_name>
@@ -706,7 +828,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>folklole-clear</mpn></mpns>
+            <skus><sku>folklole-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
@@ -730,7 +852,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -754,7 +876,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -778,7 +900,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -804,7 +926,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>soundhole-cover-uk</mpn></mpns>
+            <skus><sku>soundhole-cover-uk</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>サウンドホールカバー｜ウクレレ用【本革製】</product_name>
@@ -830,7 +952,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>leathercraft-bracelet01</mpn></mpns>
+            <skus><sku>leathercraft-bracelet01</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>レザークラフトキット｜ブレスレット</product_name>
@@ -854,11 +976,35 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
           <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>735745524</review_id>
+      <reviewer>
+        <name>麻***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2025-01-13T12:25:13Z</review_timestamp>
+      <title>良かった！</title>
+      <content>趣味としてですが長く使うものなので、自分だけのもの、がとても嬉しかったです。</content>
+      <review_url type="singleton">https://708works.jp/products/template-11769-dropdown-2</review_url>
+      <ratings>
+        <overall min="1" max="5">4</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>template-11769-dropdown-2</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>名入れ刻印を希望しますか？</product_name>
+          <product_url>https://708works.jp/products/template-11769-dropdown-2</product_url>
         </product>
       </products>
     </review>
@@ -879,11 +1025,35 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-bag</mpn></mpns>
+            <skus><sku>backstage-bag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
           <product_url>https://708works.jp/products/backstage-bag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
+      <review_id>719936346</review_id>
+      <reviewer>
+        <name>孝***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2024-12-19T06:54:06Z</review_timestamp>
+      <title>長めでもかなり短く調整できる</title>
+      <content>長めにしたので短いセッティングはできないと思っていたがかなり調整範囲が広く取られているので、どんな種類のギターにも使えると思いました</content>
+      <review_url type="singleton">https://708works.jp/products/option-set-746452-dropdown-3</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>option-set-746452-dropdown-3</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>サイズを選ぶ(調整可能範囲)</product_name>
+          <product_url>https://708works.jp/products/option-set-746452-dropdown-3</product_url>
         </product>
       </products>
     </review>
@@ -903,7 +1073,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>folklole-clear</mpn></mpns>
+            <skus><sku>folklole-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
@@ -927,7 +1097,7 @@
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -956,7 +1126,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-bag</mpn></mpns>
+            <skus><sku>backstage-bag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
@@ -980,7 +1150,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>soundhole-cover-ag</mpn></mpns>
+            <skus><sku>soundhole-cover-ag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>サウンドホールカバー｜アコースティックギター用【本革製】</product_name>
@@ -1004,7 +1174,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>triad</mpn></mpns>
+            <skus><sku>triad</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Triad トライアド｜程よい主張の三つ編みギターストラップ</product_name>
@@ -1028,7 +1198,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -1052,7 +1222,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>wellington-ukulele-clear</mpn></mpns>
+            <skus><sku>wellington-ukulele-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Wellington for ukulele Clear ver. ウェリントン｜ウロコのようなウクレレストラップ</product_name>
@@ -1076,7 +1246,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>folklole-belt</mpn></mpns>
+            <skus><sku>folklole-belt</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklole belt フォークロア｜ウロコベルト</product_name>
@@ -1100,7 +1270,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>folklore</mpn></mpns>
+            <skus><sku>folklore</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore フォークロア｜ウロコのようなギターストラップ</product_name>
@@ -1124,7 +1294,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>kolmio-camera</mpn></mpns>
+            <skus><sku>kolmio-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>kolmio for Camera コルミオ｜カメラストラップ</product_name>
@@ -1148,7 +1318,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-bag</mpn></mpns>
+            <skus><sku>backstage-bag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
@@ -1172,7 +1342,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>courier</mpn></mpns>
+            <skus><sku>courier</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Courier クーリエ｜片手で長さを調整できるギターストラップ</product_name>
@@ -1196,7 +1366,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>folklole-clear</mpn></mpns>
+            <skus><sku>folklole-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore Clear ver. フォークロア｜ウロコのようなギターストラップ</product_name>
@@ -1220,7 +1390,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>soundhole-cover-uk</mpn></mpns>
+            <skus><sku>soundhole-cover-uk</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>サウンドホールカバー｜ウクレレ用【本革製】</product_name>
@@ -1244,7 +1414,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>wellington-ukulele-clear</mpn></mpns>
+            <skus><sku>wellington-ukulele-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Wellington for ukulele Clear ver. ウェリントン｜ウロコのようなウクレレストラップ</product_name>
@@ -1268,7 +1438,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>wellington-ukulele-clear</mpn></mpns>
+            <skus><sku>wellington-ukulele-clear</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Wellington for ukulele Clear ver. ウェリントン｜ウロコのようなウクレレストラップ</product_name>
@@ -1292,7 +1462,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>leathercraft-bracelet01</mpn></mpns>
+            <skus><sku>leathercraft-bracelet01</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>レザークラフトキット｜ブレスレット</product_name>
@@ -1316,7 +1486,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>nametag-ag</mpn></mpns>
+            <skus><sku>nametag-ag</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>ギター型ネームタグ AG ver. ｜名入れサービス無料</product_name>
@@ -1340,7 +1510,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>wellington-ukulele</mpn></mpns>
+            <skus><sku>wellington-ukulele</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Wellington for ukulele ウェリントン｜ウロコのようなウクレレストラップ</product_name>
@@ -1364,7 +1534,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>triad</mpn></mpns>
+            <skus><sku>triad</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Triad トライアド｜程よい主張の三つ編みギターストラップ</product_name>
@@ -1388,7 +1558,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>wellington-ukulele</mpn></mpns>
+            <skus><sku>wellington-ukulele</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Wellington for ukulele ウェリントン｜ウロコのようなウクレレストラップ</product_name>
@@ -1412,7 +1582,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>backstage-camera</mpn></mpns>
+            <skus><sku>backstage-camera</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
@@ -1436,7 +1606,7 @@ SNSに書いたところ、ギタリスト連中は速攻で反応していま�
       <products>
         <product>
           <product_ids>
-            <mpns><mpn>folklore</mpn></mpns>
+            <skus><sku>folklore</sku></skus>
             <brands><brand>708works</brand></brands>
           </product_ids>
           <product_name>folklore フォークロア｜ウロコのようなギターストラップ</product_name>
