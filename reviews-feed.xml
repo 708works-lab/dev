@@ -12,6 +12,32 @@
   </publisher>
   <reviews>
     <review>
+      <review_id>1255035051</review_id>
+      <reviewer>
+        <name>努***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-07-12T11:00:58Z</review_timestamp>
+      <title>素敵な商品です✨</title>
+      <content>お気に入りのギターストラップ、お気に入りのバッグが合わさって自分だけのアイテムに！
+ますますお気に入りになりました✨
+素材の色、金具の色まで選べるので他の色でリピしたいです！</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-bag</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-bag</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Bag｜ギターストラップをショルダーバッグ用ストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-bag</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
       <review_id>1208522966</review_id>
       <reviewer>
         <name>成***</name>
