@@ -12,6 +12,30 @@
   </publisher>
   <reviews>
     <review>
+      <review_id>1273125620</review_id>
+      <reviewer>
+        <name>直***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-07-26T09:39:49Z</review_timestamp>
+      <title>違和感無いデザイン</title>
+      <content>素敵な柄のギターストラップを見つけ、これをカメラに使えないかとネット検索して見つけました。しっかりした作りで違和感のないデザインで買ってよかったです。</content>
+      <review_url type="singleton">https://708works.jp/products/backstage-camera</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>backstage-camera</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Backstage for Camera｜ギターストラップをカメラストラップに変身させるアタッチメント</product_name>
+          <product_url>https://708works.jp/products/backstage-camera</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
       <review_id>1267410925</review_id>
       <reviewer>
         <name>慎***</name>
