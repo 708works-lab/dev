@@ -46,19 +46,25 @@ const DUET_BELT_COLORS = [
   {id:'cream',     name:'Cream',      hex:'#e8dfc8'},
 ];
 
-// ゾーン定義（通常モード：2ゾーン、分離モード：3ゾーン）
+// 革パーツのゾーン一覧（先端①＝ストラップピン側の1枚目 〜 先端④＝ベルト側の1枚目、後端）
+const DUET_LEATHER_ZONES = ['front1','front2','front3','front4','rear'];
+
+// ゾーン定義
 const DUET_ZONE_LABEL = {
-  leather: '革パーツ（前後共通）',
-  front:   '先端（革・R切替対象）',
+  leather: '革パーツ（全体）',
+  front1:  '先端①（ピン側）',
+  front2:  '先端②',
+  front3:  '先端③',
+  front4:  '先端④（ベルト側）',
   belt:    'ベルト（ナイロン）',
-  rear:    '後端（革）',
+  rear:    '後端',
 };
 
 // ============================================================================
 // 状態
 // ============================================================================
 
-let duetColors = { front:'#1a1a1a', belt:'#1a1a1a', rear:'#1a1a1a' };
+let duetColors = { front1:'#1a1a1a', front2:'#1a1a1a', front3:'#1a1a1a', front4:'#1a1a1a', rear:'#1a1a1a', belt:'#9e3820' };
 let duetLinked      = true;
 let duetActiveZone  = 'leather';
 let duetSelectedStyle = 'standard';
@@ -166,8 +172,6 @@ function injectBeltTexture(svg) {
 function applyDuetFrontStyle() {
   const wrap = document.getElementById('duet-strap-wrap');
   if (!wrap) return;
-  const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
-  if (!style) return;
 
   DUET_FRONT_STYLES.forEach(s => {
     const g = wrap.querySelector(`#${s.svgGroup}`);
@@ -189,21 +193,19 @@ function applyDuetColors() {
     el.setAttribute('stroke-width', '1.5');
     el.setAttribute('stroke-opacity', '1');
   });
-  wrap.querySelectorAll('[data-zone="front"]').forEach(el => {
-    el.setAttribute('fill', duetColors.front);
-    el.setAttribute('stroke', leatherStroke(duetColors.front));
-    el.setAttribute('stroke-width', '1.5');
-    el.setAttribute('stroke-opacity', '1');
-  });
-  wrap.querySelectorAll('[data-zone="rear"]').forEach(el => {
-    el.setAttribute('fill', duetColors.rear);
-    el.setAttribute('stroke', leatherStroke(duetColors.rear));
-    el.setAttribute('stroke-width', '1.5');
-    el.setAttribute('stroke-opacity', '1');
+
+  DUET_LEATHER_ZONES.forEach(zone => {
+    wrap.querySelectorAll(`[data-zone="${zone}"]`).forEach(el => {
+      el.setAttribute('fill', duetColors[zone]);
+      el.setAttribute('stroke', leatherStroke(duetColors[zone]));
+      el.setAttribute('stroke-width', '1.5');
+      el.setAttribute('stroke-opacity', '1');
+    });
   });
 
+  // ロゴ刻印は先端③のパーツ上にあるため、先端③の色に合わせて刻印色を決める
   wrap.querySelectorAll('[data-role="logo"]').forEach(logo => {
-    logo.setAttribute('fill', engravingColor(duetColors.front));
+    logo.setAttribute('fill', engravingColor(duetColors.front3));
   });
 
   highlightActiveZone();
@@ -214,30 +216,32 @@ function highlightActiveZone() {
   if (!wrap) return;
 
   const highlightZones = duetActiveZone === 'leather'
-    ? ['front','rear']
+    ? DUET_LEATHER_ZONES
     : [duetActiveZone];
 
-  ['front','belt','rear'].forEach(zone => {
+  [...DUET_LEATHER_ZONES, 'belt'].forEach(zone => {
     const isActive = highlightZones.includes(zone);
     wrap.querySelectorAll(`[data-zone="${zone}"]`).forEach(el => {
       if (isActive) {
         el.setAttribute('stroke', activeStroke(zone));
-        el.setAttribute('stroke-width', '6');
-        el.setAttribute('stroke-opacity', '0.65');
+        el.setAttribute('stroke-width', '3.5');
+        el.setAttribute('stroke-opacity', '0.7');
+        el.setAttribute('stroke-linejoin', 'round');
+        el.setAttribute('stroke-linecap', 'round');
       } else {
-        const s = zone === 'belt' ? 'rgba(0,0,0,0.2)'
-                : zone === 'front' ? leatherStroke(duetColors.front)
-                : leatherStroke(duetColors.rear);
+        const s = zone === 'belt' ? 'rgba(0,0,0,0.2)' : leatherStroke(duetColors[zone]);
         el.setAttribute('stroke', s);
         el.setAttribute('stroke-width', '1.5');
         el.setAttribute('stroke-opacity', '1');
+        el.removeAttribute('stroke-linejoin');
+        el.removeAttribute('stroke-linecap');
       }
     });
   });
 }
 
 // ============================================================================
-// ゾーンボタン（前後リンクモード切替）
+// ゾーンボタン（革パーツ一括／個別切替）
 // ============================================================================
 
 function buildDuetZoneButtons() {
@@ -247,7 +251,7 @@ function buildDuetZoneButtons() {
 
   const zones = duetLinked
     ? ['leather', 'belt']
-    : ['rear', 'belt', 'front'];
+    : ['rear', 'belt', 'front4', 'front3', 'front2', 'front1'];
 
   zones.forEach(zone => {
     const btn = document.createElement('button');
@@ -256,7 +260,7 @@ function buildDuetZoneButtons() {
 
     const dot = document.createElement('span');
     dot.className = 'zone-dot';
-    const hex = zone === 'leather' ? duetColors.front
+    const hex = zone === 'leather' ? duetColors.front1
               : zone === 'belt'    ? duetColors.belt
               : duetColors[zone];
     dot.style.background = hex;
@@ -270,24 +274,25 @@ function buildDuetZoneButtons() {
     container.appendChild(btn);
   });
 
-  // 前後分離トグル
+  // 一括／個別切替トグル
   const toggle = document.createElement('button');
   toggle.className = 'duet-split-toggle' + (duetLinked ? '' : ' active');
   toggle.onclick = toggleDuetLeatherSplit;
   toggle.innerHTML = duetLinked
-    ? '<span class="toggle-icon">⊕</span> 前後を別の色にする'
-    : '<span class="toggle-icon">⊖</span> 前後を同じ色に戻す';
+    ? '<span class="toggle-icon">⊕</span> 先端・後端を1枚ずつ別の色にする'
+    : '<span class="toggle-icon">⊖</span> 革パーツをすべて同じ色に戻す';
   container.appendChild(toggle);
 }
 
 function toggleDuetLeatherSplit() {
   duetLinked = !duetLinked;
   if (duetLinked) {
-    // リンク復帰時は前端に合わせる
-    duetColors.rear = duetColors.front;
-    duetActiveZone  = 'leather';
+    // リンク復帰時は先端①の色に全パーツを揃える
+    const base = duetColors.front1;
+    DUET_LEATHER_ZONES.forEach(z => { duetColors[z] = base; });
+    duetActiveZone = 'leather';
   } else {
-    duetActiveZone  = 'front';
+    duetActiveZone = 'front1';
   }
   buildDuetZoneButtons();
   buildDuetPalette();
@@ -320,7 +325,7 @@ function buildDuetPalette() {
   palette.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;';
 
   const colors  = duetActiveZone === 'belt' ? DUET_BELT_COLORS : DUET_LEATHER_COLORS;
-  const current = duetActiveZone === 'leather' ? duetColors.front
+  const current = duetActiveZone === 'leather' ? duetColors.front1
                 : duetActiveZone === 'belt'    ? duetColors.belt
                 : duetColors[duetActiveZone];
 
@@ -349,8 +354,7 @@ function buildDuetPalette() {
 function setDuetColor(hex) {
   saveDuetHistory();
   if (duetActiveZone === 'leather') {
-    duetColors.front = hex;
-    duetColors.rear  = hex;
+    DUET_LEATHER_ZONES.forEach(z => { duetColors[z] = hex; });
   } else if (duetActiveZone === 'belt') {
     duetColors.belt = hex;
   } else {
@@ -402,13 +406,16 @@ function updateDuetSummary() {
 
   const rows = duetLinked
     ? [
-        { label: DUET_ZONE_LABEL.leather,  zone:'front', hex: duetColors.front },
-        { label: DUET_ZONE_LABEL.belt,     zone:'belt',  hex: duetColors.belt  },
+        { label: DUET_ZONE_LABEL.leather, zone:'front1', hex: duetColors.front1 },
+        { label: DUET_ZONE_LABEL.belt,    zone:'belt',   hex: duetColors.belt   },
       ]
     : [
-        { label: DUET_ZONE_LABEL.front,    zone:'front', hex: duetColors.front },
-        { label: DUET_ZONE_LABEL.belt,     zone:'belt',  hex: duetColors.belt  },
-        { label: DUET_ZONE_LABEL.rear,     zone:'rear',  hex: duetColors.rear  },
+        { label: DUET_ZONE_LABEL.rear,   zone:'rear',   hex: duetColors.rear   },
+        { label: DUET_ZONE_LABEL.belt,   zone:'belt',   hex: duetColors.belt   },
+        { label: DUET_ZONE_LABEL.front4, zone:'front4', hex: duetColors.front4 },
+        { label: DUET_ZONE_LABEL.front3, zone:'front3', hex: duetColors.front3 },
+        { label: DUET_ZONE_LABEL.front2, zone:'front2', hex: duetColors.front2 },
+        { label: DUET_ZONE_LABEL.front1, zone:'front1', hex: duetColors.front1 },
       ];
 
   el.innerHTML = rows.map(r => `
@@ -441,9 +448,7 @@ function leatherStroke(hex) {
 }
 
 function activeStroke(zone) {
-  const color = zone === 'front' ? duetColors.front
-               : zone === 'rear' ? duetColors.rear
-               : duetColors.belt;
+  const color = zone === 'belt' ? duetColors.belt : duetColors[zone];
   const h = color.replace('#','');
   const lum = (parseInt(h.slice(0,2),16)*0.299 + parseInt(h.slice(2,4),16)*0.587 + parseInt(h.slice(4,6),16)*0.114) / 255;
   if (zone === 'belt') return '#888888';
@@ -475,8 +480,9 @@ function saveDuetHistory() {
 function duetUndo() {
   if (!duetHistory.length) return;
   const prev = duetHistory.pop();
-  duetColors = {front: prev.front, belt: prev.belt, rear: prev.rear};
-  duetLinked = prev._linked;
+  const { _linked, ...colors } = prev;
+  duetColors = colors;
+  duetLinked = _linked;
   if (duetLinked && duetActiveZone !== 'belt') duetActiveZone = 'leather';
   duetImageSaved = false;
   buildDuetZoneButtons();
@@ -491,7 +497,7 @@ function duetUndo() {
 
 function duetReset() {
   saveDuetHistory();
-  duetColors  = {front:'#1a1a1a', belt:'#9e3820', rear:'#1a1a1a'};
+  duetColors  = { front1:'#1a1a1a', front2:'#1a1a1a', front3:'#1a1a1a', front4:'#1a1a1a', rear:'#1a1a1a', belt:'#9e3820' };
   duetLinked  = true;
   duetActiveZone = 'leather';
   duetImageSaved = false;
@@ -609,6 +615,18 @@ async function duetUploadImage(canvas) {
   return {orderId, imageUrl: data.url || data.imageUrl};
 }
 
+function duetOrderRows() {
+  return duetLinked
+    ? [{label: DUET_ZONE_LABEL.leather, zone:'front1', hex: duetColors.front1},
+       {label: DUET_ZONE_LABEL.belt,    zone:'belt',   hex: duetColors.belt  }]
+    : [{label: DUET_ZONE_LABEL.rear,   zone:'rear',   hex: duetColors.rear  },
+       {label: DUET_ZONE_LABEL.belt,   zone:'belt',   hex: duetColors.belt  },
+       {label: DUET_ZONE_LABEL.front4, zone:'front4', hex: duetColors.front4},
+       {label: DUET_ZONE_LABEL.front3, zone:'front3', hex: duetColors.front3},
+       {label: DUET_ZONE_LABEL.front2, zone:'front2', hex: duetColors.front2},
+       {label: DUET_ZONE_LABEL.front1, zone:'front1', hex: duetColors.front1}];
+}
+
 function showDuetConfirmModal(result) {
   const modal = document.getElementById('duet-confirm-modal');
   if (!modal) return;
@@ -616,12 +634,7 @@ function showDuetConfirmModal(result) {
   if (img) img.src = result.imageUrl;
 
   const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
-  const rows = duetLinked
-    ? [{label: DUET_ZONE_LABEL.leather, zone:'front', hex: duetColors.front},
-       {label: DUET_ZONE_LABEL.belt,    zone:'belt',  hex: duetColors.belt }]
-    : [{label: DUET_ZONE_LABEL.front,   zone:'front', hex: duetColors.front},
-       {label: DUET_ZONE_LABEL.belt,    zone:'belt',  hex: duetColors.belt },
-       {label: DUET_ZONE_LABEL.rear,    zone:'rear',  hex: duetColors.rear }];
+  const rows = duetOrderRows();
 
   const info = document.getElementById('duet-modal-info');
   if (info) info.innerHTML = `
@@ -652,9 +665,10 @@ async function duetProceedToCart() {
   closeDuetModal();
 
   const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
+  const rows  = duetOrderRows();
   const colorDataEN = duetLinked
-    ? `Leather(Front+Rear):${colorName(duetColors.front,'front')}, Belt[Nylon]:${colorName(duetColors.belt,'belt')}`
-    : `Front[Leather]:${colorName(duetColors.front,'front')}, Belt[Nylon]:${colorName(duetColors.belt,'belt')}, Rear[Leather]:${colorName(duetColors.rear,'rear')}`;
+    ? `Leather(All):${colorName(duetColors.front1,'front1')}, Belt[Nylon]:${colorName(duetColors.belt,'belt')}`
+    : rows.map(r => `${r.label}:${colorName(r.hex, r.zone)}`).join(', ');
 
   const form = document.createElement('form');
   form.method = 'POST';
