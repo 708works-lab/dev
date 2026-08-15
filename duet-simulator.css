@@ -1,0 +1,278 @@
+/* DUET Simulator */
+.duet-simulator {
+  background: #f0ede8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  padding: 0 0 20px;
+}
+.duet-simulator * { box-sizing: border-box; }
+
+/* ヘッダー */
+.duet-simulator header {
+  background: #111; color: #fff;
+  text-align: center; padding: 10px 16px 7px; margin: 0;
+}
+.duet-simulator header h1 {
+  font-size: 15px; letter-spacing: .25em; font-weight: 400; margin: 0;
+}
+.duet-simulator header p {
+  font-size: 11px; color: #666; letter-spacing: .15em; margin-top: 1px;
+}
+
+/* アプリ全体：左＝コントロール、右＝プレビュー */
+.duet-simulator .app {
+  width: 100%; max-width: 520px; margin: 0 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 8px 4px;
+}
+
+/* ━━━ 左：コントロールカラム ━━━ */
+.duet-simulator .ctrl-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* ━━━ 右：プレビューカラム ━━━ */
+.duet-simulator .preview-col {
+  flex: 0 0 42%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 前／後ろ タグ（SVGの上下） */
+.duet-simulator .dir-tag-v {
+  width: 100%;
+  text-align: center;
+  padding: 5px 4px;
+  border-radius: 6px;
+  background: #333; color: #fff;
+  font-size: 10px; font-weight: 500;
+  line-height: 1.2;
+}
+.duet-simulator .dir-tag-v small {
+  display: block; font-size: 8px; color: #aaa; font-weight: 400; margin-top: 2px;
+}
+
+.duet-simulator .strap-wrap {
+  width: 100%;
+}
+.duet-simulator .strap-wrap svg {
+  width: 100%; height: auto; display: block;
+}
+
+/* 共通ラベル */
+.duet-simulator .box-label {
+  font-size: 10px; color: #888;
+  letter-spacing: .08em; font-weight: 500; text-transform: uppercase;
+}
+
+/* ━━━ ゾーンボタン ━━━ */
+.duet-simulator .duet-zones {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.duet-simulator .duet-zone-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 9px;
+  border: 1.5px solid #ddd; border-radius: 7px;
+  background: #fff; cursor: pointer;
+  font-size: 11px; color: #444; font-weight: 400;
+  text-align: left;
+}
+.duet-simulator .duet-zone-btn.active {
+  border-color: #222; background: #222; color: #fff; font-weight: 500;
+}
+.duet-simulator .zone-dot {
+  width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,.15);
+}
+
+/* 前後分離トグル */
+.duet-simulator .duet-split-toggle {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 8px;
+  border: 1px dashed #bbb; border-radius: 6px;
+  background: transparent; cursor: pointer;
+  font-size: 10px; color: #888;
+  margin-top: 2px;
+}
+.duet-simulator .duet-split-toggle.active {
+  border-color: #555; color: #333; font-weight: 500;
+}
+.duet-simulator .toggle-icon {
+  font-size: 13px; line-height: 1;
+}
+
+/* ━━━ 長さセレクター ━━━ */
+.duet-simulator .duet-front-styles {
+  display: flex; flex-direction: column; gap: 3px;
+}
+.duet-simulator .style-btn {
+  display: flex; flex-direction: column; align-items: flex-start;
+  padding: 6px 9px;
+  border: 1.5px solid #ddd; border-radius: 7px;
+  background: #fff; cursor: pointer; text-align: left;
+  width: 100%;
+}
+.duet-simulator .style-btn.active {
+  border-color: #222; background: #222;
+}
+.duet-simulator .style-btn.active .style-label { color: #fff; }
+.duet-simulator .style-btn.active .style-desc  { color: #aaa; }
+.duet-simulator .style-label {
+  font-size: 11px; font-weight: 600; color: #333; margin-bottom: 1px;
+}
+.duet-simulator .style-desc {
+  font-size: 9.5px; color: #888;
+}
+.duet-simulator .price-adj {
+  color: #c44; font-weight: 600;
+}
+.duet-simulator .style-btn.active .price-adj { color: #f88; }
+
+/* ━━━ カラーパレット ━━━ */
+.duet-simulator .belt-note {
+  font-size: 9.5px; color: #888;
+  background: #fff7e6; border-radius: 5px; padding: 4px 6px; line-height: 1.4;
+}
+.duet-simulator .pal-box {
+  background: #fff; border-radius: 7px; padding: 7px;
+}
+.duet-simulator .palette {
+  display: flex; flex-wrap: wrap; gap: 5px;
+}
+.duet-simulator .duet-swatch {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  border: 1.5px solid rgba(0,0,0,.12);
+  transition: transform .1s;
+}
+.duet-simulator .duet-swatch:hover { transform: scale(1.15); }
+.duet-simulator .duet-swatch.selected {
+  border: 2.5px solid #111;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
+}
+
+/* ━━━ サマリー ━━━ */
+.duet-simulator .sum-box {
+  background: #fff; border-radius: 7px; padding: 7px;
+}
+.duet-simulator .summary-row {
+  display: flex; align-items: center; gap: 5px;
+  padding: 2px 0; font-size: 10.5px;
+}
+.duet-simulator .summary-label {
+  color: #888; font-size: 9.5px; min-width: 0; flex: 1;
+}
+.duet-simulator .summary-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.12); flex-shrink: 0;
+}
+.duet-simulator .summary-name {
+  color: #333; font-weight: 500; font-size: 10.5px;
+}
+
+/* ━━━ シェア・ボタンバー ━━━ */
+.duet-simulator .share-area {
+  display: flex; justify-content: center; padding: 6px 10px 0;
+}
+.duet-simulator .sbtn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border: 1px solid #bbb; border-radius: 20px;
+  background: #fff; color: #555; font-size: 11px; cursor: pointer;
+}
+.duet-simulator .bottom-bar {
+  display: flex; align-items: center; gap: 6px; padding: 8px 10px 0;
+}
+.duet-simulator .btn-reset {
+  padding: 9px 10px; border: 1px solid #ccc; border-radius: 7px;
+  background: #fff; color: #666; font-size: 11px; cursor: pointer; white-space: nowrap;
+}
+.duet-simulator .btn-undo {
+  display: flex; align-items: center; gap: 3px;
+  padding: 9px 10px; border: 1px solid #ccc; border-radius: 7px;
+  background: #fff; color: #666; font-size: 11px; cursor: pointer; white-space: nowrap;
+}
+.duet-simulator .btn-undo:disabled { opacity: .4; cursor: default; }
+.duet-simulator .btn-order {
+  flex: 1; padding: 10px 10px; background: #111; color: #fff;
+  border: none; border-radius: 7px; font-size: 11px; font-weight: 600;
+  cursor: pointer; text-align: center;
+}
+.duet-simulator .price-display {
+  font-size: 10px; font-weight: 400; color: #aaa; margin-top: 2px;
+}
+
+/* ━━━ モーダル ━━━ */
+.duet-simulator .modal {
+  display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,.6); z-index: 9999; justify-content: center; align-items: center;
+}
+.duet-simulator .modal.show { display: flex; }
+.duet-simulator .modal-content {
+  background: #fff; border-radius: 12px; width: 90%; max-width: 380px;
+  max-height: 90vh; overflow-y: auto; padding: 20px;
+}
+.duet-simulator .modal-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.duet-simulator .modal-header h2 { font-size: 14px; font-weight: 600; margin: 0; }
+.duet-simulator .modal-close {
+  background: none; border: none; font-size: 20px; cursor: pointer; color: #888;
+}
+.duet-simulator .modal-image { width: 60%; display: block; margin: 0 auto 12px; border-radius: 6px; }
+.duet-simulator .modal-info  { font-size: 12px; color: #444; margin-bottom: 12px; }
+.duet-simulator .modal-color-list { margin: 6px 0; }
+.duet-simulator .modal-color-row {
+  display: flex; align-items: center; gap: 7px; padding: 3px 0; font-size: 11px;
+}
+.duet-simulator .modal-zone-label { color: #888; min-width: 90px; font-size: 10px; }
+.duet-simulator .modal-color-dot {
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.12); flex-shrink: 0;
+}
+.duet-simulator .modal-buttons { display: flex; gap: 7px; }
+.duet-simulator .modal-btn {
+  flex: 1; padding: 10px; border-radius: 7px; font-size: 12px; cursor: pointer; border: none;
+}
+.duet-simulator .modal-btn-secondary { background: #f0f0f0; color: #555; }
+.duet-simulator .modal-btn-primary   { background: #111; color: #fff; font-weight: 600; }
+
+/* ━━━ ローディング ━━━ */
+.duet-simulator .loading-overlay {
+  display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,.5); z-index: 9999; justify-content: center; align-items: center;
+}
+.duet-simulator .loading-overlay.show { display: flex; }
+.duet-simulator .loading-content {
+  background: #fff; border-radius: 12px; padding: 24px 32px; text-align: center;
+}
+.duet-simulator .loading-spinner {
+  width: 32px; height: 32px; border: 3px solid #eee; border-top-color: #333;
+  border-radius: 50%; animation: dspin .8s linear infinite; margin: 0 auto 10px;
+}
+@keyframes dspin { to { transform: rotate(360deg); } }
+
+/* ━━━ Toast ━━━ */
+.duet-simulator .toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #111; color: #fff; padding: 9px 18px;
+  border-radius: 20px; font-size: 12px; opacity: 0;
+  transition: all .3s; z-index: 10000; pointer-events: none;
+}
+.duet-simulator .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@keyframes d-shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-5px); }
+  40%      { transform: translateX(5px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+.duet-simulator .d-shake { animation: d-shake .45s ease; }

@@ -1,0 +1,88 @@
+
+<!-- duet Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/duet-simulator.css">
+
+<div class="duet-simulator">
+  <div class="app">
+
+    <!-- 左：コントロール（先端パーツ・ゾーン・パレット・サマリー） -->
+    <div class="ctrl-left">
+      <div class="box-label">先端パーツを選択</div>
+      <div id="duet-front-styles" class="duet-front-styles"></div>
+
+      <div class="box-label" style="margin-top:8px;">パーツを選択</div>
+      <div id="duet-zones" class="duet-zones"></div>
+
+      <div class="box-label" id="duet-palette-label" style="margin-top:8px;">カラー（革パーツ）</div>
+<div class="pal-box">
+        <div class="palette" id="duet-palette"></div>
+      </div>
+      <div class="sum-box">
+        <div class="box-label">配色サマリー</div>
+        <div id="duet-summary"></div>
+      </div>
+    </div>
+
+    <!-- 右：ストラッププレビュー（後ろ・SVG・先端） -->
+    <div class="preview-col">
+      <div class="dir-tag-v">後端<small>ボディ上部側</small></div>
+      <div id="duet-strap-wrap" class="strap-wrap"></div>
+      <div class="dir-tag-v">先端<small>ストラップピン側・R切替対象</small></div>
+    </div>
+
+  </div>
+
+  <!-- 画像保存 -->
+  <div class="share-area">
+    <button class="sbtn" onclick="duetSaveImage()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      画像を保存する
+    </button>
+  </div>
+
+  <!-- 下部ボタンバー -->
+  <div class="bottom-bar">
+    <button class="btn-reset" onclick="duetReset()">リセット</button>
+    <button class="btn-undo" id="duet-btn-undo" onclick="duetUndo()" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+      </svg>戻る
+    </button>
+    <button class="btn-order" onclick="duetGoOrder()">
+      <span id="duet-cart-label">この配色でカートに入れる →</span>
+      <div class="price-display" id="duet-price-display"></div>
+    </button>
+  </div>
+
+  <!-- 注文確認モーダル -->
+  <div class="modal" id="duet-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeDuetModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="duet-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="duet-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeDuetModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="duetProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-overlay" id="duet-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="duet-toast" class="toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/duet-simulator.js"></script>
