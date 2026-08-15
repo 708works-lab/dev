@@ -498,10 +498,15 @@ async function courierSaveImage() {
   const svg = document.querySelector('#courier-strap-wrap svg');
   if (!svg) { showCourierToast('SVGが見つかりません'); return; }
   const canvas = await buildCourierSaveCanvas();
-  const link   = document.createElement('a');
+  // toDataURL + <a download> はモバイルSafari等で保存ダイアログが起動しないことがあるため、
+  // Blob URL方式（folkloreと同じ）に統一する
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href     = url;
   link.download = `courier-color-${Date.now()}.png`;
-  link.href     = canvas.toDataURL('image/png');
   link.click();
+  URL.revokeObjectURL(url);
   courierImageSaved = true;
   updateCartButtonState();
   showCourierToast('画像を保存しました ✓　カートに進めます');
