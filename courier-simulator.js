@@ -497,7 +497,7 @@ function courierReset() {
 async function courierSaveImage() {
   const svg = document.querySelector('#courier-strap-wrap svg');
   if (!svg) { showCourierToast('SVGが見つかりません'); return; }
-  const canvas = await svgToCanvas(svg, 2);
+  const canvas = await buildCourierSaveCanvas();
   const link   = document.createElement('a');
   link.download = `courier-color-${Date.now()}.png`;
   link.href     = canvas.toDataURL('image/png');
@@ -507,25 +507,105 @@ async function courierSaveImage() {
   showCourierToast('画像を保存しました ✓　カートに進めます');
 }
 
-async function svgToCanvas(svgEl, scale = 1) {
-  const VW = 480, VH = 1600;
-  const canvas = document.createElement('canvas');
-  canvas.width  = VW * scale;
-  canvas.height = VH * scale;
-  const ctx = canvas.getContext('2d');
+// 保存・注文アップロード用のキャンバスを生成する。
+// ヘッダー・上下の向きラベル・各パーツのカラー名ラベルを合成し、
+// folkloreのカラーシミュレーターと同じ見せ方にする。
+async function buildCourierSaveCanvas() {
+  const cw = 600;
+  const SVG_VW = 480, SVG_VH = 1600;
+  const svgSaveW = 130;
+  const scale = svgSaveW / SVG_VW;
+  const svgSaveH = Math.round(SVG_VH * scale);
+
+  const headerH = 50, topLabelH = 25, bottomLabelH = 25, footerH = 28;
+  const svgX  = Math.round(cw / 2 - svgSaveW / 2);
+  const svgY0 = headerH + topLabelH;
+  const ch    = svgY0 + svgSaveH + bottomLabelH + footerH + 10;
+
+  const cv = document.createElement('canvas');
+  cv.width = cw; cv.height = ch;
+  const ctx = cv.getContext('2d');
   ctx.fillStyle = '#f0ede8';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  const svgStr  = new XMLSerializer().serializeToString(svgEl);
-  const blob    = new Blob([svgStr], {type:'image/svg+xml;charset=utf-8'});
-  const url     = URL.createObjectURL(blob);
-  await new Promise((res, rej) => {
-    const img  = new Image();
-    img.onload = () => { ctx.drawImage(img, 0, 0, canvas.width, canvas.height); res(); };
-    img.onerror = rej;
-    img.src = url;
+  ctx.fillRect(0, 0, cw, ch);
+
+  // ヘッダー
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, cw, headerH);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 20px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('COURIER', cw / 2, 28);
+  ctx.fillStyle = '#666';
+  ctx.font = '11px sans-serif';
+  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 42);
+
+  // 上部ラベル
+  ctx.fillStyle = '#444';
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('▲ 後ろ（エンドピン側）', cw / 2, svgY0 - 6);
+
+  // SVGをシリアライズしてCanvasに描画（iOS Safari互換のためdata URIを使用）
+  const svgEl = document.querySelector('#courier-strap-wrap svg');
+  if (svgEl) {
+    const cloned = svgEl.cloneNode(true);
+    cloned.setAttribute('width', svgSaveW);
+    cloned.setAttribute('height', svgSaveH);
+    cloned.style.margin = '0';
+    const svgStr  = new XMLSerializer().serializeToString(cloned);
+    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+    await new Promise(resolve => {
+      const img = new Image();
+      img.onload  = () => { ctx.drawImage(img, svgX, svgY0, svgSaveW, svgSaveH); resolve(); };
+      img.onerror = resolve;
+      img.src = dataUri;
+    });
+  }
+
+  // 下部ラベル
+  ctx.fillStyle = '#444';
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('▼ 前（ボディ上部側）', cw / 2, svgY0 + svgSaveH + 14);
+
+  // 各パーツのカラーラベル（SVG右側に配置。Y座標はSVG内の各パーツのおおよその中心）
+  const labelX = svgX + svgSaveW + 18;
+  const zoneLabels = [
+    { y: 130,  zone:'rear',  label:'後ろ' },
+    { y: 800,  zone:'belt',  label:'ベルト' },
+    { y: 1460, zone:'front', label:'前' },
+  ];
+  zoneLabels.forEach(z => {
+    const hex    = courierColors[z.zone];
+    const pieceY = svgY0 + z.y * scale;
+
+    ctx.beginPath();
+    ctx.arc(labelX + 6, pieceY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = hex;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+
+    ctx.fillStyle = '#aaa';
+    ctx.font = '8px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(z.label, labelX + 16, pieceY - 2);
+
+    ctx.fillStyle = '#333';
+    ctx.font = '10px sans-serif';
+    ctx.fillText(colorName(hex, z.zone), labelX + 16, pieceY + 10);
   });
-  URL.revokeObjectURL(url);
-  return canvas;
+
+  // フッター
+  ctx.fillStyle = 'rgba(0,0,0,.1)';
+  ctx.fillRect(0, ch - footerH, cw, footerH);
+  ctx.fillStyle = '#888';
+  ctx.font = '9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('708works.jp', cw / 2, ch - 10);
+
+  return cv;
 }
 
 // ============================================================================
@@ -571,7 +651,7 @@ async function courierGoOrder() {
   try {
     const svg    = document.querySelector('#courier-strap-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
-    const canvas = await svgToCanvas(svg, 1);
+    const canvas = await buildCourierSaveCanvas();
     const result = await courierUploadImage(canvas);
     if (!result) throw new Error('画像アップロードに失敗しました');
     courierLastUploadedImage = result;
