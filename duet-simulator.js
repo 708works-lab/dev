@@ -567,8 +567,12 @@ async function duetSaveImage() {
   const link = document.createElement('a');
   link.href     = url;
   link.download = `duet-color-${Date.now()}.png`;
+  link.style.display = 'none';
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(link);
+  // 即座にrevokeするとダウンロード開始前にURLが無効化される端末があるため少し待つ
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
   duetImageSaved = true;
   updateDuetCartButtonState();
   showDuetToast('画像を保存しました ✓　カートに進めます');

@@ -505,8 +505,12 @@ async function courierSaveImage() {
   const link = document.createElement('a');
   link.href     = url;
   link.download = `courier-color-${Date.now()}.png`;
+  link.style.display = 'none';
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(link);
+  // 即座にrevokeするとダウンロード開始前にURLが無効化される端末があるため少し待つ
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
   courierImageSaved = true;
   updateCartButtonState();
   showCourierToast('画像を保存しました ✓　カートに進めます');
