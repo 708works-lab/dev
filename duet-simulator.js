@@ -582,14 +582,21 @@ async function duetSaveImage() {
 // ヘッダー・上下の向きラベル・各パーツのカラー名ラベルを合成し、
 // folkloreのカラーシミュレーターと同じ見せ方にする。
 async function buildDuetSaveCanvas() {
-  const cw = 600;
   const SVG_VW = 191.5, SVG_VH = 1406.71;
-  const svgSaveW = 80;
+  const svgSaveW = 140;                     // 解像度アップ（旧80）
   const scale = svgSaveW / SVG_VW;
   const svgSaveH = Math.round(SVG_VH * scale);
 
-  const headerH = 50, topLabelH = 25, bottomLabelH = 25, footerH = 28;
-  const svgX  = Math.round(cw / 2 - svgSaveW / 2);
+  // 画像とラベル列をまとめて中央寄せするため、左右マージンを固定して
+  // キャンバス幅をそこから逆算する（画像だけを中央寄せすると右側の
+  // 余白がラベル分だけ狭く見えてしまうため）
+  const margin    = 46;
+  const gap       = 24;
+  const labelColW = 170;
+  const cw = margin * 2 + svgSaveW + gap + labelColW;
+
+  const headerH = 64, topLabelH = 30, bottomLabelH = 30, footerH = 34;
+  const svgX  = margin;
   const svgY0 = headerH + topLabelH;
   const ch    = svgY0 + svgSaveH + bottomLabelH + footerH + 10;
 
@@ -603,18 +610,18 @@ async function buildDuetSaveCanvas() {
   ctx.fillStyle = '#111';
   ctx.fillRect(0, 0, cw, headerH);
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 20px sans-serif';
+  ctx.font = 'bold 26px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('DUET', cw / 2, 28);
+  ctx.fillText('DUET', cw / 2, 38);
   ctx.fillStyle = '#666';
-  ctx.font = '11px sans-serif';
-  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 42);
+  ctx.font = '13px sans-serif';
+  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 56);
 
   // 上部ラベル
   ctx.fillStyle = '#444';
-  ctx.font = 'bold 9px sans-serif';
+  ctx.font = 'bold 12px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('▲ 後端（エンドピン側）', cw / 2, svgY0 - 6);
+  ctx.fillText('▲ 後端（エンドピン側）', cw / 2, svgY0 - 8);
 
   // SVGをシリアライズしてCanvasに描画（iOS Safari互換のためdata URIを使用）
   const svgEl = document.querySelector('#duet-strap-wrap svg');
@@ -635,12 +642,12 @@ async function buildDuetSaveCanvas() {
 
   // 下部ラベル
   ctx.fillStyle = '#444';
-  ctx.font = 'bold 9px sans-serif';
+  ctx.font = 'bold 12px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('▼ 先端（ストラップピン側）', cw / 2, svgY0 + svgSaveH + 14);
+  ctx.fillText('▼ 先端（ストラップピン側）', cw / 2, svgY0 + svgSaveH + 20);
 
   // 各パーツのカラーラベル（SVG右側に配置。Y座標はSVG内の各パーツのおおよその中心）
-  const labelX = svgX + svgSaveW + 18;
+  const labelX = svgX + svgSaveW + gap;
   const zoneLabels = [
     { y: 69,   zone:'rear',   label:'後端'   },
     { y: 615,  zone:'belt',   label:'ベルト' },
@@ -654,30 +661,30 @@ async function buildDuetSaveCanvas() {
     const pieceY = svgY0 + z.y * scale;
 
     ctx.beginPath();
-    ctx.arc(labelX + 6, pieceY, 5, 0, Math.PI * 2);
+    ctx.arc(labelX + 7, pieceY, 6, 0, Math.PI * 2);
     ctx.fillStyle = hex;
     ctx.fill();
     ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-    ctx.lineWidth = 0.7;
+    ctx.lineWidth = 1;
     ctx.stroke();
 
-    ctx.fillStyle = '#aaa';
-    ctx.font = '8px sans-serif';
+    ctx.fillStyle = '#999';
+    ctx.font = '11px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(z.label, labelX + 16, pieceY - 2);
+    ctx.fillText(z.label, labelX + 20, pieceY - 3);
 
     ctx.fillStyle = '#333';
-    ctx.font = '10px sans-serif';
-    ctx.fillText(colorName(hex, z.zone), labelX + 16, pieceY + 10);
+    ctx.font = '14px sans-serif';
+    ctx.fillText(colorName(hex, z.zone), labelX + 20, pieceY + 14);
   });
 
   // フッター
   ctx.fillStyle = 'rgba(0,0,0,.1)';
   ctx.fillRect(0, ch - footerH, cw, footerH);
   ctx.fillStyle = '#888';
-  ctx.font = '9px sans-serif';
+  ctx.font = '11px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('708works.jp', cw / 2, ch - 10);
+  ctx.fillText('708works.jp', cw / 2, ch - 12);
 
   return cv;
 }
