@@ -1355,12 +1355,6 @@ async function proceedToCart(){
     form.action = 'https://708works.jp/cart/add';
     form.style.display = 'none';
 
-    // シミュレーター経由ディスカウント適用
-    const inputReturn = document.createElement('input');
-    inputReturn.type = 'hidden';
-    inputReturn.name = 'return_to';
-    inputReturn.value = '/discount/SIMULATOR10?redirect=/cart';
-    form.appendChild(inputReturn);
 
     // ID
     const inputId = document.createElement('input');
