@@ -62,9 +62,12 @@
 
 .duet-simulator .strap-wrap {
   width: 100%;
+  text-align: center;
 }
 .duet-simulator .strap-wrap svg {
-  width: 100%; height: auto; display: block;
+  max-width: 100%; max-height: 730px;
+  width: auto; height: auto;
+  display: inline-block;
 }
 
 /* 共通ラベル */
@@ -95,18 +98,18 @@
 
 /* 前後分離トグル */
 .duet-simulator .duet-split-toggle {
-  display: flex; align-items: center; gap: 5px;
-  padding: 5px 8px;
-  border: 1px dashed #bbb; border-radius: 6px;
-  background: transparent; cursor: pointer;
-  font-size: 10px; color: #888;
-  margin-top: 2px;
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 10px;
+  border: 1.5px solid #c8a04a; border-radius: 7px;
+  background: #fff7e6; cursor: pointer;
+  font-size: 11.5px; color: #8a6d1a; font-weight: 600;
+  margin-top: 4px;
 }
 .duet-simulator .duet-split-toggle.active {
-  border-color: #555; color: #333; font-weight: 500;
+  border-color: #222; background: #222; color: #fff;
 }
 .duet-simulator .toggle-icon {
-  font-size: 13px; line-height: 1;
+  font-size: 15px; line-height: 1;
 }
 
 /* ━━━ 長さセレクター ━━━ */

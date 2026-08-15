@@ -77,7 +77,7 @@ const DUET_ZONE_LABEL = {
 // 状態
 // ============================================================================
 
-let duetColors = { front1:'#1a1a1a', front2:'#1a1a1a', front3:'#1a1a1a', front4:'#1a1a1a', rear:'#1a1a1a', belt:'#9e3820' };
+let duetColors = { front1:'#1a1a1a', front2:'#1a1a1a', front3:'#1a1a1a', front4:'#1a1a1a', rear:'#1a1a1a', belt:'#b07840' };
 let duetLinked      = true;
 let duetActiveZone  = 'leather';
 let duetSelectedStyle = 'standard';
@@ -540,7 +540,7 @@ function duetUndo() {
 
 function duetReset() {
   saveDuetHistory();
-  duetColors  = { front1:'#1a1a1a', front2:'#1a1a1a', front3:'#1a1a1a', front4:'#1a1a1a', rear:'#1a1a1a', belt:'#9e3820' };
+  duetColors  = { front1:'#1a1a1a', front2:'#1a1a1a', front3:'#1a1a1a', front4:'#1a1a1a', rear:'#1a1a1a', belt:'#b07840' };
   duetLinked  = true;
   duetActiveZone = 'leather';
   duetImageSaved = false;
