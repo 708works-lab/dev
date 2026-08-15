@@ -8,8 +8,8 @@ const DUET_SHOPIFY_DOMAIN = '708works.jp';
 // 先端パーツ（ウロコ柄の向き）
 // CW73 = 通常（Wellingtonと同じ向き） / CW73R = R（上下逆さま）
 const DUET_FRONT_STYLES = [
-  { id:'standard', label:'通常',      desc:'ウロコ柄が正位置（Wellingtonと同じ向き）', svgGroup:'part-front-CW73'  },
-  { id:'reverse',  label:'R（リバース）', desc:'ウロコ柄を上下逆さまにした仕様',           svgGroup:'part-front-CW73R' },
+  { id:'standard', label:'通常（CW73）',   desc:'ウロコ柄が正位置（Wellingtonと同じ向き）', svgGroup:'part-front-CW73'  },
+  { id:'reverse',  label:'R（CW73R）', desc:'ウロコ柄を上下逆さまにした仕様',           svgGroup:'part-front-CW73R' },
 ];
 
 // 長さバリアント（Courierと同じ寸法・アップチャージ額）
