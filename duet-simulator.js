@@ -5,12 +5,25 @@
 const DUET_WORKER_URL     = 'https://folklore-image-upload.708works.workers.dev';
 const DUET_SHOPIFY_DOMAIN = '708works.jp';
 
-// 先端パーツ（ウロコ柄の向き）バリアント
+// 先端パーツ（ウロコ柄の向き）
 // CW73 = 通常（Wellingtonと同じ向き） / CW73R = R（上下逆さま）
 const DUET_FRONT_STYLES = [
-  { id:'standard', label:'通常',      desc:'ウロコ柄が正位置（Wellingtonと同じ向き）', price: 13860, svgGroup:'part-front-CW73',  variantId:'50074942308602' },
-  { id:'reverse',  label:'R（リバース）', desc:'ウロコ柄を上下逆さまにした仕様',           price: 13860, svgGroup:'part-front-CW73R', variantId:'50074942341370' },
+  { id:'standard', label:'通常',      desc:'ウロコ柄が正位置（Wellingtonと同じ向き）', svgGroup:'part-front-CW73'  },
+  { id:'reverse',  label:'R（リバース）', desc:'ウロコ柄を上下逆さまにした仕様',           svgGroup:'part-front-CW73R' },
 ];
+
+// 長さバリアント（Courierと同じ寸法・アップチャージ額）
+const DUET_LENGTHS = [
+  { id:'short',    label:'短め',  desc:'最短約85cm〜最長約130cm',  price: 13860, priceAdj:    0 },
+  { id:'standard', label:'標準',  desc:'最短約95cm〜最長約145cm',  price: 13860, priceAdj:    0 },
+  { id:'long',     label:'長め',  desc:'最短約95cm〜最長約160cm',  price: 14410, priceAdj: +550 },
+];
+
+// 先端パーツ × 長さ → Shopifyバリアント ID
+const DUET_VARIANT_MAP = {
+  standard: { short:'50077074718970', standard:'50077074751738', long:'50077074784506' },
+  reverse:  { short:'50077074817274', standard:'50077074850042', long:'50077074882810' },
+};
 
 // 革パーツ用カラー（20色）
 const DUET_LEATHER_COLORS = [
@@ -68,6 +81,7 @@ let duetColors = { front1:'#1a1a1a', front2:'#1a1a1a', front3:'#1a1a1a', front4:
 let duetLinked      = true;
 let duetActiveZone  = 'leather';
 let duetSelectedStyle = 'standard';
+let duetSelectedLength = 'standard';
 let duetImageSaved  = false;
 let duetHistory     = [];
 let duetLastUploadedImage = null;
@@ -87,6 +101,7 @@ function initDuetSimulator() {
   buildDuetPalette();
   updateDuetSummary();
   buildFrontStyleSelector();
+  buildLengthSelector();
   updateDuetPriceDisplay();
   updateDuetCartButtonState();
   loadDuetSVG();
@@ -397,6 +412,34 @@ function selectDuetFrontStyle(id) {
 }
 
 // ============================================================================
+// 長さセレクター
+// ============================================================================
+
+function buildLengthSelector() {
+  const container = document.getElementById('duet-lengths');
+  if (!container) return;
+  container.innerHTML = '';
+
+  DUET_LENGTHS.forEach(len => {
+    const btn = document.createElement('button');
+    btn.className = 'style-btn' + (len.id === duetSelectedLength ? ' active' : '');
+    btn.onclick   = () => selectDuetLength(len.id);
+
+    const adj = len.priceAdj > 0 ? ` <span class="price-adj">+¥${len.priceAdj.toLocaleString()}</span>` : '';
+    btn.innerHTML = `
+      <span class="style-label">${len.label}</span>
+      <span class="style-desc">${len.desc}${adj}</span>`;
+    container.appendChild(btn);
+  });
+}
+
+function selectDuetLength(id) {
+  duetSelectedLength = id;
+  buildLengthSelector();
+  updateDuetPriceDisplay();
+}
+
+// ============================================================================
 // サマリー・価格
 // ============================================================================
 
@@ -427,9 +470,9 @@ function updateDuetSummary() {
 }
 
 function updateDuetPriceDisplay() {
-  const el    = document.getElementById('duet-price-display');
-  const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
-  if (el && style) el.textContent = `¥${style.price.toLocaleString()}（税込）`;
+  const el  = document.getElementById('duet-price-display');
+  const len = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
+  if (el && len) el.textContent = `¥${len.price.toLocaleString()}（税込）`;
 }
 
 function colorName(hex, zone) {
@@ -634,6 +677,7 @@ function showDuetConfirmModal(result) {
   if (img) img.src = result.imageUrl;
 
   const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
+  const len   = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
   const rows = duetOrderRows();
 
   const info = document.getElementById('duet-modal-info');
@@ -651,6 +695,11 @@ function showDuetConfirmModal(result) {
         <span></span>
         <span>${style?.label}（${style?.desc}）</span>
       </div>
+      <div class="modal-color-row">
+        <span class="modal-zone-label">長さ</span>
+        <span></span>
+        <span>${len?.label}（${len?.desc}）</span>
+      </div>
     </div>`;
   modal.classList.add('show');
 }
@@ -665,6 +714,9 @@ async function duetProceedToCart() {
   closeDuetModal();
 
   const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
+  const len   = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
+  const variantId = DUET_VARIANT_MAP[duetSelectedStyle]?.[duetSelectedLength];
+  if (!variantId) { showDuetToast('バリアントが見つかりません'); return; }
   const rows  = duetOrderRows();
   const colorDataEN = duetLinked
     ? `Leather(All):${colorName(duetColors.front1,'front1')}, Belt[Nylon]:${colorName(duetColors.belt,'belt')}`
@@ -675,11 +727,11 @@ async function duetProceedToCart() {
   form.action = `https://${DUET_SHOPIFY_DOMAIN}/cart/add`;
   form.style.display = 'none';
 
-  [['id', style.variantId],['quantity','1']].forEach(([k,v]) => {
+  [['id', variantId],['quantity','1']].forEach(([k,v]) => {
     const i = document.createElement('input');
     i.type='hidden'; i.name=k; i.value=v; form.appendChild(i);
   });
-  Object.entries({'Order ID': duetLastUploadedImage.orderId, 'Colors': colorDataEN, 'Front Part': style.label, 'Image URL': duetLastUploadedImage.imageUrl})
+  Object.entries({'Order ID': duetLastUploadedImage.orderId, 'Colors': colorDataEN, 'Front Part': style.label, 'Length': len.label, 'Image URL': duetLastUploadedImage.imageUrl})
     .forEach(([k,v]) => {
       const i = document.createElement('input');
       i.type='hidden'; i.name=`properties[${k}]`; i.value=v; form.appendChild(i);
