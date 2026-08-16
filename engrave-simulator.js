@@ -38,30 +38,22 @@
     await localFont.load().catch(() => {});
   }
 
+  // フォントの正式名称はお客様には見せず、「フォントA」等の記号名＋系統で表示する。
+  // 正式名称（family）は注文内容の記録用にFONTS配列側に残す。
   function buildFontSelect() {
     const select = document.getElementById('eg-font-select');
     select.innerHTML = '';
     FONTS.forEach(f => {
       const opt = document.createElement('option');
       opt.value = f.id;
-      opt.textContent = `${f.category} － ${f.family}${f.noUppercase ? '（大文字非対応）' : ''}`;
+      opt.textContent = `フォント${f.id}（${f.category}）${f.noUppercase ? '・大文字非対応' : ''}`;
       if (f.id === state.fontId) opt.selected = true;
       select.appendChild(opt);
     });
     select.addEventListener('change', () => {
       state.fontId = select.value;
-      updateFontPreview();
       validateAndDraw();
     });
-    updateFontPreview();
-  }
-
-  function updateFontPreview() {
-    const font = currentFont();
-    const preview = document.getElementById('eg-font-preview');
-    preview.textContent = font.family;
-    preview.style.fontFamily = `'${font.family}'`;
-    preview.style.fontWeight = font.weight;
   }
 
   function validateAndDraw() {

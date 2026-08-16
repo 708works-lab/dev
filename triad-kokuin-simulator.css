@@ -81,15 +81,6 @@
   outline: none;
   border-color: #c8a04a;
 }
-.tk-simulator .font-preview {
-  font-size: 22px;
-  color: #1a1a1a;
-  text-align: center;
-  padding: 10px 8px 2px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
 
 .tk-simulator .preview-box {
   margin-top: 0;
