@@ -68,10 +68,21 @@
 .tk-simulator .warn-msg.show { display: block; }
 
 .tk-simulator .font-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 6px;
+}
+.tk-simulator .font-category {
+  font-size: 10px;
+  color: #999;
+  letter-spacing: .1em;
+  margin-bottom: -3px;
+}
+.tk-simulator .font-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
 }
 .tk-simulator .font-opt {
   border: 1.5px solid #ddd;

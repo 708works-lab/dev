@@ -4,11 +4,14 @@
    サンプル刻印（ABCDEFG）のパス座標から算出した固定値。 */
 (function () {
   const FONTS = [
-    { id: 'A', family: 'Cabin Sketch', weight: '700', google: true, googleParam: 'Cabin+Sketch:wght@700' },
-    { id: 'B', family: 'Special Elite', weight: '400', google: true, googleParam: 'Special+Elite' },
-    { id: 'C', family: 'Lobster', weight: '400', google: true, googleParam: 'Lobster' },
-    { id: 'D', family: 'Playball', weight: '400', google: true, googleParam: 'Playball' },
-    { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, localUrl: './fonts/AG-Stencil.ttf' }
+    { id: 'A', family: 'Cabin Sketch', weight: '700', google: true, googleParam: 'Cabin+Sketch:wght@700', category: '手書き' },
+    { id: 'B', family: 'Special Elite', weight: '400', google: true, googleParam: 'Special+Elite', category: 'スタンプ・タイプ' },
+    { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, localUrl: './fonts/AG-Stencil.ttf', category: 'スタンプ・タイプ' },
+    { id: 'C', family: 'Lobster', weight: '400', google: true, googleParam: 'Lobster', category: 'スクリプト' },
+    { id: 'D', family: 'Playball', weight: '400', google: true, googleParam: 'Playball', category: 'スクリプト' },
+    { id: 'H', family: 'Great Vibes', weight: '400', google: true, googleParam: 'Great+Vibes', category: 'スクリプト' },
+    { id: 'F', family: 'Bebas Neue', weight: '400', google: true, googleParam: 'Bebas+Neue', category: 'インパクト' },
+    { id: 'G', family: 'UnifrakturMaguntia', weight: '400', google: true, googleParam: 'UnifrakturMaguntia', category: 'インパクト' }
   ];
   const MAX_LEN = 15;
   // 半角英数字 + 許容記号（- _ . , : ; $ !）+ 半角スペースのみ許可
@@ -56,7 +59,21 @@
   function buildFontGrid() {
     const grid = document.getElementById('tk-font-grid');
     grid.innerHTML = '';
+    let lastCategory = null;
     FONTS.forEach(f => {
+      if (f.category !== lastCategory) {
+        const heading = document.createElement('div');
+        heading.className = 'font-category';
+        heading.textContent = f.category;
+        grid.appendChild(heading);
+        lastCategory = f.category;
+      }
+      const row = grid.lastElementChild.classList.contains('font-row') ? grid.lastElementChild : (() => {
+        const r = document.createElement('div');
+        r.className = 'font-row';
+        grid.appendChild(r);
+        return r;
+      })();
       const el = document.createElement('div');
       el.className = 'font-opt' + (f.id === state.fontId ? ' active' : '');
       el.innerHTML = `
@@ -68,7 +85,7 @@
         buildFontGrid();
         validateAndDraw();
       });
-      grid.appendChild(el);
+      row.appendChild(el);
     });
   }
 

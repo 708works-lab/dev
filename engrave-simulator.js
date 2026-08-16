@@ -1,11 +1,14 @@
 /* Engrave Simulator (prototype) — テキスト + フォント選択でレーザー刻印の仕上がりイメージをプレビュー */
 (function () {
   const FONTS = [
-    { id: 'A', family: 'Cabin Sketch', weight: '700', google: true },
-    { id: 'B', family: 'Special Elite', weight: '400', google: true },
-    { id: 'C', family: 'Lobster', weight: '400', google: true },
-    { id: 'D', family: 'Playball', weight: '400', google: true },
-    { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true }
+    { id: 'A', family: 'Cabin Sketch', weight: '700', google: true, category: '手書き' },
+    { id: 'B', family: 'Special Elite', weight: '400', google: true, category: 'スタンプ・タイプ' },
+    { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, category: 'スタンプ・タイプ' },
+    { id: 'C', family: 'Lobster', weight: '400', google: true, category: 'スクリプト' },
+    { id: 'D', family: 'Playball', weight: '400', google: true, category: 'スクリプト' },
+    { id: 'H', family: 'Great Vibes', weight: '400', google: true, category: 'スクリプト' },
+    { id: 'F', family: 'Bebas Neue', weight: '400', google: true, category: 'インパクト' },
+    { id: 'G', family: 'UnifrakturMaguntia', weight: '400', google: true, category: 'インパクト' }
   ];
   const MAX_LEN = 15;
   const DEFAULT_TEXT = 'Sample 0123';
@@ -38,7 +41,21 @@
   function buildFontGrid() {
     const grid = document.getElementById('eg-font-grid');
     grid.innerHTML = '';
+    let lastCategory = null;
     FONTS.forEach(f => {
+      if (f.category !== lastCategory) {
+        const heading = document.createElement('div');
+        heading.className = 'font-category';
+        heading.textContent = f.category;
+        grid.appendChild(heading);
+        lastCategory = f.category;
+      }
+      const row = grid.lastElementChild.classList.contains('font-row') ? grid.lastElementChild : (() => {
+        const r = document.createElement('div');
+        r.className = 'font-row';
+        grid.appendChild(r);
+        return r;
+      })();
       const el = document.createElement('div');
       el.className = 'font-opt' + (f.id === state.fontId ? ' active' : '');
       el.dataset.id = f.id;
@@ -51,7 +68,7 @@
         buildFontGrid();
         validateAndDraw();
       });
-      grid.appendChild(el);
+      row.appendChild(el);
     });
   }
 
