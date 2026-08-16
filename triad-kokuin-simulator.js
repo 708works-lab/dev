@@ -108,6 +108,15 @@
 
     state.text = text;
     drawKokuinText();
+    updateFontSwatch();
+  }
+
+  function updateFontSwatch() {
+    const swatch = document.getElementById('tk-font-swatch');
+    const font = currentFont();
+    swatch.textContent = state.text || '';
+    swatch.style.fontFamily = `'${font.family}'`;
+    swatch.style.fontWeight = font.weight;
   }
 
   function drawKokuinText() {

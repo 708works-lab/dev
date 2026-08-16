@@ -90,6 +90,15 @@
 
     state.text = text;
     draw();
+    updateFontSwatch();
+  }
+
+  function updateFontSwatch() {
+    const swatch = document.getElementById('eg-font-swatch');
+    const font = currentFont();
+    swatch.textContent = state.text || '';
+    swatch.style.fontFamily = `'${font.family}'`;
+    swatch.style.fontWeight = font.weight;
   }
 
   function draw() {
