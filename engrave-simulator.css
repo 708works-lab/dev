@@ -117,6 +117,21 @@
 }
 
 /* ── ボタン ── */
+.engrave-simulator .notice-box {
+  font-size: 11px;
+  color: #666;
+  background: #f5f2ec;
+  border: 1px solid #e2ddd0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 16px;
+  line-height: 1.7;
+}
+.engrave-simulator .notice-box strong {
+  color: #856404;
+  font-size: 11px;
+}
+
 .engrave-simulator .bottom-bar {
   display: flex;
   gap: 8px;
