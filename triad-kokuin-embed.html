@@ -1,0 +1,33 @@
+
+<!-- Triad 名入れ刻印シミュレーター（プロトタイプ／Phase 2：実際の刻印箇所SVGを使用） -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&display=swap">
+<link rel="stylesheet" href="./triad-kokuin-simulator.css">
+
+<div class="tk-simulator">
+  <div class="proto-badge">試作版（Phase 2）— Triad正面の刻印箇所で検証中</div>
+  <header>
+    <h1>ENGRAVE SIMULATOR</h1>
+    <p>刻印する文字とフォントを選んで、仕上がりイメージを確認できます</p>
+  </header>
+
+  <div class="app">
+    <div class="field-label">刻印する文字（半角英数字）</div>
+    <input type="text" id="tk-text" maxlength="20" placeholder="例：Sample" value="Sample">
+    <div class="char-count" id="tk-char-count">0 / 12</div>
+    <div class="warn-msg" id="tk-warn"></div>
+
+    <div class="field-label">フォントを選択</div>
+    <div class="font-grid" id="tk-font-grid"></div>
+
+    <div class="preview-box">
+      <div class="pv-caption">仕上がりイメージ</div>
+      <div class="svg-wrap" id="tk-svg-wrap"></div>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn-save" id="tk-save-btn">画像を保存する</button>
+    </div>
+  </div>
+</div>
+
+<script src="./triad-kokuin-simulator.js"></script>
