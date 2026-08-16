@@ -1,0 +1,33 @@
+
+<!-- 名入れ刻印シミュレーター（プロトタイプ／Phase 1） -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&display=swap">
+<link rel="stylesheet" href="./engrave-simulator.css">
+
+<div class="engrave-simulator">
+  <div class="proto-badge">試作版（Phase 1）— 実際の刻印箇所画像は未反映です</div>
+  <header>
+    <h1>ENGRAVE SIMULATOR</h1>
+    <p>刻印する文字とフォントを選んで、仕上がりイメージを確認できます</p>
+  </header>
+
+  <div class="app">
+    <div class="field-label">刻印する文字（半角英数字）</div>
+    <input type="text" id="eg-text" maxlength="30" placeholder="例：Sample 0123">
+    <div class="char-count" id="eg-char-count">0 / 20</div>
+    <div class="warn-msg" id="eg-warn"></div>
+
+    <div class="field-label">フォントを選択</div>
+    <div class="font-grid" id="eg-font-grid"></div>
+
+    <div class="preview-box">
+      <div class="pv-caption">仕上がりイメージ（試作背景）</div>
+      <canvas id="eg-canvas" width="600" height="300"></canvas>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn-save" id="eg-save-btn">画像を保存する</button>
+    </div>
+  </div>
+</div>
+
+<script src="./engrave-simulator.js"></script>
