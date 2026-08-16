@@ -525,12 +525,31 @@ async function buildCourierSaveCanvas() {
   const scale = svgSaveW / SVG_VW;
   const svgSaveH = Math.round(SVG_VH * scale);
 
+  const zoneLabels = [
+    { y: 130,  zone:'rear',  label:'後ろ' },
+    { y: 800,  zone:'belt',  label:'ベルト' },
+    { y: 1460, zone:'front', label:'前' },
+  ];
+
+  // ラベル列は色名によって幅が変わるため、実際に描画するテキストを
+  // 計測してから余白を決める（固定幅だと短い色名のときに右の
+  // 余白だけ大きく空いて見えてしまうため）
+  const measureCtx = document.createElement('canvas').getContext('2d');
+  let labelColW = 50;
+  zoneLabels.forEach(z => {
+    const hex = courierColors[z.zone];
+    measureCtx.font = '14px sans-serif';
+    const nameW = measureCtx.measureText(colorName(hex, z.zone)).width;
+    measureCtx.font = '11px sans-serif';
+    const smallW = measureCtx.measureText(z.label).width;
+    labelColW = Math.max(labelColW, 20 + Math.max(nameW, smallW));
+  });
+
   // 画像とラベル列をまとめて中央寄せするため、左右マージンを固定して
   // キャンバス幅をそこから逆算する（画像だけを中央寄せすると右側の
   // 余白がラベル分だけ狭く見えてしまうため）
-  const margin    = 46;
-  const gap       = 24;
-  const labelColW = 160;
+  const margin = 46;
+  const gap    = 24;
   const cw = margin * 2 + svgSaveW + gap + labelColW;
 
   const headerH = 64, topLabelH = 30, bottomLabelH = 30, footerH = 34;
@@ -586,11 +605,6 @@ async function buildCourierSaveCanvas() {
 
   // 各パーツのカラーラベル（SVG右側に配置。Y座標はSVG内の各パーツのおおよその中心）
   const labelX = svgX + svgSaveW + gap;
-  const zoneLabels = [
-    { y: 130,  zone:'rear',  label:'後ろ' },
-    { y: 800,  zone:'belt',  label:'ベルト' },
-    { y: 1460, zone:'front', label:'前' },
-  ];
   zoneLabels.forEach(z => {
     const hex    = courierColors[z.zone];
     const pieceY = svgY0 + z.y * scale;
