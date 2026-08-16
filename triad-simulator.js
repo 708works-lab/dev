@@ -7,7 +7,7 @@ const TRIAD_SHOPIFY_DOMAIN = '708works.jp';
 
 // 価格（長さバリエーションなし・単一価格）
 const TRIAD_PRICE      = 27170;
-const TRIAD_VARIANT_ID = '46634549608698';
+const TRIAD_VARIANT_ID = '50079425396986';
 
 // 3つ編みベルト用カラー（Triad専用12色。参照：708works.jp/products/sample02のカラーサンプル実写）
 const TRIAD_BELT_COLORS = [
@@ -31,7 +31,7 @@ const TRIAD_PARTS_COLORS = [
   {id:'black', name:'Black', hex:'#1c1614'},
 ];
 
-// 金具（バックル・ハトメ）カラー
+// 金具（バックル・カシメ）カラー
 const TRIAD_HARDWARE_COLORS = [
   {id:'gold',   name:'Gold',   hex:'#e5b415'},
   {id:'silver', name:'Silver', hex:'#c7c9cd'},
@@ -53,7 +53,7 @@ const TRIAD_ZONE_LABEL = {
   leather2: 'ベルト②',
   leather3: 'ベルト③',
   parts:    '取付け革（前後共通）',
-  hardware: '金具（バックル・ハトメ）',
+  hardware: '金具（バックル・カシメ）',
 };
 
 // ============================================================================
@@ -160,8 +160,8 @@ function highlightActiveZone() {
     svg.querySelectorAll(`.${cls}`).forEach(el => {
       if (isActive) {
         el.style.stroke = '#ffffff';
-        el.style.strokeWidth = '3';
-        el.style.strokeOpacity = '0.85';
+        el.style.strokeWidth = '1.1';
+        el.style.strokeOpacity = '0.9';
       } else {
         el.style.stroke = 'none';
       }
@@ -362,7 +362,7 @@ async function triadSaveImage() {
 // ヘッダー・配色サマリーを合成し、他シリーズのカラーシミュレーターと同じ見せ方にする。
 async function buildTriadSaveCanvas() {
   const SVG_VW = 470.31, SVG_VH = 973.91;
-  const svgSaveW = 320;
+  const svgSaveW = 480;
   const scale = svgSaveW / SVG_VW;
   const svgSaveH = Math.round(SVG_VH * scale);
 

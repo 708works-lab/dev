@@ -20,7 +20,7 @@
 
 /* アプリ全体：左＝コントロール、右＝プレビュー */
 .triad-simulator .app {
-  width: 100%; max-width: 560px; margin: 0 auto;
+  width: 100%; max-width: 860px; margin: 0 auto;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -39,7 +39,7 @@
 
 /* ━━━ 右：プレビューカラム ━━━ */
 .triad-simulator .preview-col {
-  flex: 0 0 46%;
+  flex: 0 0 52%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -238,7 +238,7 @@
   .triad-simulator .preview-col {
     flex: none;
     width: 100%;
-    max-width: 260px;
+    max-width: 340px;
     margin: 0 auto;
   }
 }
