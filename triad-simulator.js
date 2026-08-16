@@ -226,7 +226,9 @@ function buildTriadPalette() {
   colors.forEach(c => {
     const sw = document.createElement('div');
     sw.className = 'triad-swatch' + (c.hex === current ? ' selected' : '');
-    sw.style.background = c.hex;
+    // テーマのbase.cssに `div:empty{display:none}` があるため、
+    // 子要素を持たない空divのままだと非表示になってしまう。display指定を明示して回避する。
+    sw.style.cssText = `display:block;background:${c.hex};`;
     sw.title = c.name;
     sw.onclick = () => setTriadColor(c.hex);
     palette.appendChild(sw);
