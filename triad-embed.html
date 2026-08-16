@@ -1,0 +1,85 @@
+
+<!-- Triad Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/triad-simulator.css">
+
+<div class="triad-simulator">
+  <div class="app">
+
+    <!-- 左：コントロール（ゾーン・パレット・サマリー） -->
+    <div class="ctrl-left">
+      <div class="box-label">パーツを選択</div>
+      <div id="triad-zones" class="triad-zones"></div>
+
+      <div class="box-label" id="triad-palette-label" style="margin-top:8px;">カラー</div>
+      <div class="pal-box">
+        <div class="palette" id="triad-palette"></div>
+      </div>
+
+      <div class="sum-box">
+        <div class="box-label">配色サマリー</div>
+        <div id="triad-summary"></div>
+      </div>
+    </div>
+
+    <!-- 右：着用イメージプレビュー（正面・背面） -->
+    <div class="preview-col">
+      <div class="dir-tag-v">着用イメージ<small>正面（上）／背面（下）</small></div>
+      <div id="triad-strap-wrap" class="strap-wrap"></div>
+    </div>
+
+  </div>
+
+  <!-- 画像保存 -->
+  <div class="share-area">
+    <button class="sbtn" onclick="triadSaveImage()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      画像を保存する
+    </button>
+  </div>
+
+  <!-- 下部ボタンバー -->
+  <div class="bottom-bar">
+    <button class="btn-reset" onclick="triadReset()">リセット</button>
+    <button class="btn-undo" id="triad-btn-undo" onclick="triadUndo()" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+      </svg>戻る
+    </button>
+    <button class="btn-order" onclick="triadGoOrder()">
+      <span id="triad-cart-label">この配色でカートに入れる →</span>
+      <div class="price-display" id="triad-price-display"></div>
+    </button>
+  </div>
+
+  <!-- 注文確認モーダル -->
+  <div class="modal" id="triad-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeTriadModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="triad-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="triad-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeTriadModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="triadProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-overlay" id="triad-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="triad-toast" class="toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/triad-simulator.js"></script>
