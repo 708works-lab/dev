@@ -67,48 +67,32 @@
 }
 .tk-simulator .warn-msg.show { display: block; }
 
-.tk-simulator .font-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 6px;
-}
-.tk-simulator .font-category {
-  font-size: 10px;
-  color: #999;
-  letter-spacing: .1em;
-  margin-bottom: -3px;
-}
-.tk-simulator .font-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 8px;
-}
-.tk-simulator .font-opt {
-  border: 1.5px solid #ddd;
+.tk-simulator .font-select {
+  width: 100%;
+  font-size: 15px;
+  padding: 10px 12px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
   background: #fff;
-  border-radius: 10px;
-  padding: 10px 8px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color .15s, box-shadow .15s;
+  margin-top: 6px;
+  appearance: auto;
 }
-.tk-simulator .font-opt:hover { border-color: #c8a04a; }
-.tk-simulator .font-opt.active {
+.tk-simulator .font-select:focus {
+  outline: none;
   border-color: #c8a04a;
-  box-shadow: 0 0 0 2px rgba(200,160,74,.25);
-  background: #fffaf0;
 }
-.tk-simulator .font-opt .fo-label {
-  font-size: 10px; color: #999; margin-bottom: 4px;
-}
-.tk-simulator .font-opt .fo-sample {
-  font-size: 18px; color: #1a1a1a; line-height: 1.3;
-  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+.tk-simulator .font-preview {
+  font-size: 22px;
+  color: #1a1a1a;
+  text-align: center;
+  padding: 10px 8px 2px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .tk-simulator .preview-box {
-  margin-top: 20px;
+  margin-top: 0;
   border-radius: 14px;
   overflow: hidden;
   background: #fff;

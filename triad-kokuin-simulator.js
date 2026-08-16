@@ -56,37 +56,30 @@
     document.getElementById('tk-svg-wrap').innerHTML = svgText;
   }
 
-  function buildFontGrid() {
-    const grid = document.getElementById('tk-font-grid');
-    grid.innerHTML = '';
-    let lastCategory = null;
+  function buildFontSelect() {
+    const select = document.getElementById('tk-font-select');
+    select.innerHTML = '';
     FONTS.forEach(f => {
-      if (f.category !== lastCategory) {
-        const heading = document.createElement('div');
-        heading.className = 'font-category';
-        heading.textContent = f.category;
-        grid.appendChild(heading);
-        lastCategory = f.category;
-      }
-      const row = grid.lastElementChild.classList.contains('font-row') ? grid.lastElementChild : (() => {
-        const r = document.createElement('div');
-        r.className = 'font-row';
-        grid.appendChild(r);
-        return r;
-      })();
-      const el = document.createElement('div');
-      el.className = 'font-opt' + (f.id === state.fontId ? ' active' : '');
-      el.innerHTML = `
-        <div class="fo-label">フォント${f.id}${f.noUppercase ? '（大文字非対応）' : ''}</div>
-        <div class="fo-sample" style="font-family:'${f.family}';font-weight:${f.weight};">${f.family}</div>
-      `;
-      el.addEventListener('click', () => {
-        state.fontId = f.id;
-        buildFontGrid();
-        validateAndDraw();
-      });
-      row.appendChild(el);
+      const opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = `${f.category} － ${f.family}${f.noUppercase ? '（大文字非対応）' : ''}`;
+      if (f.id === state.fontId) opt.selected = true;
+      select.appendChild(opt);
     });
+    select.addEventListener('change', () => {
+      state.fontId = select.value;
+      updateFontPreview();
+      validateAndDraw();
+    });
+    updateFontPreview();
+  }
+
+  function updateFontPreview() {
+    const font = currentFont();
+    const preview = document.getElementById('tk-font-preview');
+    preview.textContent = font.family;
+    preview.style.fontFamily = `'${font.family}'`;
+    preview.style.fontWeight = font.weight;
   }
 
   function validateAndDraw() {
@@ -244,7 +237,7 @@
     input.addEventListener('input', validateAndDraw);
     document.getElementById('tk-save-btn').addEventListener('click', saveImage);
 
-    buildFontGrid();
+    buildFontSelect();
     await Promise.all([loadFonts(), loadBaseSvg()]);
     validateAndDraw();
   }
