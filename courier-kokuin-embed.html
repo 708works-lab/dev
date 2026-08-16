@@ -1,0 +1,39 @@
+
+<!-- Courier 名入れ刻印シミュレーター（プロトタイプ／Phase 2：実際の刻印箇所SVGを使用） -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
+<link rel="stylesheet" href="./courier-kokuin-simulator.css">
+
+<div class="cr-simulator">
+  <div class="proto-badge">試作版（Phase 2）— Courier前面タブの刻印箇所で検証中</div>
+  <header>
+    <h1>ENGRAVE SIMULATOR</h1>
+    <p>刻印する文字とフォントを選んで、仕上がりイメージを確認できます</p>
+  </header>
+
+  <div class="app">
+    <div class="preview-box">
+      <div class="pv-caption">仕上がりイメージ</div>
+      <div class="svg-wrap" id="cr-svg-wrap"></div>
+      <div class="font-swatch" id="cr-font-swatch"></div>
+    </div>
+
+    <div class="field-label">刻印する文字（半角英数字）</div>
+    <input type="text" id="cr-text" maxlength="20" placeholder="例：Sample" value="Sample">
+    <div class="char-count" id="cr-char-count">0 / 15</div>
+    <div class="warn-msg" id="cr-warn"></div>
+
+    <div class="field-label">フォントを選択</div>
+    <select class="font-select" id="cr-font-select"></select>
+
+    <div class="notice-box">
+      <strong>ご注意</strong><br>
+      こちらはあくまで仕上がりイメージの確認用です。実際の刻印は、バランスを見て文字サイズや余白を弊社側で調整する場合があります。文字数や書体によっては、見栄えを考慮して2段配置に変更することもあります。あらかじめご了承ください。
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn-save" id="cr-save-btn">画像を保存する</button>
+    </div>
+  </div>
+</div>
+
+<script src="./courier-kokuin-simulator.js"></script>
