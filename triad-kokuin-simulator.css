@@ -150,3 +150,12 @@
   border: 1.5px solid #1a1a1a !important;
 }
 .tk-simulator .btn-save:hover { background: #f5f5f5; }
+.tk-simulator .btn-save.btn-disabled,
+.tk-simulator .btn-save:disabled {
+  background: #eee;
+  color: #aaa;
+  border-color: #ddd !important;
+  cursor: not-allowed;
+}
+.tk-simulator .btn-save.btn-disabled:hover,
+.tk-simulator .btn-save:disabled:hover { background: #eee; }

@@ -10,21 +10,33 @@
     { id: 'D', family: 'Playball', weight: '400', google: true, googleParam: 'Playball' },
     { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, localUrl: './fonts/AG-Stencil.ttf' }
   ];
-  const MAX_LEN = 12;
+  const MAX_LEN = 15;
+  // 半角英数字 + 許容記号（- _ . , : ; $ !）+ 半角スペースのみ許可
+  const ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
+  const ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
 
-  // ── サンプル刻印パス（ABCDEFG）から算出した配置基準 ──
+  // ── サンプル刻印パス（ABCDEFG）から算出した配置基準（2026-08-16差し替え版SVGで再計測） ──
   // 中心アンカー：先頭文字と末尾文字のbbox中心の中点
   // 角度：先頭→末尾の中心を結んだ直線の傾き
-  const ANCHOR = { x: 197.35, y: 269.3 };
-  const ANGLE_DEG = 47.66;
-  const BASE_FONT_SIZE = 30;   // サンプル文字高(約15px)より少し大きめの初期値
-  const MAX_TEXT_WIDTH = 165;  // ベルト幅に収まる目安の最大横幅（SVGローカル座標）
-  const MIN_FONT_SIZE = 12;
+  const VIEWBOX = { w: 713.65, h: 639.56 };
+  const ANCHOR = { x: 270.86, y: 327.15 };
+  const ANGLE_DEG = 32.44;
+  const BASE_FONT_SIZE = 26;   // 文字数が少ないときも詰まって見えないよう、控えめな初期値に設定
+  const MAX_TEXT_WIDTH = 190;  // ベルト幅に収まる目安の最大横幅（SVGローカル座標）。余白を残すため実測より狭めに設定
+  const MIN_FONT_SIZE = 11;
 
   let state = { text: 'Sample', fontId: 'A' };
 
   function currentFont() {
     return FONTS.find(f => f.id === state.fontId);
+  }
+
+  function isValid(text, font) {
+    if (!text) return false;
+    if (text.length > MAX_LEN) return false;
+    if (!ALLOWED_PATTERN.test(text)) return false;
+    if (font.noUppercase && /[A-Z]/.test(text)) return false;
+    return true;
   }
 
   async function loadFonts() {
@@ -64,6 +76,7 @@
     const input = document.getElementById('tk-text');
     const countEl = document.getElementById('tk-char-count');
     const warnEl = document.getElementById('tk-warn');
+    const saveBtn = document.getElementById('tk-save-btn');
     let text = input.value;
 
     const overLen = text.length > MAX_LEN;
@@ -72,17 +85,24 @@
 
     const font = currentFont();
     const warnings = [];
-    if (/[^\x00-\x7F]/.test(text)) {
-      warnings.push('半角英数字・記号のみご入力ください（日本語・全角文字は正しく表示されません）。');
+    if (!ALLOWED_PATTERN.test(text)) {
+      warnings.push(ALLOWED_HINT);
     }
     if (font.noUppercase && /[A-Z]/.test(text)) {
       warnings.push(`フォント${font.id}は大文字に対応していません。小文字でご入力ください。`);
     }
     if (overLen) {
-      warnings.push(`文字数の上限は${MAX_LEN}文字です（ベルト幅に収まる目安の暫定値）。`);
+      warnings.push(`文字数の上限は${MAX_LEN}文字です。`);
+    }
+    if (!text) {
+      warnings.push('刻印する文字を入力してください。');
     }
     warnEl.innerHTML = warnings.join('<br>');
     warnEl.classList.toggle('show', warnings.length > 0);
+
+    const valid = isValid(text, font);
+    saveBtn.disabled = !valid;
+    saveBtn.classList.toggle('btn-disabled', !valid);
 
     state.text = text;
     drawKokuinText();
@@ -146,16 +166,18 @@
   }
 
   async function saveImage() {
+    const font = currentFont();
+    if (!isValid(state.text, font)) return;
+
     const saveBtn = document.getElementById('tk-save-btn');
     saveBtn.disabled = true;
     saveBtn.textContent = '画像を生成中…';
     try {
       const liveSvg = document.querySelector('#tk-svg-wrap svg');
       const clone = liveSvg.cloneNode(true);
-      clone.setAttribute('width', '539.49');
-      clone.setAttribute('height', '588.62');
+      clone.setAttribute('width', String(VIEWBOX.w));
+      clone.setAttribute('height', String(VIEWBOX.h));
 
-      const font = currentFont();
       const fontFaceCss = await buildFontFaceCss(font);
       const styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
       styleEl.textContent = fontFaceCss;
@@ -174,7 +196,7 @@
 
       const canvas = document.createElement('canvas');
       canvas.width = 1080;
-      canvas.height = 1080 * (588.62 / 539.49);
+      canvas.height = 1080 * (VIEWBOX.h / VIEWBOX.w);
       const ctx = canvas.getContext('2d');
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -195,7 +217,7 @@
       console.error('[triad-kokuin] save failed', e);
       alert('画像の生成に失敗しました。もう一度お試しください。');
     } finally {
-      saveBtn.disabled = false;
+      saveBtn.disabled = !isValid(state.text, currentFont());
       saveBtn.textContent = '画像を保存する';
     }
   }

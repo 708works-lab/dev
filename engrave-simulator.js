@@ -7,13 +7,24 @@
     { id: 'D', family: 'Playball', weight: '400', google: true },
     { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true }
   ];
-  const MAX_LEN = 20;
+  const MAX_LEN = 15;
   const DEFAULT_TEXT = 'Sample 0123';
+  // 半角英数字 + 許容記号（- _ . , : ; $ !）+ 半角スペースのみ許可
+  const ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
+  const ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
 
   let state = { text: DEFAULT_TEXT, fontId: 'A' };
 
   function currentFont() {
     return FONTS.find(f => f.id === state.fontId);
+  }
+
+  function isValid(text, font) {
+    if (!text) return false;
+    if (text.length > MAX_LEN) return false;
+    if (!ALLOWED_PATTERN.test(text)) return false;
+    if (font.noUppercase && /[A-Z]/.test(text)) return false;
+    return true;
   }
 
   async function loadFonts() {
@@ -48,6 +59,7 @@
     const input = document.getElementById('eg-text');
     const countEl = document.getElementById('eg-char-count');
     const warnEl = document.getElementById('eg-warn');
+    const saveBtn = document.getElementById('eg-save-btn');
     let text = input.value;
 
     const overLen = text.length > MAX_LEN;
@@ -56,17 +68,24 @@
 
     const font = currentFont();
     const warnings = [];
-    if (/[^\x00-\x7F]/.test(text)) {
-      warnings.push('半角英数字・記号のみご入力ください（日本語・全角文字は正しく表示されません）。');
+    if (!ALLOWED_PATTERN.test(text)) {
+      warnings.push(ALLOWED_HINT);
     }
     if (font.noUppercase && /[A-Z]/.test(text)) {
       warnings.push(`フォント${font.id}は大文字に対応していません。小文字でご入力ください。`);
     }
     if (overLen) {
-      warnings.push(`文字数の上限は${MAX_LEN}文字です（試作版の暫定値。商品ごとに刻印可能エリアが決まり次第調整します）。`);
+      warnings.push(`文字数の上限は${MAX_LEN}文字です。`);
+    }
+    if (!text) {
+      warnings.push('刻印する文字を入力してください。');
     }
     warnEl.innerHTML = warnings.join('<br>');
     warnEl.classList.toggle('show', warnings.length > 0);
+
+    const valid = isValid(text, font);
+    saveBtn.disabled = !valid;
+    saveBtn.classList.toggle('btn-disabled', !valid);
 
     state.text = text;
     draw();
@@ -90,8 +109,8 @@
     if (!text) return;
 
     const font = currentFont();
-    const maxWidth = W - 100;
-    let fontSize = 64;
+    const maxWidth = W - 140;
+    let fontSize = 52;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     do {
@@ -124,6 +143,7 @@
   }
 
   function saveImage() {
+    if (!isValid(state.text, currentFont())) return;
     const canvas = document.getElementById('eg-canvas');
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
