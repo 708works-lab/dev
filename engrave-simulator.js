@@ -2,13 +2,13 @@
 (function () {
   const FONTS = [
     { id: 'A', family: 'Cabin Sketch', weight: '700', google: true, category: '手書き' },
-    { id: 'B', family: 'Special Elite', weight: '400', google: true, category: 'スタンプ・タイプ' },
-    { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, category: 'スタンプ・タイプ' },
-    { id: 'C', family: 'Lobster', weight: '400', google: true, category: 'スクリプト' },
-    { id: 'D', family: 'Playball', weight: '400', google: true, category: 'スクリプト' },
-    { id: 'H', family: 'Great Vibes', weight: '400', google: true, category: 'スクリプト' },
-    { id: 'F', family: 'Bebas Neue', weight: '400', google: true, category: 'インパクト' },
-    { id: 'G', family: 'UnifrakturMaguntia', weight: '400', google: true, category: 'インパクト' }
+    { id: 'B', family: 'Special Elite', weight: '400', google: true, category: 'スタンプ風' },
+    { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, category: 'スタンプ風' },
+    { id: 'C', family: 'Lobster', weight: '400', google: true, category: '筆記体' },
+    { id: 'D', family: 'Playball', weight: '400', google: true, category: '筆記体' },
+    { id: 'H', family: 'Great Vibes', weight: '400', google: true, category: '筆記体' },
+    { id: 'F', family: 'Bebas Neue', weight: '400', google: true, category: 'モダン' },
+    { id: 'G', family: 'UnifrakturMaguntia', weight: '400', google: true, category: 'ゴシック' }
   ];
   const MAX_LEN = 15;
   const DEFAULT_TEXT = 'Sample 0123';

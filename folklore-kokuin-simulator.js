@@ -5,13 +5,13 @@
 (function () {
   const FONTS = [
     { id: 'A', family: 'Cabin Sketch', weight: '700', google: true, googleParam: 'Cabin+Sketch:wght@700', category: '手書き' },
-    { id: 'B', family: 'Special Elite', weight: '400', google: true, googleParam: 'Special+Elite', category: 'スタンプ・タイプ' },
-    { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, localUrl: './fonts/AG-Stencil.ttf', category: 'スタンプ・タイプ' },
-    { id: 'C', family: 'Lobster', weight: '400', google: true, googleParam: 'Lobster', category: 'スクリプト' },
-    { id: 'D', family: 'Playball', weight: '400', google: true, googleParam: 'Playball', category: 'スクリプト' },
-    { id: 'H', family: 'Great Vibes', weight: '400', google: true, googleParam: 'Great+Vibes', category: 'スクリプト' },
-    { id: 'F', family: 'Bebas Neue', weight: '400', google: true, googleParam: 'Bebas+Neue', category: 'インパクト' },
-    { id: 'G', family: 'UnifrakturMaguntia', weight: '400', google: true, googleParam: 'UnifrakturMaguntia', category: 'インパクト' }
+    { id: 'B', family: 'Special Elite', weight: '400', google: true, googleParam: 'Special+Elite', category: 'スタンプ風' },
+    { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, localUrl: './fonts/AG-Stencil.ttf', category: 'スタンプ風' },
+    { id: 'C', family: 'Lobster', weight: '400', google: true, googleParam: 'Lobster', category: '筆記体' },
+    { id: 'D', family: 'Playball', weight: '400', google: true, googleParam: 'Playball', category: '筆記体' },
+    { id: 'H', family: 'Great Vibes', weight: '400', google: true, googleParam: 'Great+Vibes', category: '筆記体' },
+    { id: 'F', family: 'Bebas Neue', weight: '400', google: true, googleParam: 'Bebas+Neue', category: 'モダン' },
+    { id: 'G', family: 'UnifrakturMaguntia', weight: '400', google: true, googleParam: 'UnifrakturMaguntia', category: 'ゴシック' }
   ];
   const MAX_LEN = 15;
   // 半角英数字 + 許容記号（- _ . , : ; $ !）+ 半角スペースのみ許可
