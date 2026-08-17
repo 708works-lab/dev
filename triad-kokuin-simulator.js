@@ -143,11 +143,14 @@
     textEl.textContent = text;
     group.appendChild(textEl);
 
-    // 横幅を測定してベルト幅に収まるようフォントサイズを自動縮小
-    const measuredWidth = textEl.getBBox().width;
-    if (measuredWidth > MAX_TEXT_WIDTH) {
-      const fitted = Math.max(MIN_FONT_SIZE, BASE_FONT_SIZE * (MAX_TEXT_WIDTH / measuredWidth));
-      textEl.setAttribute('font-size', fitted);
+    // 横幅を測定してベルト幅に収まるまでフォントサイズを段階的に縮小
+    // MIN_FONT_SIZEは目安の下限であり、それでも収まらない場合ははみ出し防止を優先してさらに縮小する
+    let fontSize = BASE_FONT_SIZE;
+    let measuredWidth = textEl.getBBox().width;
+    while (measuredWidth > MAX_TEXT_WIDTH && fontSize > 4) {
+      fontSize -= 1;
+      textEl.setAttribute('font-size', fontSize);
+      measuredWidth = textEl.getBBox().width;
     }
   }
 

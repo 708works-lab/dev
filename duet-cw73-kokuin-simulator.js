@@ -26,7 +26,9 @@
   const ANGLE_DEG = -57.70;
   const BASE_FONT_SIZE = 20;   // 文字数が少ないときも詰まって見えないよう、控えめな初期値に設定
   const MAX_TEXT_WIDTH = 130;  // パーツ幅に収まる目安の最大横幅（SVGローカル座標）
-  const MIN_FONT_SIZE = 10;
+  const MIN_FONT_SIZE = 14;    // 可読性を保てる下限。これより縮小が必要な場合は1行を諦めて2段組みに切り替える
+  const HARD_FLOOR_FONT_SIZE = 6; // 2段組みでも収まらない場合の最終フォールバック
+  const LINE_GAP_RATIO = 1.15;    // 2段組み時の行間（フォントサイズに対する比率）
 
   let state = { text: 'Sample', fontId: 'A' };
 
@@ -119,6 +121,51 @@
     swatch.style.fontWeight = font.weight;
   }
 
+  function makeTextEl(font) {
+    const ns = 'http://www.w3.org/2000/svg';
+    const el = document.createElementNS(ns, 'text');
+    el.setAttribute('text-anchor', 'middle');
+    el.setAttribute('dominant-baseline', 'central');
+    el.setAttribute('font-family', font.family);
+    el.setAttribute('font-weight', font.weight);
+    el.setAttribute('fill', '#2a1710');
+    el.setAttribute('fill-opacity', '0.82');
+    return el;
+  }
+
+  // el（SVGに追加済み）の文字列をmaxWidth以内に収まるまでfloorSizeを下限として縮小する
+  function fitFontSize(el, text, maxWidth, startSize, floorSize) {
+    el.textContent = text;
+    let size = startSize;
+    el.setAttribute('font-size', size);
+    let width = el.getBBox().width;
+    while (width > maxWidth && size > floorSize) {
+      size -= 1;
+      el.setAttribute('font-size', size);
+      width = el.getBBox().width;
+    }
+    return { size, width };
+  }
+
+  // 中央付近のスペースで分割。スペースがなければ文字数で半分に分割する
+  function splitInHalf(text) {
+    if (text.includes(' ')) {
+      const mid = text.length / 2;
+      let best = -1, bestDist = Infinity;
+      for (let i = 0; i < text.length; i++) {
+        if (text[i] === ' ') {
+          const d = Math.abs(i - mid);
+          if (d < bestDist) { bestDist = d; best = i; }
+        }
+      }
+      if (best >= 0) {
+        return [text.slice(0, best).trim(), text.slice(best + 1).trim()];
+      }
+    }
+    const mid = Math.ceil(text.length / 2);
+    return [text.slice(0, mid), text.slice(mid)];
+  }
+
   function drawKokuinText() {
     const group = document.getElementById('kokuin1');
     if (!group) return;
@@ -128,27 +175,41 @@
     if (!text) return;
 
     const font = currentFont();
-    const ns = 'http://www.w3.org/2000/svg';
-    const textEl = document.createElementNS(ns, 'text');
-    textEl.setAttribute('x', ANCHOR.x);
-    textEl.setAttribute('y', ANCHOR.y);
-    textEl.setAttribute('text-anchor', 'middle');
-    textEl.setAttribute('dominant-baseline', 'central');
-    textEl.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
-    textEl.setAttribute('font-family', font.family);
-    textEl.setAttribute('font-weight', font.weight);
-    textEl.setAttribute('font-size', BASE_FONT_SIZE);
-    textEl.setAttribute('fill', '#2a1710');
-    textEl.setAttribute('fill-opacity', '0.82');
-    textEl.textContent = text;
-    group.appendChild(textEl);
 
-    // 横幅を測定してパーツ幅に収まるようフォントサイズを自動縮小
-    const measuredWidth = textEl.getBBox().width;
-    if (measuredWidth > MAX_TEXT_WIDTH) {
-      const fitted = Math.max(MIN_FONT_SIZE, BASE_FONT_SIZE * (MAX_TEXT_WIDTH / measuredWidth));
-      textEl.setAttribute('font-size', fitted);
+    // まず1行での配置を試みる（MIN_FONT_SIZEまで縮小して収まればそのまま採用）
+    const line1 = makeTextEl(font);
+    group.appendChild(line1);
+    const singleFit = fitFontSize(line1, text, MAX_TEXT_WIDTH, BASE_FONT_SIZE, MIN_FONT_SIZE);
+
+    if (singleFit.width <= MAX_TEXT_WIDTH) {
+      line1.setAttribute('x', ANCHOR.x);
+      line1.setAttribute('y', ANCHOR.y);
+      line1.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
+      return;
     }
+
+    // 1行では収まらないため2段組みに切り替える
+    group.innerHTML = '';
+    const [textA, textB] = splitInHalf(text);
+    const lineA = makeTextEl(font);
+    const lineB = makeTextEl(font);
+    group.appendChild(lineA);
+    group.appendChild(lineB);
+
+    const fitA = fitFontSize(lineA, textA, MAX_TEXT_WIDTH, BASE_FONT_SIZE, HARD_FLOOR_FONT_SIZE);
+    const fitB = fitFontSize(lineB, textB, MAX_TEXT_WIDTH, BASE_FONT_SIZE, HARD_FLOOR_FONT_SIZE);
+    const sharedSize = Math.min(fitA.size, fitB.size);
+    lineA.setAttribute('font-size', sharedSize);
+    lineB.setAttribute('font-size', sharedSize);
+
+    // 2行とも同じ回転軸（ANCHOR）を中心に回転させることで、パーツ角度に対して垂直に積む
+    const lineGap = sharedSize * LINE_GAP_RATIO;
+    lineA.setAttribute('x', ANCHOR.x);
+    lineA.setAttribute('y', ANCHOR.y - lineGap / 2);
+    lineA.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
+    lineB.setAttribute('x', ANCHOR.x);
+    lineB.setAttribute('y', ANCHOR.y + lineGap / 2);
+    lineB.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
   }
 
   async function fetchAsDataUri(url) {
