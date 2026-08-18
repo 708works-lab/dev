@@ -27,9 +27,10 @@
   const HARD_FLOOR_FONT_SIZE = 6;
   const LINE_GAP_RATIO = 1.15;
 
-  // folklore_kokuin_base.svg内は「.st1, .st2 { fill: #995200; }」という結合セレクタで
-  // 1色しか使われていないため、他商品のようなゾーン別マッピングは不要。
-  const KOKUIN_FILL_RE = /(\.st1,\s*\.st2\s*\{[^}]*fill:\s*)#[0-9a-fA-F]{3,6}/;
+  // folklore_kokuin_base.svg は実物同様、先頭（前）から5枚分のウロコが個別のグループ
+  // （_x31_〜_x35_ = P1〜P5）として並んでいる。各グループを対応するpartColorsの色で
+  // 個別に塗り分ける（インデックスは配列末尾がP1＝先頭になる並び）。
+  const KOKUIN_PIECE_GROUPS = ['_x31_', '_x32_', '_x33_', '_x34_', '_x35_']; // P1〜P5
 
   const KOKUIN_PRICE_ADD = 1100;
 
@@ -73,17 +74,19 @@
     applyFolkloreKokuinColors();
   }
 
-  // カラーシミュレーター本体で選ばれた色（先頭から3番目のウロコ＝partColors[N-3]）を、
-  // 刻印プレビューSVGにも反映する
+  // カラーシミュレーター本体で選ばれた各ウロコの色を、刻印プレビューSVGの5枚それぞれに反映する
+  // （P1〜P5 = 先頭から1〜5枚目。刻印はP3＝partColors[N-3]に固定、変更なし）
   function applyFolkloreKokuinColors() {
     const svg = kokuinShadowRoot?.querySelector('svg');
     if (!svg || typeof partColors === 'undefined' || typeof N === 'undefined') return;
-    const hex = partColors[N - 3];
-    if (!hex) return;
-    const styleEl = svg.querySelector('defs style') || svg.querySelector('style');
-    if (styleEl) {
-      styleEl.textContent = styleEl.textContent.replace(KOKUIN_FILL_RE, `$1${hex}`);
-    }
+    KOKUIN_PIECE_GROUPS.forEach((groupId, i) => {
+      const frontNum = i + 1; // 1〜5
+      const hex = partColors[N - frontNum];
+      if (!hex) return;
+      const group = svg.querySelector(`#${groupId}`);
+      if (!group) return;
+      group.querySelectorAll('path:not(.st0)').forEach(p => { p.style.fill = hex; });
+    });
     drawKokuinText();
   }
   window.applyFolkloreKokuinColors = applyFolkloreKokuinColors;
