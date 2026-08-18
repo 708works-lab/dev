@@ -7,9 +7,9 @@ const COURIER_SHOPIFY_DOMAIN = '708works.jp';
 
 // 長さバリアント
 const COURIER_LENGTHS = [
-  { id:'short',    label:'短め',  desc:'最短約85cm〜最長約130cm',  price: 9130, priceAdj:    0, variantId:'49001055092986' },
-  { id:'standard', label:'標準',  desc:'最短約95cm〜最長約145cm',  price: 9130, priceAdj:    0, variantId:'49000891351290' },
-  { id:'long',     label:'長め',  desc:'最短約95cm〜最長約160cm',  price: 9680, priceAdj: +550, variantId:'49001055125754' },
+  { id:'short',    label:'短め',  desc:'最短約85cm〜最長約130cm',  price: 9130, priceAdj:    0, variantIds:{ noeng:'49001055092986', eng:'50127995437306' } },
+  { id:'standard', label:'標準',  desc:'最短約95cm〜最長約145cm',  price: 9130, priceAdj:    0, variantIds:{ noeng:'49000891351290', eng:'50127995470074' } },
+  { id:'long',     label:'長め',  desc:'最短約95cm〜最長約160cm',  price: 9680, priceAdj: +550, variantIds:{ noeng:'49001055125754', eng:'50127995502842' } },
 ];
 
 // 革パーツ用カラー（20色）
@@ -189,6 +189,7 @@ function applyCourierColors() {
   if (logo) logo.setAttribute('fill', engravingColor(courierColors.front));
 
   highlightActiveZone();
+  if (typeof applyCourierKokuinColors === 'function') applyCourierKokuinColors();
 }
 
 function highlightActiveZone() {
@@ -404,7 +405,9 @@ function updateCourierSummary() {
 function updateCourierPriceDisplay() {
   const el  = document.getElementById('courier-price-display');
   const len = COURIER_LENGTHS.find(l => l.id === courierSelectedLen);
-  if (el && len) el.textContent = `¥${len.price.toLocaleString()}（税込）`;
+  if (!el || !len) return;
+  const kokuinAdd = (window.COURIER_KOKUIN_STATE?.enabled && window.COURIER_KOKUIN_PRICE_ADD) || 0;
+  el.textContent = `¥${(len.price + kokuinAdd).toLocaleString()}（税込）`;
 }
 
 function colorName(hex, zone) {
@@ -552,10 +555,14 @@ async function buildCourierSaveCanvas() {
   const gap    = 24;
   const cw = margin * 2 + svgSaveW + gap + labelColW;
 
+  const kokuin = window.COURIER_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+  const kokuinH = kokuinEnabled ? 78 : 0;
+
   const headerH = 64, topLabelH = 30, bottomLabelH = 30, footerH = 34;
   const svgX  = margin;
   const svgY0 = headerH + topLabelH;
-  const ch    = svgY0 + svgSaveH + bottomLabelH + footerH + 10;
+  const ch    = svgY0 + svgSaveH + bottomLabelH + kokuinH + footerH + 10;
 
   const cv = document.createElement('canvas');
   cv.width = cw; cv.height = ch;
@@ -627,6 +634,32 @@ async function buildCourierSaveCanvas() {
     ctx.fillText(colorName(hex, z.zone), labelX + 20, pieceY + 14);
   });
 
+  // 名入れ刻印プレビュー（実際に選んだフォントで描画。あとから見返せるよう保存画像に含める）
+  if (kokuinEnabled) {
+    const boxX = margin, boxY = svgY0 + svgSaveH + bottomLabelH + 6;
+    const boxW = cw - margin * 2, boxH = kokuinH - 12;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(boxX + 8, boxY);
+    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 8);
+    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, 8);
+    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, 8);
+    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, 8);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#999';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('名入れ刻印', boxX + 14, boxY + 18);
+
+    await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+    ctx.textAlign = 'left';
+    ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
+  }
+
   // フッター
   ctx.fillStyle = 'rgba(0,0,0,.1)';
   ctx.fillRect(0, ch - footerH, cw, footerH);
@@ -648,6 +681,10 @@ function updateCartButtonState() {
 }
 
 async function courierGoOrder() {
+  if (window.COURIER_KOKUIN_STATE?.enabled && !window.COURIER_KOKUIN_STATE.valid) {
+    showCourierToast('刻印する文字を正しく入力してください');
+    return;
+  }
   if (!courierImageSaved) {
     await courierSaveImage();
   }
@@ -695,6 +732,15 @@ function showCourierConfirmModal(result) {
        {label: ZONE_LABEL.belt,    zone:'belt',  hex: courierColors.belt },
        {label: ZONE_LABEL.rear,    zone:'rear',  hex: courierColors.rear }];
 
+  const kokuin = window.COURIER_KOKUIN_STATE;
+  const kokuinRow = (kokuin?.enabled && kokuin.valid && kokuin.text)
+    ? `<div class="modal-color-row">
+        <span class="modal-zone-label">名入れ刻印</span>
+        <span></span>
+        <span>${kokuin.text}（${kokuin.fontLabel}）</span>
+      </div>`
+    : '';
+
   const info = document.getElementById('courier-modal-info');
   if (info) info.innerHTML = `
     <p><strong>注文ID:</strong> ${result.orderId}</p>
@@ -710,6 +756,7 @@ function showCourierConfirmModal(result) {
         <span></span>
         <span>${len?.label}（${len?.desc}）</span>
       </div>
+      ${kokuinRow}
     </div>`;
   modal.classList.add('show');
 }
@@ -724,6 +771,10 @@ async function courierProceedToCart() {
   closeCourierModal();
 
   const len = COURIER_LENGTHS.find(l => l.id === courierSelectedLen);
+  const kokuin = window.COURIER_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+  const variantId = len.variantIds?.[kokuinEnabled ? 'eng' : 'noeng'];
+  if (!variantId) { showCourierToast('バリアントが見つかりません'); return; }
   const colorDataEN = courierLinked
     ? `Leather(Front+Rear):${colorName(courierColors.front,'front')}, Belt[Nylon]:${colorName(courierColors.belt,'belt')}`
     : `Front[Leather]:${colorName(courierColors.front,'front')}, Belt[Nylon]:${colorName(courierColors.belt,'belt')}, Rear[Leather]:${colorName(courierColors.rear,'rear')}`;
@@ -733,11 +784,16 @@ async function courierProceedToCart() {
   form.action = `https://${COURIER_SHOPIFY_DOMAIN}/cart/add`;
   form.style.display = 'none';
 
-  [['id', len.variantId],['quantity','1']].forEach(([k,v]) => {
+  [['id', variantId],['quantity','1']].forEach(([k,v]) => {
     const i = document.createElement('input');
     i.type='hidden'; i.name=k; i.value=v; form.appendChild(i);
   });
-  Object.entries({'Order ID': courierLastUploadedImage.orderId, 'Colors': colorDataEN, 'Image URL': courierLastUploadedImage.imageUrl})
+  const properties = {'Order ID': courierLastUploadedImage.orderId, 'Colors': colorDataEN, 'Image URL': courierLastUploadedImage.imageUrl};
+  if (kokuinEnabled) {
+    properties['刻印文字'] = kokuin.text;
+    properties['刻印フォント'] = kokuin.fontLabel;
+  }
+  Object.entries(properties)
     .forEach(([k,v]) => {
       const i = document.createElement('input');
       i.type='hidden'; i.name=`properties[${k}]`; i.value=v; form.appendChild(i);
