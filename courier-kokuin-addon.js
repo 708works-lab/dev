@@ -86,6 +86,7 @@
       });
       styleEl.textContent = css;
     }
+    drawKokuinText();
   }
   window.applyCourierKokuinColors = applyCourierKokuinColors;
 
@@ -163,7 +164,11 @@
     el.setAttribute('dominant-baseline', 'central');
     el.setAttribute('font-family', font.family);
     el.setAttribute('font-weight', font.weight);
-    el.setAttribute('fill', '#2a1710');
+    // レーザー刻印は革の色に関わらず視認できるため、刻印箇所の革色（front）に対して
+    // コントラストが出る色（本体シミュレーターのロゴ刻印と同じロジック）を使う
+    const baseHex = (typeof courierColors !== 'undefined') ? courierColors.front : null;
+    const fillColor = (baseHex && typeof engravingColor === 'function') ? engravingColor(baseHex) : '#2a1710';
+    el.setAttribute('fill', fillColor);
     el.setAttribute('fill-opacity', '0.82');
     return el;
   }

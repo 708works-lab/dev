@@ -89,6 +89,7 @@
     if (logo && typeof engravingColor === 'function') {
       logo.style.fill = engravingColor(triadColors.parts);
     }
+    drawKokuinText();
   }
   window.applyTriadKokuinColors = applyTriadKokuinColors;
 
@@ -179,7 +180,12 @@
     textEl.setAttribute('font-family', font.family);
     textEl.setAttribute('font-weight', font.weight);
     textEl.setAttribute('font-size', BASE_FONT_SIZE);
-    textEl.setAttribute('fill', '#2a1710');
+    // レーザー刻印は革の色に関わらず視認できるため、刻印箇所（ベルト②が実際に
+    // 重なる位置）の革色に対してコントラストが出る色を使う（ロゴ刻印とは別の場所のため
+    // parts ではなく leather2 を参照する）
+    const baseHex = (typeof triadColors !== 'undefined') ? triadColors.leather2 : null;
+    const fillColor = (baseHex && typeof engravingColor === 'function') ? engravingColor(baseHex) : '#2a1710';
+    textEl.setAttribute('fill', fillColor);
     textEl.setAttribute('fill-opacity', '0.82');
     textEl.textContent = text;
     group.appendChild(textEl);
