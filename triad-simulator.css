@@ -111,6 +111,16 @@
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
 }
 
+/* ━━━ 長さ選択 ━━━ */
+.triad-simulator .length-box {
+  background: #fff; border-radius: 7px; padding: 7px;
+}
+.triad-simulator .length-box select {
+  width: 100%; font-size: 10.5px; color: #444;
+  padding: 7px 8px; border: 1.5px solid #ddd; border-radius: 6px; background: #fff;
+}
+.triad-simulator .length-box select:focus { outline: none; border-color: #222; }
+
 /* ━━━ サマリー ━━━ */
 .triad-simulator .sum-box {
   background: #fff; border-radius: 7px; padding: 7px;
