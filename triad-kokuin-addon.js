@@ -63,6 +63,9 @@
     // 使っており、light DOMにそのまま挿入すると<style>がページ全体に漏れて色が混線するため。
     kokuinShadowRoot = wrap.attachShadow({ mode: 'open' });
     kokuinShadowRoot.innerHTML = `<style>svg{width:100%;height:auto;display:block;}</style>${svgText}`;
+    // Shopifyテーマのbase.cssに div:empty{display:none} があり、shadow rootを持つだけの
+    // （light DOM上は子を持たない）divが非表示にされてしまうため、インラインで明示的に上書きする。
+    wrap.style.display = 'block';
     svgLoaded = true;
     applyTriadKokuinColors();
   }
