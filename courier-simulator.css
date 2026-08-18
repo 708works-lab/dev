@@ -198,6 +198,10 @@
 .courier-simulator .price-bar-value {
   font-size: 15px; color: #222; font-weight: 700;
 }
+.courier-simulator .order-note {
+  font-size: 10px; color: #999; text-align: center;
+  margin: 6px 10px 0; line-height: 1.5;
+}
 .courier-simulator .bottom-bar {
   display: flex; align-items: center; gap: 6px; padding: 8px 10px 0;
 }

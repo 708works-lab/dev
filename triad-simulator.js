@@ -520,30 +520,8 @@ async function buildTriadSaveCanvas() {
 // ============================================================================
 
 function updateTriadCartButtonState() {
-  const cartBtn  = document.querySelector('.triad-simulator .btn-order');
-  const cartLabel= document.getElementById('triad-cart-label');
-  const saveBtn  = document.querySelector('.triad-simulator .sbtn');
-  const svgDl = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
-  const svgOk = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
-
-  if (cartLabel) {
-    cartLabel.textContent = triadImageSaved
-      ? 'この配色で注文する →'
-      : '先に画像を保存してください →';
-  }
-  if (cartBtn) {
-    Object.assign(cartBtn.style, triadImageSaved
-      ? { opacity:'1', cursor:'pointer', background:'#111', color:'#fff' }
-      : { opacity:'1', cursor:'not-allowed', background:'#bbb', color:'#fff' });
-  }
-  if (saveBtn) {
-    saveBtn.innerHTML = triadImageSaved
-      ? `${svgOk} 保存済み`
-      : `${svgDl} 画像を保存する`;
-    Object.assign(saveBtn.style, triadImageSaved
-      ? { background:'#edf7ee', borderColor:'#5cb86a', color:'#2e7d32' }
-      : { background:'', borderColor:'', color:'' });
-  }
+  const cartLabel = document.getElementById('triad-cart-label');
+  if (cartLabel) cartLabel.textContent = '画像を保存してカートに入れる →';
 }
 
 async function triadGoOrder() {
@@ -552,10 +530,7 @@ async function triadGoOrder() {
     return;
   }
   if (!triadImageSaved) {
-    showTriadToast('先に「画像を保存する」を押してください');
-    const saveBtn = document.querySelector('.triad-simulator .sbtn');
-    if (saveBtn) { saveBtn.classList.add('t-shake'); setTimeout(() => saveBtn.classList.remove('t-shake'), 500); }
-    return;
+    await triadSaveImage();
   }
   const loadEl = document.getElementById('triad-loading-overlay');
   if (loadEl) loadEl.classList.add('show');

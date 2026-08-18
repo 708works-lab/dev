@@ -32,23 +32,13 @@
 
   </div>
 
-  <!-- 画像保存 -->
-  <div class="share-area">
-    <button class="sbtn" onclick="courierSaveImage()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      画像を保存する
-    </button>
-  </div>
-
   <!-- 価格表示 -->
   <div class="price-bar">
     <span class="price-bar-label">価格</span>
     <span class="price-bar-value" id="courier-price-display"></span>
   </div>
+
+  <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
 
   <!-- 下部ボタンバー -->
   <div class="bottom-bar">
@@ -59,7 +49,7 @@
       </svg>戻る
     </button>
     <button class="btn-order" onclick="courierGoOrder()">
-      <span id="courier-cart-label">この配色でカートに入れる →</span>
+      <span id="courier-cart-label">画像を保存してカートに入れる →</span>
     </button>
   </div>
 
