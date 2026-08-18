@@ -1,7 +1,6 @@
 /* Triad 名入れ刻印アドオン（有料オプション） */
 .triad-simulator .kokuin-toggle-area {
-  width: 100%; max-width: 860px; margin: 0 auto;
-  padding: 10px 10px 0;
+  width: 100%;
 }
 .triad-simulator .kokuin-toggle {
   display: flex; align-items: center; gap: 8px;
@@ -17,8 +16,7 @@
 }
 
 .triad-simulator .kokuin-section {
-  width: 100%; max-width: 860px; margin: 6px auto 0;
-  padding: 0 10px;
+  width: 100%; margin: 6px 0 0;
 }
 .triad-simulator .kokuin-section[hidden] { display: none; }
 .triad-simulator .kokuin-inner {

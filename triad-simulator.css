@@ -150,7 +150,7 @@
   background: #fff; color: #555; font-size: 11px; cursor: pointer;
 }
 .triad-simulator .price-bar {
-  width: 100%; max-width: 860px;
+  width: 100%; max-width: 840px;
   display: flex; align-items: baseline; justify-content: space-between;
   background: #fff; border-radius: 7px;
   margin: 8px auto 0; padding: 7px 10px;

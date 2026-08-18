@@ -26,6 +26,37 @@
         <div class="box-label">配色サマリー</div>
         <div id="triad-summary"></div>
       </div>
+
+      <!-- 名入れ刻印オプション（有料アップチャージ） -->
+      <div class="kokuin-toggle-area">
+        <label class="kokuin-toggle">
+          <input type="checkbox" id="triad-kokuin-toggle">
+          <span>名入れ刻印を追加する <span class="kokuin-price">（+¥1,100 税込）</span></span>
+        </label>
+      </div>
+
+      <div class="kokuin-section" id="triad-kokuin-section" hidden>
+        <div class="kokuin-inner">
+          <div class="kokuin-preview-box">
+            <div class="kokuin-pv-caption">刻印イメージ</div>
+            <div class="kokuin-svg-wrap" id="triad-kokuin-svg-wrap"></div>
+            <div class="kokuin-font-swatch" id="triad-kokuin-font-swatch"></div>
+          </div>
+
+          <div class="kokuin-field-label">刻印する文字（半角英数字）</div>
+          <input type="text" id="triad-kokuin-text" maxlength="20" placeholder="例：Sample">
+          <div class="kokuin-char-count" id="triad-kokuin-char-count">0 / 15</div>
+          <div class="kokuin-warn" id="triad-kokuin-warn"></div>
+
+          <div class="kokuin-field-label">フォントを選択</div>
+          <select id="triad-kokuin-font-select"></select>
+
+          <div class="kokuin-notice">
+            <strong>ご注意</strong><br>
+            こちらはあくまで仕上がりイメージの確認用です。実際の刻印は、バランスを見て文字サイズや余白を弊社側で調整する場合があります。文字数や書体によっては、見栄えを考慮して2段配置に変更することもあります。あらかじめご了承ください。
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 右：着用イメージプレビュー（正面・背面） -->
@@ -34,37 +65,6 @@
       <div id="triad-strap-wrap" class="strap-wrap"></div>
     </div>
 
-  </div>
-
-  <!-- 名入れ刻印オプション（有料アップチャージ） -->
-  <div class="kokuin-toggle-area">
-    <label class="kokuin-toggle">
-      <input type="checkbox" id="triad-kokuin-toggle">
-      <span>名入れ刻印を追加する <span class="kokuin-price">（+¥1,100 税込）</span></span>
-    </label>
-  </div>
-
-  <div class="kokuin-section" id="triad-kokuin-section" hidden>
-    <div class="kokuin-inner">
-      <div class="kokuin-preview-box">
-        <div class="kokuin-pv-caption">刻印イメージ</div>
-        <div class="kokuin-svg-wrap" id="triad-kokuin-svg-wrap"></div>
-        <div class="kokuin-font-swatch" id="triad-kokuin-font-swatch"></div>
-      </div>
-
-      <div class="kokuin-field-label">刻印する文字（半角英数字）</div>
-      <input type="text" id="triad-kokuin-text" maxlength="20" placeholder="例：Sample">
-      <div class="kokuin-char-count" id="triad-kokuin-char-count">0 / 15</div>
-      <div class="kokuin-warn" id="triad-kokuin-warn"></div>
-
-      <div class="kokuin-field-label">フォントを選択</div>
-      <select id="triad-kokuin-font-select"></select>
-
-      <div class="kokuin-notice">
-        <strong>ご注意</strong><br>
-        こちらはあくまで仕上がりイメージの確認用です。実際の刻印は、バランスを見て文字サイズや余白を弊社側で調整する場合があります。文字数や書体によっては、見栄えを考慮して2段配置に変更することもあります。あらかじめご了承ください。
-      </div>
-    </div>
   </div>
 
   <!-- 価格表示 -->
