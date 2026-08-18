@@ -8,6 +8,7 @@ const TRIAD_SHOPIFY_DOMAIN = '708works.jp';
 // 価格（長さバリエーションなし・単一価格）
 const TRIAD_PRICE      = 27170;
 const TRIAD_VARIANT_ID = '50079425396986';
+const TRIAD_ENGRAVE_VARIANT_ID = '50087819804922'; // 名入れ刻印ありバリアント（+¥1,100）
 
 // 3つ編みベルト用カラー（Triad専用12色。参照：708works.jp/products/sample02のカラーサンプル実写）
 const TRIAD_BELT_COLORS = [
@@ -148,6 +149,8 @@ function applyTriadColors() {
   if (logo) logo.style.fill = engravingColor(triadColors.parts);
 
   highlightActiveZone();
+
+  if (typeof applyTriadKokuinColors === 'function') applyTriadKokuinColors();
 }
 
 function highlightActiveZone() {
@@ -264,7 +267,9 @@ function updateTriadSummary() {
 
 function updateTriadPriceDisplay() {
   const el = document.getElementById('triad-price-display');
-  if (el) el.textContent = `¥${TRIAD_PRICE.toLocaleString()}（税込）`;
+  if (!el) return;
+  const kokuinAdd = (window.TRIAD_KOKUIN_STATE?.enabled && window.TRIAD_KOKUIN_PRICE_ADD) || 0;
+  el.textContent = `¥${(TRIAD_PRICE + kokuinAdd).toLocaleString()}（税込）`;
 }
 
 function colorName(hex, zone) {
@@ -490,6 +495,10 @@ function updateTriadCartButtonState() {
 }
 
 async function triadGoOrder() {
+  if (window.TRIAD_KOKUIN_STATE?.enabled && !window.TRIAD_KOKUIN_STATE.valid) {
+    showTriadToast('刻印する文字を正しく入力してください');
+    return;
+  }
   if (!triadImageSaved) {
     showTriadToast('先に「画像を保存する」を押してください');
     const saveBtn = document.querySelector('.triad-simulator .sbtn');
@@ -532,6 +541,11 @@ function showTriadConfirmModal(result) {
   const img = document.getElementById('triad-modal-image');
   if (img) img.src = result.imageUrl;
 
+  const kokuin = window.TRIAD_KOKUIN_STATE;
+  const kokuinRow = kokuin?.enabled
+    ? `<div class="modal-color-row"><span class="modal-zone-label">名入れ刻印</span><span>「${kokuin.text}」</span></div>`
+    : '';
+
   const info = document.getElementById('triad-modal-info');
   if (info) info.innerHTML = `
     <p><strong>注文ID:</strong> ${result.orderId}</p>
@@ -542,6 +556,7 @@ function showTriadConfirmModal(result) {
           <span class="modal-color-dot" style="background:${triadColors[zone]}"></span>
           <span>${colorName(triadColors[zone], zone)}</span>
         </div>`).join('')}
+      ${kokuinRow}
     </div>`;
   modal.classList.add('show');
 }
@@ -559,16 +574,25 @@ async function triadProceedToCart() {
     .map(zone => `${TRIAD_ZONE_LABEL[zone]}:${colorName(triadColors[zone], zone)}`)
     .join(', ');
 
+  const kokuin = window.TRIAD_KOKUIN_STATE;
+  const kokuinEnabled = !!kokuin?.enabled;
+  const variantId = kokuinEnabled ? TRIAD_ENGRAVE_VARIANT_ID : TRIAD_VARIANT_ID;
+
   const form = document.createElement('form');
   form.method = 'POST';
   form.action = `https://${TRIAD_SHOPIFY_DOMAIN}/cart/add`;
   form.style.display = 'none';
 
-  [['id', TRIAD_VARIANT_ID],['quantity','1']].forEach(([k,v]) => {
+  [['id', variantId],['quantity','1']].forEach(([k,v]) => {
     const i = document.createElement('input');
     i.type='hidden'; i.name=k; i.value=v; form.appendChild(i);
   });
-  Object.entries({'Order ID': triadLastUploadedImage.orderId, 'Colors': colorDataEN, 'Image URL': triadLastUploadedImage.imageUrl})
+  const properties = {'Order ID': triadLastUploadedImage.orderId, 'Colors': colorDataEN, 'Image URL': triadLastUploadedImage.imageUrl};
+  if (kokuinEnabled) {
+    properties['刻印文字'] = kokuin.text;
+    properties['刻印フォント'] = kokuin.fontFamily;
+  }
+  Object.entries(properties)
     .forEach(([k,v]) => {
       const i = document.createElement('input');
       i.type='hidden'; i.name=`properties[${k}]`; i.value=v; form.appendChild(i);
