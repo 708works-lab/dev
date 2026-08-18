@@ -150,9 +150,10 @@
   background: #fff; color: #555; font-size: 11px; cursor: pointer;
 }
 .triad-simulator .price-bar {
+  width: 100%; max-width: 860px;
   display: flex; align-items: baseline; justify-content: space-between;
   background: #fff; border-radius: 7px;
-  margin: 8px 10px 0; padding: 7px 10px;
+  margin: 8px auto 0; padding: 7px 10px;
 }
 .triad-simulator .price-bar-label {
   font-size: 10px; color: #888;
@@ -166,7 +167,8 @@
   margin: 6px 10px 0; line-height: 1.5;
 }
 .triad-simulator .bottom-bar {
-  display: flex; align-items: center; gap: 6px; padding: 8px 10px 0;
+  width: 100%; max-width: 860px;
+  display: flex; align-items: center; gap: 6px; margin: 0 auto; padding: 8px 10px 0;
 }
 .triad-simulator .btn-reset {
   padding: 9px 10px; border: 1px solid #ccc; border-radius: 7px;
