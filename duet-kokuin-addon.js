@@ -18,23 +18,24 @@
   const ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
 
   // 先端パーツ（duetSelectedStyle）ごとの配置基準・ベースSVG（duet-cw73/cw73r-kokuin-simulator.jsと同じ値）
+  // pieceSelectors は実物同様に4枚（先端①〜④）が個別パスとして存在するため、それぞれを
+  // 個別に塗り分けるためのCSSセレクタ（CW73とCW73Rでid付与のされ方が異なるため別々に定義）
   const STYLE_CONFIG = {
     standard: {
       svgUrl: 'https://708works-lab.github.io/dev/duet_cw73_kokuin_base.svg',
       groupId: 'kokuin1',
       anchor: { x: 358.71, y: 213.89 },
-      angleDeg: -57.70
+      angleDeg: -57.70,
+      pieceSelectors: { front1: '#_x31_1', front2: '#_x32_1', front3: '#_x33_2', front4: '#_x34_1' }
     },
     reverse: {
       svgUrl: 'https://708works-lab.github.io/dev/duet_cw73r_kokuin_base.svg',
       groupId: 'kokuin',
       anchor: { x: 360.0, y: 214.73 },
-      angleDeg: -57.70
+      angleDeg: -57.70,
+      pieceSelectors: { front1: '#_x31_', front2: '#_x32_', front3: '#_x33_ path', front4: '#_x34_ path' }
     }
   };
-  // ロゴ刻印は先端③のパーツ上にあるため（duet-simulator.js側と同じ理由）、
-  // 刻印プレビューSVGのst1（先端リーフ本体）はfront3の色に、st2（ベルト）はbeltの色に同期する
-  const KOKUIN_ZONE_CLASS = { front3: 'st1', belt: 'st2' };
 
   const BASE_FONT_SIZE = 20;
   const MAX_TEXT_WIDTH = 130;
@@ -97,21 +98,24 @@
     drawKokuinText();
   }
 
-  // カラーシミュレーター本体で選ばれた色を、刻印プレビューSVGにも反映する
+  // カラーシミュレーター本体で選ばれた各先端パーツ（①〜④）・ベルトの色を、
+  // 刻印プレビューSVGの該当パーツそれぞれに個別に反映する
   function applyDuetKokuinColors() {
     const svg = kokuinShadowRoot?.querySelector('svg');
-    if (!svg || typeof duetColors === 'undefined') return;
-    const styleEl = svg.querySelector('defs style') || svg.querySelector('style');
-    if (styleEl) {
-      let css = styleEl.textContent;
-      Object.entries(KOKUIN_ZONE_CLASS).forEach(([zone, cls]) => {
-        const hex = duetColors[zone];
-        if (!hex) return;
-        const re = new RegExp(`(\\.${cls}\\s*{[^}]*fill:\\s*)#[0-9a-fA-F]{3,6}`);
-        css = css.replace(re, `$1${hex}`);
-      });
-      styleEl.textContent = css;
-    }
+    if (!svg || typeof duetColors === 'undefined' || !currentStyleId) return;
+    const cfg = STYLE_CONFIG[currentStyleId];
+    if (!cfg) return;
+
+    const belt = svg.querySelector('#part-belt');
+    if (belt && duetColors.belt) belt.style.fill = duetColors.belt;
+
+    ['front1', 'front2', 'front3', 'front4'].forEach(zone => {
+      const hex = duetColors[zone];
+      const sel = cfg.pieceSelectors[zone];
+      if (!hex || !sel) return;
+      svg.querySelectorAll(sel).forEach(p => { p.style.fill = hex; });
+    });
+
     drawKokuinText();
   }
   window.applyDuetKokuinColors = applyDuetKokuinColors;
