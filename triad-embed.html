@@ -5,6 +5,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
 
 <div class="triad-simulator">
+  <div class="price-summary">
+    <span class="price-summary-label">価格</span>
+    <span class="price-summary-value" id="triad-price-display"></span>
+  </div>
   <div class="app">
 
     <!-- 左：コントロール（ゾーン・パレット・サマリー） -->
@@ -89,7 +93,6 @@
     </button>
     <button class="btn-order" onclick="triadGoOrder()">
       <span id="triad-cart-label">この配色でカートに入れる →</span>
-      <div class="price-display" id="triad-price-display"></div>
     </button>
   </div>
 

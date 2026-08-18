@@ -3,6 +3,10 @@
 <link rel="stylesheet" href="https://708works-lab.github.io/dev/duet-simulator.css">
 
 <div class="duet-simulator">
+  <div class="price-summary">
+    <span class="price-summary-label">価格</span>
+    <span class="price-summary-value" id="duet-price-display"></span>
+  </div>
   <div class="app">
 
     <!-- 左：コントロール（先端パーツ・ゾーン・パレット・サマリー） -->
@@ -58,7 +62,6 @@
     </button>
     <button class="btn-order" onclick="duetGoOrder()">
       <span id="duet-cart-label">この配色でカートに入れる →</span>
-      <div class="price-display" id="duet-price-display"></div>
     </button>
   </div>
 
