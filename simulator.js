@@ -8,29 +8,29 @@ const WORKER_URL = 'https://folklore-image-upload.708works.workers.dev';
 // Shopify設定
 const SHOPIFY_DOMAIN = '708works.jp';
 
-// ウロコ数とVariant IDのマッピング
+// ウロコ数とVariant IDのマッピング（刻印なし/あり）
 const VARIANT_MAP = {
-  10: '48782492270842',
-  11: '48782492303610',
-  12: '48782492336378',
-  13: '48782492369146',
-  14: '48782492401914',
-  15: '48782492434682',
-  16: '48782492467450',
-  17: '48782492500218',
-  18: '48782492532986',
-  19: '48782492565754',
-  20: '48782492598522',
-  21: '48782492631290',
-  22: '48782492664058',
-  23: '48782492696826',
-  24: '48782492729594',
-  25: '48782492762362',
-  26: '48782492795130',
-  27: '48782492827898',
-  28: '48782492860666',
-  29: '48782492893434',
-  30: '48782492926202',
+  10: { noeng:'48782492270842', eng:'50128144957690' },
+  11: { noeng:'48782492303610', eng:'50128144990458' },
+  12: { noeng:'48782492336378', eng:'50128145023226' },
+  13: { noeng:'48782492369146', eng:'50128145055994' },
+  14: { noeng:'48782492401914', eng:'50128145088762' },
+  15: { noeng:'48782492434682', eng:'50128145121530' },
+  16: { noeng:'48782492467450', eng:'50128145154298' },
+  17: { noeng:'48782492500218', eng:'50128145187066' },
+  18: { noeng:'48782492532986', eng:'50128145219834' },
+  19: { noeng:'48782492565754', eng:'50128145252602' },
+  20: { noeng:'48782492598522', eng:'50128145285370' },
+  21: { noeng:'48782492631290', eng:'50128145318138' },
+  22: { noeng:'48782492664058', eng:'50128145350906' },
+  23: { noeng:'48782492696826', eng:'50128145383674' },
+  24: { noeng:'48782492729594', eng:'50128145416442' },
+  25: { noeng:'48782492762362', eng:'50128145449210' },
+  26: { noeng:'48782492795130', eng:'50128145481978' },
+  27: { noeng:'48782492827898', eng:'50128145514746' },
+  28: { noeng:'48782492860666', eng:'50128145547514' },
+  29: { noeng:'48782492893434', eng:'50128145580282' },
+  30: { noeng:'48782492926202', eng:'50128145613050' },
 };
 
 // 価格マップ
@@ -169,7 +169,8 @@ function updatePriceDisplay(){
   const el = document.getElementById('price-display');
   if (!el) return;
   const price = PRICE_MAP[N];
-  el.textContent = `¥${price.toLocaleString()}（税込）`;
+  const kokuinAdd = (window.FOLKLORE_KOKUIN_STATE?.enabled && window.FOLKLORE_KOKUIN_PRICE_ADD) || 0;
+  el.textContent = `¥${(price + kokuinAdd).toLocaleString()}（税込）`;
 }
 
 // ============================================================================
@@ -432,6 +433,7 @@ function redrawSVG(){
       p.setAttribute('stroke-miterlimit','10');
     });
   });
+  if (typeof applyFolkloreKokuinColors === 'function') applyFolkloreKokuinColors();
 }
 
 function setSvgPieceColor(svgPn, color, isSel){
@@ -464,6 +466,7 @@ function redrawCanvas(){
       lbl.innerHTML=`<span style="font-size:8px;color:#bbb;">P${frontNum}</span><br><span style="color:${selected.has(i)?'#111':'#666'};font-weight:${selected.has(i)?600:400};">${cname}</span>`;
     }
   }
+  if (typeof applyFolkloreKokuinColors === 'function') applyFolkloreKokuinColors();
 }
 
 function drawDrop(ctx,cx,y,color,isSel,badge,isEndPin,isBodyPin){
@@ -769,6 +772,10 @@ async function saveImage(){
 // ============================================================================
 
 async function goOrder(){
+  if (window.FOLKLORE_KOKUIN_STATE?.enabled && !window.FOLKLORE_KOKUIN_STATE.valid) {
+    showToast('刻印する文字を正しく入力してください');
+    return;
+  }
   if (!hasDownloadedImage) {
     await saveImage();
   }
@@ -1052,6 +1059,10 @@ async function buildSaveCanvas() {
   const vbH = vbBottom - vbTop;
   const svgSaveH = Math.round(vbH * scale);
 
+  const kokuin = window.FOLKLORE_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+  const kokuinH = kokuinEnabled ? 78 : 0;
+
   const headerH = 50;
   const topLabelH = 25;
   const bottomLabelH = 25;
@@ -1059,7 +1070,7 @@ async function buildSaveCanvas() {
   // ウロコ画像をキャンバス中央に、ラベルは右側に配置
   const svgX = Math.round(cw / 2 - svgSaveW / 2); // SVG中心 = cw/2
   const svgY0 = headerH + topLabelH;
-  const ch = svgY0 + svgSaveH + bottomLabelH + footerH + 10;
+  const ch = svgY0 + svgSaveH + bottomLabelH + kokuinH + footerH + 10;
 
   cv.width = cw;
   cv.height = ch;
@@ -1140,6 +1151,33 @@ async function buildSaveCanvas() {
     ctx.fillText(cname, labelX + 16, pieceY + 10);
   });
 
+  // 名入れ刻印プレビュー（実際に選んだフォントで描画。あとから見返せるよう保存画像に含める）
+  if (kokuinEnabled) {
+    const boxMargin = 24;
+    const boxX = boxMargin, boxY = svgY0 + svgSaveH + bottomLabelH + 6;
+    const boxW = cw - boxMargin * 2, boxH = kokuinH - 12;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(boxX + 8, boxY);
+    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 8);
+    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, 8);
+    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, 8);
+    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, 8);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#999';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('名入れ刻印', boxX + 14, boxY + 18);
+
+    await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+    ctx.textAlign = 'left';
+    ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
+  }
+
   // フッター
   ctx.fillStyle = 'rgba(0,0,0,.1)';
   ctx.fillRect(0, ch - footerH, cw, footerH);
@@ -1203,14 +1241,20 @@ function showConfirmModal(uploadResult){
   
   modalImage.src = uploadResult.imageUrl;
   
-  const price = PRICE_MAP[N];
+  const kokuinEnabled0 = !!(window.FOLKLORE_KOKUIN_STATE?.enabled && window.FOLKLORE_KOKUIN_STATE.valid && window.FOLKLORE_KOKUIN_STATE.text);
+  const price = PRICE_MAP[N] + (kokuinEnabled0 ? (window.FOLKLORE_KOKUIN_PRICE_ADD || 0) : 0);
   const colorSummary = generateColorSummary();
-  
+  const kokuin = window.FOLKLORE_KOKUIN_STATE;
+  const kokuinLine = kokuinEnabled0
+    ? `<p><strong>名入れ刻印:</strong> ${kokuin.text}（${kokuin.fontLabel}）</p>`
+    : '';
+
   modalInfo.innerHTML = `
     <p><strong>注文ID:</strong> ${uploadResult.orderId}</p>
     <p><strong>ウロコパーツ数:</strong> ${N}個</p>
     <p><strong>全長:</strong> 約${1150 + (N - 20) * 60}mm</p>
     <p><strong>価格:</strong> ¥${price.toLocaleString()}（税込）</p>
+    ${kokuinLine}
     <p style="margin-top:12px;"><strong>カラー構成:</strong></p>
     <div style="font-size:12px;line-height:1.6;color:#888;margin-top:4px;">${colorSummary}</div>
   `;
@@ -1262,14 +1306,16 @@ async function proceedToCart(){
       return `P${String(i + 1).padStart(2, '0')}${pos}:${name}`;
     }).join(', '); // カンマ区切り1行に
     
-    const price = PRICE_MAP[N];
-    const variantId = VARIANT_MAP[N];
-    
+    const kokuin = window.FOLKLORE_KOKUIN_STATE;
+    const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+    const price = PRICE_MAP[N] + (kokuinEnabled ? (window.FOLKLORE_KOKUIN_PRICE_ADD || 0) : 0);
+    const variantId = VARIANT_MAP[N]?.[kokuinEnabled ? 'eng' : 'noeng'];
+
     console.log('=== カート追加デバッグ情報 ===');
     console.log('ウロコ数:', N);
     console.log('Variant ID:', variantId);
     console.log('価格:', price);
-    
+
     if (!variantId) {
       throw new Error('該当するバリエーションが見つかりません');
     }
@@ -1303,7 +1349,11 @@ async function proceedToCart(){
       'Colors': colorDataEN,
       'Image URL': lastUploadedImage.imageUrl
     };
-    
+    if (kokuinEnabled) {
+      props['刻印文字'] = kokuin.text;
+      props['刻印フォント'] = kokuin.fontLabel;
+    }
+
     Object.entries(props).forEach(([key, value]) => {
       const input = document.createElement('input');
       input.type = 'hidden';

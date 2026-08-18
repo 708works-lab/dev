@@ -1,6 +1,8 @@
 
 <!-- FOLKLORE Color Simulator - Shopify埋め込み用 -->
 <link rel="stylesheet" href="https://708works-lab.github.io/dev/simulator.css">
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/folklore-kokuin-addon.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
 
 <div class="folklore-simulator">
   <header>
@@ -47,6 +49,38 @@
         <div class="dir-tag">前<small>ボディ上部側</small></div>
       </div>
     </div>
+
+    <!-- 名入れ刻印オプション（有料アップチャージ） -->
+    <div class="kokuin-toggle-area">
+      <label class="kokuin-toggle">
+        <input type="checkbox" id="folklore-kokuin-toggle">
+        <span>名入れ刻印を追加する <span class="kokuin-price">（+¥1,100 税込）</span></span>
+      </label>
+    </div>
+
+    <div class="kokuin-section" id="folklore-kokuin-section" hidden>
+      <div class="kokuin-inner">
+        <div class="kokuin-preview-box">
+          <div class="kokuin-pv-caption">刻印イメージ</div>
+          <div class="kokuin-svg-wrap" id="folklore-kokuin-svg-wrap"></div>
+          <div class="kokuin-font-swatch" id="folklore-kokuin-font-swatch"></div>
+        </div>
+
+        <div class="kokuin-field-label">刻印する文字（半角英数字）</div>
+        <input type="text" id="folklore-kokuin-text" maxlength="20" placeholder="例：Sample">
+        <div class="kokuin-char-count" id="folklore-kokuin-char-count">0 / 15</div>
+        <div class="kokuin-warn" id="folklore-kokuin-warn"></div>
+
+        <div class="kokuin-field-label">フォントを選択</div>
+        <select id="folklore-kokuin-font-select"></select>
+
+        <div class="kokuin-notice">
+          <strong>ご注意</strong><br>
+          こちらはあくまで仕上がりイメージの確認用です。実際の刻印は、バランスを見て文字サイズや余白を弊社側で調整する場合があります。文字数や書体によっては、見栄えを考慮して2段配置に変更することもあります。あらかじめご了承ください。
+        </div>
+      </div>
+    </div>
+
     <div class="price-bar">
       <span class="price-bar-label">価格</span>
       <span class="price-bar-value" id="price-display"></span>
@@ -94,3 +128,4 @@
 </div>
 
 <script src="https://708works-lab.github.io/dev/simulator.js"></script>
+<script src="https://708works-lab.github.io/dev/folklore-kokuin-addon.js"></script>
