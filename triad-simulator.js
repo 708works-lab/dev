@@ -408,10 +408,14 @@ async function buildTriadSaveCanvas() {
   const gap    = 24;
   const cw = margin * 2 + svgSaveW + gap + labelColW;
 
+  const kokuin = window.TRIAD_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+  const kokuinH = kokuinEnabled ? 78 : 0;
+
   const headerH = 64;
   const svgY0 = headerH + 16;
   const footerH = 34;
-  const ch = svgY0 + svgSaveH + footerH + 16;
+  const ch = svgY0 + svgSaveH + kokuinH + footerH + 16;
 
   const cv = document.createElement('canvas');
   cv.width = cw; cv.height = ch;
@@ -473,6 +477,32 @@ async function buildTriadSaveCanvas() {
     ctx.font = '13px sans-serif';
     ctx.fillText(colorName(hex, zone), labelX + 20, y + 14);
   });
+
+  // 名入れ刻印プレビュー（実際に選んだフォントで描画。あとから見返せるよう保存画像に含める）
+  if (kokuinEnabled) {
+    const boxX = margin, boxY = svgY0 + svgSaveH + 6;
+    const boxW = cw - margin * 2, boxH = kokuinH - 12;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(boxX + 8, boxY);
+    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 8);
+    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, 8);
+    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, 8);
+    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, 8);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#999';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('名入れ刻印', boxX + 14, boxY + 18);
+
+    await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+    ctx.textAlign = 'left';
+    ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
+  }
 
   // フッター
   ctx.fillStyle = 'rgba(0,0,0,.1)';
@@ -565,7 +595,7 @@ function showTriadConfirmModal(result) {
 
   const kokuin = window.TRIAD_KOKUIN_STATE;
   const kokuinRow = kokuin?.enabled
-    ? `<div class="modal-color-row"><span class="modal-zone-label">名入れ刻印</span><span>「${kokuin.text}」</span></div>`
+    ? `<div class="modal-color-row"><span class="modal-zone-label">名入れ刻印</span><span>「${kokuin.text}」（${kokuin.fontLabel}）</span></div>`
     : '';
   const selectedLength = TRIAD_LENGTHS[triadLengthIndex];
   const lengthRow = `<div class="modal-color-row"><span class="modal-zone-label">長さ</span><span>${selectedLength.label}：${selectedLength.range}</span></div>`;
@@ -621,7 +651,7 @@ async function triadProceedToCart() {
   };
   if (kokuinEnabled) {
     properties['刻印文字'] = kokuin.text;
-    properties['刻印フォント'] = kokuin.fontFamily;
+    properties['刻印フォント'] = kokuin.fontLabel;
   }
   Object.entries(properties)
     .forEach(([k,v]) => {

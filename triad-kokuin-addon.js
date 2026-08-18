@@ -139,7 +139,11 @@
     window.TRIAD_KOKUIN_STATE = {
       enabled: state.enabled,
       text: state.text,
+      fontId: font.id,
       fontFamily: font.family,
+      fontWeight: font.weight,
+      // 注文properties用：スタッフがサンプルシートの「フォントA」等とすぐ照合できるよう記号名も併記
+      fontLabel: `フォント${font.id}：${font.family}`,
       valid: state.enabled ? valid : true
     };
 
