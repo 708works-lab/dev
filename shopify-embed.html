@@ -47,16 +47,13 @@
         <div class="dir-tag">前<small>ボディ上部側</small></div>
       </div>
     </div>
-    <div class="share-area">
-      <button class="sbtn" onclick="saveImage()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        画像を保存する
-      </button>
+    <div class="price-bar">
+      <span class="price-bar-label">価格</span>
+      <span class="price-bar-value" id="price-display"></span>
     </div>
+
+    <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
+
     <div class="bottom-bar">
       <button class="btn-reset" onclick="resetAll()">リセット</button>
       <button class="btn-undo" id="btn-undo" onclick="undo()" disabled>
@@ -65,8 +62,7 @@
         </svg>戻る
       </button>
       <button class="btn-order" id="btn-order" onclick="goOrder()">
-        この配色でカートに入れる →
-        <div class="price-display" id="price-display"></div>
+        画像を保存してカートに入れる →
       </button>
     </div>
   </div>

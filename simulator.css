@@ -270,6 +270,10 @@
 .folklore-simulator .share-area { width: 100%; max-width: 520px; padding: 10px 10px 0; margin: 0 auto; }
 .folklore-simulator .sbtn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 11px; border: 1px solid #e0e0e0; background: #fff; cursor: pointer; font-size: 12px; color: #444; }
 .folklore-simulator .sbtn:active { background: #111; color: #fff; }
+.folklore-simulator .price-bar { width: 100%; max-width: 520px; margin: 8px auto 0; display: flex; align-items: baseline; justify-content: space-between; background: #fff; border-radius: 7px; padding: 7px 10px; }
+.folklore-simulator .price-bar-label { font-size: 10px; color: #888; letter-spacing: .08em; font-weight: 500; text-transform: uppercase; }
+.folklore-simulator .price-bar-value { font-size: 15px; color: #222; font-weight: 700; }
+.folklore-simulator .order-note { font-size: 10px; color: #999; text-align: center; margin: 6px 10px 0; line-height: 1.5; }
 .folklore-simulator #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 11px; opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap; z-index: 9999; }
 .folklore-simulator #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .folklore-simulator .bottom-bar { width: 100%; max-width: 520px; padding: 8px 10px 24px; display: flex; gap: 6px; margin: 10px auto 0; }
@@ -279,7 +283,6 @@
 .folklore-simulator .btn-order { flex: 2.5; padding: 14px; border: none; border-radius: 10px; background: #111; color: #fff; font-size: 13px; cursor: pointer; font-weight: 500; letter-spacing: .04em; }
 .folklore-simulator .btn-order:active { opacity: .7; }
 .folklore-simulator .btn-order:disabled { opacity: .5; cursor: not-allowed; }
-.folklore-simulator .price-display { font-size: 10px; color: #fff; opacity: .8; margin-top: 2px; }
 .folklore-simulator .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
 .folklore-simulator .modal.show { display: flex; }
 .folklore-simulator .modal-content { background: #fff; border-radius: 16px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
