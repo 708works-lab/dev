@@ -19,10 +19,18 @@ const DUET_LENGTHS = [
   { id:'long',     label:'長め',  desc:'最短約95cm〜最長約160cm',  price: 14410, priceAdj: +550 },
 ];
 
-// 先端パーツ × 長さ → Shopifyバリアント ID
+// 先端パーツ × 長さ × 刻印有無 → Shopifyバリアント ID
 const DUET_VARIANT_MAP = {
-  standard: { short:'50077074718970', standard:'50077074751738', long:'50077074784506' },
-  reverse:  { short:'50077074817274', standard:'50077074850042', long:'50077074882810' },
+  standard: {
+    short:    { noeng:'50077074718970', eng:'50127859548410' },
+    standard: { noeng:'50077074751738', eng:'50127859581178' },
+    long:     { noeng:'50077074784506', eng:'50127859613946' }
+  },
+  reverse: {
+    short:    { noeng:'50077074817274', eng:'50127859646714' },
+    standard: { noeng:'50077074850042', eng:'50127859679482' },
+    long:     { noeng:'50077074882810', eng:'50127859712250' }
+  }
 };
 
 // 革パーツ用カラー（20色）
@@ -224,6 +232,7 @@ function applyDuetColors() {
   });
 
   highlightActiveZone();
+  if (typeof applyDuetKokuinColors === 'function') applyDuetKokuinColors();
 }
 
 function highlightActiveZone() {
@@ -409,6 +418,7 @@ function selectDuetFrontStyle(id) {
   updateDuetPriceDisplay();
   applyDuetFrontStyle();
   applyDuetColors();
+  if (typeof onDuetFrontStyleChangeForKokuin === 'function') onDuetFrontStyleChangeForKokuin(id);
 }
 
 // ============================================================================
@@ -472,7 +482,9 @@ function updateDuetSummary() {
 function updateDuetPriceDisplay() {
   const el  = document.getElementById('duet-price-display');
   const len = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
-  if (el && len) el.textContent = `¥${len.price.toLocaleString()}（税込）`;
+  if (!el || !len) return;
+  const kokuinAdd = (window.DUET_KOKUIN_STATE?.enabled && window.DUET_KOKUIN_PRICE_ADD) || 0;
+  el.textContent = `¥${(len.price + kokuinAdd).toLocaleString()}（税込）`;
 }
 
 function colorName(hex, zone) {
@@ -617,10 +629,14 @@ async function buildDuetSaveCanvas() {
   const gap    = 24;
   const cw = margin * 2 + svgSaveW + gap + labelColW;
 
+  const kokuin = window.DUET_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+  const kokuinH = kokuinEnabled ? 78 : 0;
+
   const headerH = 64, topLabelH = 30, bottomLabelH = 30, footerH = 34;
   const svgX  = margin;
   const svgY0 = headerH + topLabelH;
-  const ch    = svgY0 + svgSaveH + bottomLabelH + footerH + 10;
+  const ch    = svgY0 + svgSaveH + bottomLabelH + kokuinH + footerH + 10;
 
   const cv = document.createElement('canvas');
   cv.width = cw; cv.height = ch;
@@ -692,6 +708,32 @@ async function buildDuetSaveCanvas() {
     ctx.fillText(colorName(hex, z.zone), labelX + 20, pieceY + 14);
   });
 
+  // 名入れ刻印プレビュー（実際に選んだフォントで描画。あとから見返せるよう保存画像に含める）
+  if (kokuinEnabled) {
+    const boxX = margin, boxY = svgY0 + svgSaveH + bottomLabelH + 6;
+    const boxW = cw - margin * 2, boxH = kokuinH - 12;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(boxX + 8, boxY);
+    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 8);
+    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, 8);
+    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, 8);
+    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, 8);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#999';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('名入れ刻印', boxX + 14, boxY + 18);
+
+    await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+    ctx.textAlign = 'left';
+    ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
+  }
+
   // フッター
   ctx.fillStyle = 'rgba(0,0,0,.1)';
   ctx.fillRect(0, ch - footerH, cw, footerH);
@@ -713,6 +755,10 @@ function updateDuetCartButtonState() {
 }
 
 async function duetGoOrder() {
+  if (window.DUET_KOKUIN_STATE?.enabled && !window.DUET_KOKUIN_STATE.valid) {
+    showDuetToast('刻印する文字を正しく入力してください');
+    return;
+  }
   if (!duetImageSaved) {
     await duetSaveImage();
   }
@@ -767,6 +813,14 @@ function showDuetConfirmModal(result) {
   const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
   const len   = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
   const rows = duetOrderRows();
+  const kokuin = window.DUET_KOKUIN_STATE;
+  const kokuinRow = (kokuin?.enabled && kokuin.valid && kokuin.text)
+    ? `<div class="modal-color-row">
+        <span class="modal-zone-label">名入れ刻印</span>
+        <span></span>
+        <span>${kokuin.text}（${kokuin.fontLabel}）</span>
+      </div>`
+    : '';
 
   const info = document.getElementById('duet-modal-info');
   if (info) info.innerHTML = `
@@ -788,6 +842,7 @@ function showDuetConfirmModal(result) {
         <span></span>
         <span>${len?.label}（${len?.desc}）</span>
       </div>
+      ${kokuinRow}
     </div>`;
   modal.classList.add('show');
 }
@@ -803,7 +858,9 @@ async function duetProceedToCart() {
 
   const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
   const len   = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
-  const variantId = DUET_VARIANT_MAP[duetSelectedStyle]?.[duetSelectedLength];
+  const kokuin = window.DUET_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+  const variantId = DUET_VARIANT_MAP[duetSelectedStyle]?.[duetSelectedLength]?.[kokuinEnabled ? 'eng' : 'noeng'];
   if (!variantId) { showDuetToast('バリアントが見つかりません'); return; }
   const rows  = duetOrderRows();
   const colorDataEN = duetLinked
@@ -819,7 +876,12 @@ async function duetProceedToCart() {
     const i = document.createElement('input');
     i.type='hidden'; i.name=k; i.value=v; form.appendChild(i);
   });
-  Object.entries({'Order ID': duetLastUploadedImage.orderId, 'Colors': colorDataEN, 'Front Part': style.label, 'Length': len.label, 'Image URL': duetLastUploadedImage.imageUrl})
+  const properties = {'Order ID': duetLastUploadedImage.orderId, 'Colors': colorDataEN, 'Front Part': style.label, 'Length': len.label, 'Image URL': duetLastUploadedImage.imageUrl};
+  if (kokuinEnabled) {
+    properties['刻印文字'] = kokuin.text;
+    properties['刻印フォント'] = kokuin.fontLabel;
+  }
+  Object.entries(properties)
     .forEach(([k,v]) => {
       const i = document.createElement('input');
       i.type='hidden'; i.name=`properties[${k}]`; i.value=v; form.appendChild(i);
