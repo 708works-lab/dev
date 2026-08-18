@@ -18,12 +18,12 @@
   const ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
   const ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
 
-  // ── サンプル刻印パス（ABCDEFGHIJK）から算出した配置基準（folklore_kokuin_simulator.svg 2026-08-16） ──
+  // ── サンプル刻印パス（ABCDEFGHIJK）から算出した配置基準（folklore_kokuin_simulator.svg 2026-08-18差し替え版） ──
   // 中心アンカー：先頭文字と末尾文字のbbox中心の中点
   // 角度：先頭→末尾の中心を結んだ直線の傾き（真ん中のリーフ型パーツに沿って右上がり）
-  const VIEWBOX = { w: 765.65, h: 509.29 };
-  const ANCHOR = { x: 379.17, y: 245.55 };
-  const ANGLE_DEG = -60.7;
+  const VIEWBOX = { w: 713.09, h: 474.06 };
+  const ANCHOR = { x: 333.52, y: 216.26 };
+  const ANGLE_DEG = -60.70;
   const BASE_FONT_SIZE = 20;   // リーフ型パーツはTriadのベルトより幅が狭いため控えめに設定
   const MAX_TEXT_WIDTH = 130;  // パーツ幅に収まる目安の最大横幅（SVGローカル座標）
   const MIN_FONT_SIZE = 14;    // 可読性を保てる下限。これより縮小が必要な場合は1行を諦めて2段組みに切り替える
