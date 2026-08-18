@@ -18,11 +18,11 @@
   const ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
   const ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
 
-  // ── サンプル刻印パス（ABCDEFGHIJK）から算出した配置基準（courier_kokuin_simulator.svg 2026-08-16） ──
+  // ── サンプル刻印パス（ABCDEFGHIJK）から算出した配置基準（courier_kokuin_simulator.svg 2026-08-18差し替え版） ──
   // 中心アンカー：先頭文字と末尾文字のbbox中心の中点
   // 角度：先頭→末尾の中心を結んだ直線の傾き（前面タブに沿って右上がり）
-  const VIEWBOX = { w: 810.82, h: 570.32 };
-  const ANCHOR = { x: 587.28, y: 397.47 };
+  const VIEWBOX = { w: 682.88, h: 448 };
+  const ANCHOR = { x: 496.45, y: 307.14 };
   const ANGLE_DEG = -61.33;
   const BASE_FONT_SIZE = 24;   // 文字数が少ないときも詰まって見えないよう、控えめな初期値に設定
   const MAX_TEXT_WIDTH = 150;  // タブ幅（リベット3個の間）に収まる目安の最大横幅（SVGローカル座標）
@@ -167,7 +167,7 @@
   }
 
   function drawKokuinText() {
-    const group = document.getElementById('kokuin');
+    const group = document.getElementById('kokuin1');
     if (!group) return;
     group.innerHTML = '';
 
