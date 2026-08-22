@@ -2,6 +2,11 @@
 .kolmio-simulator .kokuin-toggle-area {
   width: 100%;
   margin-top: 8px;
+  /* .top-area(padding:10px 10px 0)やprice-bar/bottom-barと左右端を揃えるための余白。
+     このクラス自体には元々横方向のpaddingがなく、.appの幅いっぱいに広がって
+     他の要素より左右にはみ出して見えていた。 */
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 .kolmio-simulator .kokuin-toggle {
   display: flex; align-items: center; gap: 8px;
@@ -26,6 +31,7 @@
 
 .kolmio-simulator .kokuin-section {
   width: 100%; margin: 6px 0 0;
+  padding: 0 10px; box-sizing: border-box;
 }
 .kolmio-simulator .kokuin-section[hidden] { display: none; }
 .kolmio-simulator .kokuin-inner {
