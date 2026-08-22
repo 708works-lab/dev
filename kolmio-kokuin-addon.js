@@ -1,6 +1,6 @@
 /* Kolmio 名入れ刻印アドオン（有料オプション、+¥1,100税込・要確認）
    既存の kolmio-simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
-   刻印は先端(1番)パーツに乗るため、色は常に kolmioBlocks[0]（色1）を参照する。 */
+   刻印は先端(1番)パーツに乗るため、色は常に kPieceColors[1]（先端パーツの色）を参照する。 */
 (function () {
   const FONTS = [
     { id: 'A', family: 'Cabin Sketch', weight: '700', google: true, googleParam: 'Cabin+Sketch:wght@700', category: '手書き' },
@@ -68,11 +68,11 @@
     applyKolmioKokuinColors();
   }
 
-  // カラーシミュレーター本体の「色1」（先端パーツの色）を刻印プレビューSVGにも反映する
+  // カラーシミュレーター本体の先端(1番)パーツの色を刻印プレビューSVGにも反映する
   function applyKolmioKokuinColors() {
     const svg = kokuinShadowRoot?.querySelector('svg');
-    if (!svg || typeof kolmioBlocks === 'undefined') return;
-    const hex = kolmioBlocks[0]?.hex;
+    if (!svg || typeof kPieceColors === 'undefined') return;
+    const hex = kPieceColors[1];
     if (hex) {
       svg.querySelectorAll('.st0').forEach(el => { el.style.fill = hex; });
     }
@@ -168,8 +168,8 @@
     textEl.setAttribute('font-size', BASE_FONT_SIZE);
     // レーザー刻印は革の色に関わらず視認できるため、先端パーツ（色1）に対して
     // コントラストが出る色を使う
-    const baseHex = (typeof kolmioBlocks !== 'undefined') ? kolmioBlocks[0]?.hex : null;
-    const fillColor = (baseHex && typeof engravingColorKolmio === 'function') ? engravingColorKolmio(baseHex) : '#2a1710';
+    const baseHex = (typeof kPieceColors !== 'undefined') ? kPieceColors[1] : null;
+    const fillColor = (baseHex && typeof kolmioEngravingColor === 'function') ? kolmioEngravingColor(baseHex) : '#2a1710';
     textEl.setAttribute('fill', fillColor);
     textEl.setAttribute('fill-opacity', '0.82');
     textEl.textContent = text;
