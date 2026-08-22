@@ -5,12 +5,12 @@
 const KOLMIO_WORKER_URL     = 'https://folklore-image-upload.708works.workers.dev';
 const KOLMIO_SHOPIFY_DOMAIN = '708works.jp';
 
-// 鱗の数レンジ：ウクレレの短めサイズ〜ギター用の長いサイズまでを1シミュレーターでカバー
+// ウロコの数レンジ：ウクレレの短めサイズ〜ギター用の長いサイズまでを1シミュレーターでカバー
 const KOLMIO_SCALE_MIN = 10;
 const KOLMIO_SCALE_MAX = 22;
 const KOLMIO_SCALE_DEFAULT = 20;
 
-// 価格（標準=鱗14個・薄革のkolmio for ukuleleをベースに、鱗1個あたり既存Shopifyオプションの
+// 価格（標準=ウロコ14個・薄革のkolmio for ukuleleをベースに、ウロコ1個あたり既存Shopifyオプションの
 // 実績値+¥1,540を適用。厚革仕様(ギター向け)・名入れ刻印は別建てのアップチャージ）
 const KOLMIO_BASE_PRICE     = 21560;
 const KOLMIO_STANDARD_COUNT = 14;
@@ -21,7 +21,7 @@ function kolmioPriceForCount(n) {
   return KOLMIO_BASE_PRICE + (n - KOLMIO_STANDARD_COUNT) * KOLMIO_PER_SCALE_ADD;
 }
 
-// Shopify商品「kolmio-color-order」の実バリエーションID（鱗の数 × 革の厚み × 名入れ刻印）
+// Shopify商品「kolmio-color-order」の実バリエーションID（ウロコの数 × 革の厚み × 名入れ刻印）
 const KOLMIO_VARIANT_MAP = {
   10: { standard: { noeng: "50148708155642", eng: "50148708188410" }, thick: { noeng: "50148708221178", eng: "50148708253946" } },
   11: { standard: { noeng: "50148708286714", eng: "50148708319482" }, thick: { noeng: "50148708352250", eng: "50148708385018" } },
@@ -70,7 +70,7 @@ const KOLMIO_GRADS = [
   {name:'キャンディ', fn:i=>['#d96090','#f0a0a8','#e8c84a','#7baed0','#a8c43a','#d96090'][i%6]},
 ];
 
-// SVG内 各鱗パーツ番号 ⇔ 実DOM要素ID（Illustrator書き出しのエンコードIDそのまま）
+// SVG内 各ウロコパーツ番号 ⇔ 実DOM要素ID（Illustrator書き出しのエンコードIDそのまま）
 const KOLMIO_ID_BY_NUM = {
   22: '_x32_2-rear',
   21: '_x32_1', 20: '_x32_0', 19: '_x31_9', 18: '_x31_8', 17: '_x31_7',
@@ -188,7 +188,7 @@ function kolmioUndo() {
 }
 
 // ============================================================================
-// 鱗の数（±ステッパー）
+// ウロコの数（±ステッパー）
 // ============================================================================
 
 function updateKolmioCountDisplay() {
@@ -229,7 +229,7 @@ function buildKolmioStrapSVG() {
   if (!scroll || !col) return;
 
   const order = kolmioDisplayOrder(kN); // [22, N-1, ..., 1]
-  // 固定表示幅(px)。Kolmioの鱗はFolkloreの葉型パーツよりも縦横比が細長いため、
+  // 固定表示幅(px)。KolmioのウロコはFolkloreの葉型パーツよりも縦横比が細長いため、
   // 同じ表示幅では全長が入りきらない。.strap-scrollのmax-height(CSS側)による
   // 内部スクロールと組み合わせ、タップしやすい幅を優先して設定する。
   const dispW = 30;
@@ -670,7 +670,7 @@ function showKolmioConfirmModal(uploadResult) {
 
   modalInfo.innerHTML = `
     <p><strong>注文ID:</strong> ${uploadResult.orderId}</p>
-    <p><strong>鱗の数:</strong> ${kN}個</p>
+    <p><strong>ウロコの数:</strong> ${kN}個</p>
     <p><strong>全長:</strong> 約${970 + (kN - KOLMIO_STANDARD_COUNT) * 70}mm</p>
     <p><strong>仕様:</strong> ${kThick ? '厚革仕様（ギター向け）' : '標準厚み'}</p>
     <p><strong>価格:</strong> ¥${price.toLocaleString()}（税込）</p>

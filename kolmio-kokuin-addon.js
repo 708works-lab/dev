@@ -22,6 +22,12 @@
   const ANGLE_DEG = -60.12;
   const BASE_FONT_SIZE = 22;
   const MAX_TEXT_WIDTH = 180;
+  const MIN_FONT_SIZE = 14;       // 1行のまま縮小できる下限。これより縮小が必要なら2段組みに切り替える
+  const HARD_FLOOR_FONT_SIZE = 8; // 2段組みでも収まらない場合の最終フォールバック
+  const LINE_GAP_RATIO = 1.15;    // 2段組み時の行間（フォントサイズに対する比率）
+
+  // 刻印プレビューSVG(kolmio_kokuin_base.svg)に写っている先端側4パーツのID⇔ピース番号対応
+  const KOKUIN_PIECE_IDS = { 4: '_x34_', 3: '_x33_', 2: '_x32_', 1: '_x31_-front' };
 
   const KOKUIN_PRICE_ADD = 1100; // 暫定額（他シリーズの刻印オプションと同額。要確認）
 
@@ -68,14 +74,16 @@
     applyKolmioKokuinColors();
   }
 
-  // カラーシミュレーター本体の先端(1番)パーツの色を刻印プレビューSVGにも反映する
+  // カラーシミュレーター本体の先端側4パーツ(1〜4番)の色を、刻印プレビューSVGの
+  // 対応する各パーツにそれぞれ反映する（一律1色ではなく、パーツごとの実際の色を使う）
   function applyKolmioKokuinColors() {
     const svg = kokuinShadowRoot?.querySelector('svg');
     if (!svg || typeof kPieceColors === 'undefined') return;
-    const hex = kPieceColors[1];
-    if (hex) {
-      svg.querySelectorAll('.st0').forEach(el => { el.style.fill = hex; });
-    }
+    Object.entries(KOKUIN_PIECE_IDS).forEach(([pieceNum, id]) => {
+      const el = svg.querySelector('#' + CSS.escape(id));
+      const hex = kPieceColors[pieceNum];
+      if (el && hex) el.style.fill = hex;
+    });
     drawKokuinText();
   }
   window.applyKolmioKokuinColors = applyKolmioKokuinColors;
@@ -147,6 +155,56 @@
     swatch.style.fontWeight = font.weight;
   }
 
+  function kokuinFillColor() {
+    // レーザー刻印は革の色に関わらず視認できるため、先端パーツ（色1）に対して
+    // コントラストが出る色を使う
+    const baseHex = (typeof kPieceColors !== 'undefined') ? kPieceColors[1] : null;
+    return (baseHex && typeof kolmioEngravingColor === 'function') ? kolmioEngravingColor(baseHex) : '#2a1710';
+  }
+
+  function makeKokuinTextEl(font) {
+    const ns = 'http://www.w3.org/2000/svg';
+    const el = document.createElementNS(ns, 'text');
+    el.setAttribute('text-anchor', 'middle');
+    el.setAttribute('dominant-baseline', 'central');
+    el.setAttribute('font-family', font.family);
+    el.setAttribute('font-weight', font.weight);
+    el.setAttribute('fill', kokuinFillColor());
+    el.setAttribute('fill-opacity', '0.82');
+    return el;
+  }
+
+  // el（SVGに追加済み）の文字列をmaxWidth以内に収まるまでfloorSizeを下限として縮小する
+  function fitKokuinFontSize(el, text, maxWidth, startSize, floorSize) {
+    el.textContent = text;
+    let size = startSize;
+    el.setAttribute('font-size', size);
+    let width = el.getBBox().width;
+    while (width > maxWidth && size > floorSize) {
+      size -= 1;
+      el.setAttribute('font-size', size);
+      width = el.getBBox().width;
+    }
+    return { size, width };
+  }
+
+  // 中央付近のスペースで分割。スペースがなければ文字数で半分に分割する
+  function splitKokuinInHalf(text) {
+    if (text.includes(' ')) {
+      const mid = text.length / 2;
+      let best = -1, bestDist = Infinity;
+      for (let i = 0; i < text.length; i++) {
+        if (text[i] === ' ') {
+          const d = Math.abs(i - mid);
+          if (d < bestDist) { bestDist = d; best = i; }
+        }
+      }
+      if (best >= 0) return [text.slice(0, best).trim(), text.slice(best + 1).trim()];
+    }
+    const mid = Math.ceil(text.length / 2);
+    return [text.slice(0, mid), text.slice(mid)];
+  }
+
   function drawKokuinText() {
     const group = kokuinShadowRoot?.getElementById('kokuin');
     if (!group) return;
@@ -156,32 +214,41 @@
     if (!text) return;
 
     const font = currentFont();
-    const ns = 'http://www.w3.org/2000/svg';
-    const textEl = document.createElementNS(ns, 'text');
-    textEl.setAttribute('x', ANCHOR.x);
-    textEl.setAttribute('y', ANCHOR.y);
-    textEl.setAttribute('text-anchor', 'middle');
-    textEl.setAttribute('dominant-baseline', 'central');
-    textEl.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
-    textEl.setAttribute('font-family', font.family);
-    textEl.setAttribute('font-weight', font.weight);
-    textEl.setAttribute('font-size', BASE_FONT_SIZE);
-    // レーザー刻印は革の色に関わらず視認できるため、先端パーツ（色1）に対して
-    // コントラストが出る色を使う
-    const baseHex = (typeof kPieceColors !== 'undefined') ? kPieceColors[1] : null;
-    const fillColor = (baseHex && typeof kolmioEngravingColor === 'function') ? kolmioEngravingColor(baseHex) : '#2a1710';
-    textEl.setAttribute('fill', fillColor);
-    textEl.setAttribute('fill-opacity', '0.82');
-    textEl.textContent = text;
-    group.appendChild(textEl);
 
-    let fontSize = BASE_FONT_SIZE;
-    let measuredWidth = textEl.getBBox().width;
-    while (measuredWidth > MAX_TEXT_WIDTH && fontSize > 4) {
-      fontSize -= 1;
-      textEl.setAttribute('font-size', fontSize);
-      measuredWidth = textEl.getBBox().width;
+    // まず1行での配置を試みる（MIN_FONT_SIZEまで縮小して収まればそのまま採用）
+    const line1 = makeKokuinTextEl(font);
+    group.appendChild(line1);
+    const singleFit = fitKokuinFontSize(line1, text, MAX_TEXT_WIDTH, BASE_FONT_SIZE, MIN_FONT_SIZE);
+
+    if (singleFit.width <= MAX_TEXT_WIDTH) {
+      line1.setAttribute('x', ANCHOR.x);
+      line1.setAttribute('y', ANCHOR.y);
+      line1.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
+      return;
     }
+
+    // 1行では収まらないため2段組みに切り替える
+    group.innerHTML = '';
+    const [textA, textB] = splitKokuinInHalf(text);
+    const lineA = makeKokuinTextEl(font);
+    const lineB = makeKokuinTextEl(font);
+    group.appendChild(lineA);
+    group.appendChild(lineB);
+
+    const fitA = fitKokuinFontSize(lineA, textA, MAX_TEXT_WIDTH, BASE_FONT_SIZE, HARD_FLOOR_FONT_SIZE);
+    const fitB = fitKokuinFontSize(lineB, textB, MAX_TEXT_WIDTH, BASE_FONT_SIZE, HARD_FLOOR_FONT_SIZE);
+    const sharedSize = Math.min(fitA.size, fitB.size);
+    lineA.setAttribute('font-size', sharedSize);
+    lineB.setAttribute('font-size', sharedSize);
+
+    // 2行とも同じ回転軸（ANCHOR）を中心に回転させることでストラップ角度に対して垂直に積む
+    const lineGap = sharedSize * LINE_GAP_RATIO;
+    lineA.setAttribute('x', ANCHOR.x);
+    lineA.setAttribute('y', ANCHOR.y - lineGap / 2);
+    lineA.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
+    lineB.setAttribute('x', ANCHOR.x);
+    lineB.setAttribute('y', ANCHOR.y + lineGap / 2);
+    lineB.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
   }
 
   async function onToggleChange() {
