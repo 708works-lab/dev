@@ -1,0 +1,123 @@
+
+<!-- Kolmio Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/kolmio-simulator.css">
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/kolmio-kokuin-addon.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
+
+<div class="kolmio-simulator">
+  <div class="app">
+
+    <!-- 左：コントロール（配色ブロック・パレット・長さ・サマリー） -->
+    <div class="ctrl-left">
+      <div class="box-label">配色ブロック数を選ぶ</div>
+      <div id="kolmio-block-count" class="kolmio-block-count"></div>
+
+      <div id="kolmio-block-tabs" class="kolmio-block-tabs"></div>
+      <div id="kolmio-boundaries"></div>
+
+      <div class="box-label" id="kolmio-palette-label" style="margin-top:8px;">カラー</div>
+      <div class="pal-box">
+        <div class="palette" id="kolmio-palette"></div>
+      </div>
+
+      <div class="box-label" style="margin-top:8px;">長さを選ぶ（鱗の数）</div>
+      <div class="length-box">
+        <span id="kolmio-length-label"></span>
+        <input type="range" id="kolmio-length-slider">
+      </div>
+
+      <div class="sum-box">
+        <div class="box-label">配色サマリー</div>
+        <div id="kolmio-summary"></div>
+      </div>
+
+      <!-- 名入れ刻印オプション（有料アップチャージ） -->
+      <div class="kokuin-toggle-area">
+        <label class="kokuin-toggle">
+          <input type="checkbox" id="kolmio-kokuin-toggle">
+          <span>名入れ刻印を追加する <span class="kokuin-price">（+¥1,100 税込）</span></span>
+        </label>
+      </div>
+
+      <div class="kokuin-section" id="kolmio-kokuin-section" hidden>
+        <div class="kokuin-inner">
+          <div class="kokuin-preview-box">
+            <div class="kokuin-pv-caption">刻印イメージ</div>
+            <div class="kokuin-svg-wrap" id="kolmio-kokuin-svg-wrap"></div>
+            <div class="kokuin-font-swatch" id="kolmio-kokuin-font-swatch"></div>
+          </div>
+
+          <div class="kokuin-field-label">刻印する文字（半角英数字）</div>
+          <input type="text" id="kolmio-kokuin-text" maxlength="20" placeholder="例：Sample">
+          <div class="kokuin-char-count" id="kolmio-kokuin-char-count">0 / 15</div>
+          <div class="kokuin-warn" id="kolmio-kokuin-warn"></div>
+
+          <div class="kokuin-field-label">フォントを選択</div>
+          <select id="kolmio-kokuin-font-select"></select>
+
+          <div class="kokuin-notice">
+            <strong>ご注意</strong><br>
+            こちらはあくまで仕上がりイメージの確認用です。実際の刻印は、バランスを見て文字サイズや余白を弊社側で調整する場合があります。文字数や書体によっては、見栄えを考慮して2段配置に変更することもあります。あらかじめご了承ください。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：プレビュー -->
+    <div class="preview-col">
+      <div class="dir-tag-v">プレビュー<small>先端（上）〜末端（下）</small></div>
+      <div id="kolmio-strap-wrap" class="strap-wrap"></div>
+    </div>
+
+  </div>
+
+  <!-- 価格表示 -->
+  <div class="price-bar">
+    <span class="price-bar-label">価格</span>
+    <span class="price-bar-value" id="kolmio-price-display"></span>
+  </div>
+
+  <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
+
+  <!-- 下部ボタンバー -->
+  <div class="bottom-bar">
+    <button class="btn-reset" onclick="kolmioReset()">リセット</button>
+    <button class="btn-undo" id="kolmio-btn-undo" onclick="kolmioUndo()" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+      </svg>戻る
+    </button>
+    <button class="btn-order" onclick="kolmioGoOrder()">
+      <span id="kolmio-cart-label">画像を保存してカートに入れる →</span>
+    </button>
+  </div>
+
+  <!-- 注文確認モーダル -->
+  <div class="modal" id="kolmio-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeKolmioModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="kolmio-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="kolmio-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeKolmioModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="kolmioProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-overlay" id="kolmio-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="kolmio-toast" class="toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/kolmio-simulator.js"></script>
+<script src="https://708works-lab.github.io/dev/kolmio-kokuin-addon.js"></script>

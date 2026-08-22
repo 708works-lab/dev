@@ -5,13 +5,13 @@
 const KOLMIO_WORKER_URL     = 'https://folklore-image-upload.708works.workers.dev';
 const KOLMIO_SHOPIFY_DOMAIN = '708works.jp';
 
-// 価格（暫定値。Shopify側の実商品作成時に要確認・要調整）
-// ベースは現行「kolmio for ukulele」標準(鱗14個・薄革)の価格を流用。
+// 価格（暫定値。要確認・要調整）
+// 本商品はギター向け特別仕様（厚革）が前提のため、厚みはトグルにせずベース価格へ組み込み済み。
+// ベースは現行「kolmio for ukulele」標準(鱗14個・薄革)の価格 ¥21,560 に、厚革アップチャージ(暫定+¥3,000)を加算。
 // 鱗1個あたりの価格は、現行Shopify「ウロコ追加」オプションの実績値(+7cm/+¥1,540)をそのまま採用。
-const KOLMIO_BASE_PRICE      = 21560;
+const KOLMIO_BASE_PRICE      = 24560;
 const KOLMIO_STANDARD_COUNT  = 14;
 const KOLMIO_PER_SCALE_ADD   = 1540;
-const KOLMIO_THICK_LEATHER_ADD = 3000; // 暫定額（要確認）
 
 // 鱗の総数レンジ：ウクレレの短めサイズ〜ギター用の長いサイズまでを1シミュレーターでカバー
 const KOLMIO_SCALE_MIN = 10;
@@ -54,6 +54,23 @@ const KOLMIO_PIECE_Y = {
   2:  1648.75, 1: 1726.79,
 };
 
+// Shopify商品「kolmio-color-order」の実バリエーションID（鱗の数 × 名入れ刻印）
+const KOLMIO_SCALE_VARIANTS = {
+  10: { noeng: "50148549230842", eng: "50148549263610" },
+  11: { noeng: "50148549296378", eng: "50148549329146" },
+  12: { noeng: "50148549361914", eng: "50148549394682" },
+  13: { noeng: "50148549427450", eng: "50148549460218" },
+  14: { noeng: "50148549492986", eng: "50148549525754" },
+  15: { noeng: "50148549558522", eng: "50148549591290" },
+  16: { noeng: "50148549624058", eng: "50148549656826" },
+  17: { noeng: "50148549689594", eng: "50148549722362" },
+  18: { noeng: "50148549755130", eng: "50148549787898" },
+  19: { noeng: "50148549820666", eng: "50148549853434" },
+  20: { noeng: "50148549886202", eng: "50148549918970" },
+  21: { noeng: "50148549951738", eng: "50148549984506" },
+  22: { noeng: "50148550017274", eng: "50148550050042" },
+};
+
 // ベルト用カラー（Triad/Duet/Courierと共通の12色パレット。708works.jp/products/sample02より抽出）
 const KOLMIO_BELT_COLORS = [
   {id:'natural',   name:'Natural',    hex:'#e1c5ba'},
@@ -75,13 +92,17 @@ const KOLMIO_BELT_COLORS = [
 // ============================================================================
 
 let kolmioScaleCount    = KOLMIO_SCALE_DEFAULT;
-let kolmioThickLeather  = true; // 今回のギター用途を想定しデフォルトON
 let kolmioBlockCount    = 1;    // 1〜3色
 let kolmioBlocks        = [{ through: KOLMIO_SCALE_DEFAULT, hex: '#e4ad90' }];
 let kolmioActiveBlock   = 0;
 let kolmioImageSaved    = false;
 let kolmioHistory       = [];
 let kolmioLastUploadedImage = null;
+
+function updateKolmioCartButtonState() {
+  const cartLabel = document.getElementById('kolmio-cart-label');
+  if (cartLabel) cartLabel.textContent = '画像を保存してカートに入れる →';
+}
 
 // ============================================================================
 // 初期化
@@ -100,6 +121,7 @@ function initKolmioSimulator() {
   updateKolmioSummary();
   updateKolmioLengthUI();
   updateKolmioPriceDisplay();
+  updateKolmioCartButtonState();
   loadKolmioSVG();
 }
 
@@ -405,14 +427,8 @@ function updateKolmioPriceDisplay() {
 
 function kolmioPrice() {
   const scaleAdd = (kolmioScaleCount - KOLMIO_STANDARD_COUNT) * KOLMIO_PER_SCALE_ADD;
-  const thickAdd = kolmioThickLeather ? KOLMIO_THICK_LEATHER_ADD : 0;
   const kokuinAdd = (window.KOLMIO_KOKUIN_STATE?.enabled && window.KOLMIO_KOKUIN_PRICE_ADD) || 0;
-  return KOLMIO_BASE_PRICE + scaleAdd + thickAdd + kokuinAdd;
-}
-
-function toggleKolmioThickLeather(checked) {
-  kolmioThickLeather = checked;
-  updateKolmioPriceDisplay();
+  return KOLMIO_BASE_PRICE + scaleAdd + kokuinAdd;
 }
 
 // ============================================================================
@@ -530,7 +546,7 @@ async function buildKolmioSaveCanvas() {
       return { label: `色${i + 1}（${rangeLabel}）`, hex: b.hex, name: kolmioColorName(b.hex) };
     }),
     { label: '長さ', hex: null, name: `鱗${kolmioScaleCount}個（全長約${Math.round(kolmioTotalLengthMm(kolmioScaleCount))}mm）` },
-    { label: '革の厚み', hex: null, name: kolmioThickLeather ? '厚革仕様' : '標準' },
+    { label: '仕様', hex: null, name: '厚革仕様（ギター用特別仕様）' },
   ];
   const rowGap = svgSaveH / (rows.length + 1);
   rows.forEach((row, i) => {
@@ -561,6 +577,129 @@ async function buildKolmioSaveCanvas() {
   ctx.fillText('708works.jp', cw / 2, ch - 12);
 
   return cv;
+}
+
+// ============================================================================
+// カート注文
+// ============================================================================
+
+async function kolmioGoOrder() {
+  if (window.KOLMIO_KOKUIN_STATE?.enabled && !window.KOLMIO_KOKUIN_STATE.valid) {
+    showKolmioToast('刻印する文字を正しく入力してください');
+    return;
+  }
+  if (!kolmioImageSaved) {
+    await kolmioSaveImage();
+  }
+  const loadEl = document.getElementById('kolmio-loading-overlay');
+  if (loadEl) loadEl.classList.add('show');
+  try {
+    const svg = document.querySelector('#kolmio-strap-wrap svg');
+    if (!svg) throw new Error('SVGが見つかりません');
+    const canvas = await buildKolmioSaveCanvas();
+    const result = await kolmioUploadImage(canvas);
+    if (!result) throw new Error('画像アップロードに失敗しました');
+    kolmioLastUploadedImage = result;
+    if (loadEl) loadEl.classList.remove('show');
+    showKolmioConfirmModal(result);
+  } catch (e) {
+    console.error(e);
+    showKolmioToast(e.message);
+    if (loadEl) loadEl.classList.remove('show');
+  }
+}
+
+async function kolmioUploadImage(canvas) {
+  const blob    = await new Promise(r => canvas.toBlob(r, 'image/png'));
+  const orderId = 'KOL-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+  const form    = new FormData();
+  form.append('image', blob, `kolmio-${orderId}.png`);
+  form.append('orderId', orderId);
+  const res  = await fetch(KOLMIO_WORKER_URL, { method: 'POST', body: form });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return { orderId, imageUrl: data.url || data.imageUrl };
+}
+
+function showKolmioConfirmModal(result) {
+  const modal = document.getElementById('kolmio-confirm-modal');
+  if (!modal) return;
+  const img = document.getElementById('kolmio-modal-image');
+  if (img) img.src = result.imageUrl;
+
+  const kokuin = window.KOLMIO_KOKUIN_STATE;
+  const kokuinRow = kokuin?.enabled
+    ? `<div class="modal-color-row"><span class="modal-zone-label">名入れ刻印</span><span>「${kokuin.text}」（${kokuin.fontLabel}）</span></div>`
+    : '';
+  const lengthRow = `<div class="modal-color-row"><span class="modal-zone-label">長さ</span><span>鱗${kolmioScaleCount}個（全長約${Math.round(kolmioTotalLengthMm(kolmioScaleCount))}mm）</span></div>`;
+
+  const info = document.getElementById('kolmio-modal-info');
+  if (info) info.innerHTML = `
+    <p><strong>注文ID:</strong> ${result.orderId}</p>
+    <div class="modal-color-list">
+      ${kolmioBlocks.map((b, i) => {
+        const from = i === 0 ? 1 : kolmioBlocks[i - 1].through + 1;
+        const rangeLabel = kolmioBlocks.length === 1 ? '全体' : `${from}〜${b.through}個目`;
+        return `
+        <div class="modal-color-row">
+          <span class="modal-zone-label">色${i + 1}（${rangeLabel}）</span>
+          <span class="modal-color-dot" style="background:${b.hex}"></span>
+          <span>${kolmioColorName(b.hex)}</span>
+        </div>`;
+      }).join('')}
+      ${lengthRow}
+      ${kokuinRow}
+    </div>`;
+  modal.classList.add('show');
+}
+
+function closeKolmioModal() {
+  const modal = document.getElementById('kolmio-confirm-modal');
+  if (modal) modal.classList.remove('show');
+}
+
+async function kolmioProceedToCart() {
+  if (!kolmioLastUploadedImage) { showKolmioToast('画像情報が見つかりません'); return; }
+  closeKolmioModal();
+
+  const colorDataEN = kolmioBlocks.map((b, i) => {
+    const from = i === 0 ? 1 : kolmioBlocks[i - 1].through + 1;
+    const rangeLabel = kolmioBlocks.length === 1 ? 'all' : `${from}-${b.through}`;
+    return `Color${i + 1}(${rangeLabel}):${kolmioColorName(b.hex)}`;
+  }).join(', ');
+
+  const kokuin = window.KOLMIO_KOKUIN_STATE;
+  const kokuinEnabled = !!kokuin?.enabled;
+  const variantSet = KOLMIO_SCALE_VARIANTS[kolmioScaleCount];
+  const variantId = variantSet?.[kokuinEnabled ? 'eng' : 'noeng'];
+  if (!variantId) { showKolmioToast('バリエーションが見つかりません'); return; }
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = `https://${KOLMIO_SHOPIFY_DOMAIN}/cart/add`;
+  form.style.display = 'none';
+
+  [['id', variantId], ['quantity', '1']].forEach(([k, v]) => {
+    const i = document.createElement('input');
+    i.type = 'hidden'; i.name = k; i.value = v; form.appendChild(i);
+  });
+  const properties = {
+    'Order ID': kolmioLastUploadedImage.orderId,
+    'Colors': colorDataEN,
+    '長さ': `鱗${kolmioScaleCount}個（全長約${Math.round(kolmioTotalLengthMm(kolmioScaleCount))}mm）`,
+    'Image URL': kolmioLastUploadedImage.imageUrl,
+  };
+  if (kokuinEnabled) {
+    properties['刻印文字'] = kokuin.text;
+    properties['刻印フォント'] = kokuin.fontLabel;
+  }
+  Object.entries(properties).forEach(([k, v]) => {
+    const i = document.createElement('input');
+    i.type = 'hidden'; i.name = `properties[${k}]`; i.value = v; form.appendChild(i);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
 }
 
 // ============================================================================

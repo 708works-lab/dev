@@ -142,15 +142,6 @@
   font-size: 11px; color: #333; font-weight: 500; margin-bottom: 4px; display: block;
 }
 
-/* ━━━ 厚み選択 ━━━ */
-.kolmio-simulator .thick-box {
-  background: #fff; border-radius: 7px; padding: 7px;
-  display: flex; align-items: center; gap: 6px;
-}
-.kolmio-simulator .thick-box label {
-  font-size: 11px; color: #444; display: flex; align-items: center; gap: 6px; cursor: pointer;
-}
-
 /* ━━━ サマリー ━━━ */
 .kolmio-simulator .sum-box {
   background: #fff; border-radius: 7px; padding: 7px;
@@ -209,6 +200,56 @@
   border: none; border-radius: 7px; font-size: 11px; font-weight: 600;
   cursor: pointer; text-align: center;
 }
+
+/* ━━━ モーダル ━━━ */
+.kolmio-simulator .modal {
+  display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,.6); z-index: 9999; justify-content: center; align-items: center;
+}
+.kolmio-simulator .modal.show { display: flex; }
+.kolmio-simulator .modal-content {
+  background: #fff; border-radius: 12px; width: 90%; max-width: 380px;
+  max-height: 90vh; overflow-y: auto; padding: 20px;
+}
+.kolmio-simulator .modal-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+}
+.kolmio-simulator .modal-header h2 { font-size: 14px; font-weight: 600; margin: 0; }
+.kolmio-simulator .modal-close {
+  background: none; border: none; font-size: 20px; cursor: pointer; color: #888;
+}
+.kolmio-simulator .modal-image { width: 60%; display: block; margin: 0 auto 12px; border-radius: 6px; }
+.kolmio-simulator .modal-info  { font-size: 12px; color: #444; margin-bottom: 12px; }
+.kolmio-simulator .modal-color-list { margin: 6px 0; }
+.kolmio-simulator .modal-color-row {
+  display: flex; align-items: center; gap: 7px; padding: 3px 0; font-size: 11px;
+}
+.kolmio-simulator .modal-zone-label { color: #888; min-width: 90px; font-size: 10px; }
+.kolmio-simulator .modal-color-dot {
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.12); flex-shrink: 0;
+}
+.kolmio-simulator .modal-buttons { display: flex; gap: 7px; }
+.kolmio-simulator .modal-btn {
+  flex: 1; padding: 10px; border-radius: 7px; font-size: 12px; cursor: pointer; border: none;
+}
+.kolmio-simulator .modal-btn-secondary { background: #f0f0f0; color: #555; }
+.kolmio-simulator .modal-btn-primary   { background: #111; color: #fff; font-weight: 600; }
+
+/* ━━━ ローディング ━━━ */
+.kolmio-simulator .loading-overlay {
+  display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,.5); z-index: 9999; justify-content: center; align-items: center;
+}
+.kolmio-simulator .loading-overlay.show { display: flex; }
+.kolmio-simulator .loading-content {
+  background: #fff; border-radius: 12px; padding: 24px 32px; text-align: center;
+}
+.kolmio-simulator .loading-spinner {
+  width: 32px; height: 32px; border: 3px solid #eee; border-top-color: #333;
+  border-radius: 50%; animation: kspin .8s linear infinite; margin: 0 auto 10px;
+}
+@keyframes kspin { to { transform: rotate(360deg); } }
 
 /* ━━━ Toast ━━━ */
 .kolmio-simulator .toast {
