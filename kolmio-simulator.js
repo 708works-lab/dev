@@ -15,7 +15,7 @@ const KOLMIO_SCALE_DEFAULT = 14; // ウクレレ用の標準に合わせる。�
 const KOLMIO_BASE_PRICE     = 21560;
 const KOLMIO_STANDARD_COUNT = 14;
 const KOLMIO_PER_SCALE_ADD  = 1540;
-const KOLMIO_THICK_ADD      = 3000; // 暫定額（要確認）
+const KOLMIO_THICK_ADD      = 1100;
 
 function kolmioPriceForCount(n) {
   return KOLMIO_BASE_PRICE + (n - KOLMIO_STANDARD_COUNT) * KOLMIO_PER_SCALE_ADD;
@@ -109,7 +109,7 @@ for (let p = 1; p <= 22; p++) kPieceColors[p] = '#c46030';
 let kSelected = new Set(); // 選択中のピース番号
 let kMode = 'single', kRangeStartIdx = null; // range用は表示順インデックスで管理
 let kActiveColor = KOLMIO_COLORS[12]; // Camel
-let kThick = false; // ギター向け厚革仕様（+¥3,000）
+let kThick = false; // ギター向け厚革仕様（+¥1,100）
 let kHistory = [];
 let kLastUploadedImage = null;
 let kHasDownloadedImage = false;
