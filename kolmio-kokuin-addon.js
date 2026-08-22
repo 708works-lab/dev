@@ -21,9 +21,9 @@
   const ANCHOR = { x: 578.825, y: 360.69 };
   const ANGLE_DEG = -60.12;
   const BASE_FONT_SIZE = 22;
-  // サンプル刻印「ABCDEFG」(7文字)の実測直線距離が約85前後だったため、
-  // それを安全上限として採用する（180は実測に基づかない過大な仮値だったため修正）
-  const MAX_TEXT_WIDTH = 90;
+  // サンプル刻印「ABCDEFG」(7文字)の実測直線距離は約85前後だったが、それをそのまま
+  // 上限にすると輪郭ギリギリになるため、パーツ端との余白を確保できるよう縮小している
+  const MAX_TEXT_WIDTH = 68;
   const MIN_FONT_SIZE = 14;       // 1行のまま縮小できる下限。これより縮小が必要なら2段組みに切り替える
   const HARD_FLOOR_FONT_SIZE = 8; // 2段組みでも収まらない場合の最終フォールバック
   const LINE_GAP_RATIO = 1.15;    // 2段組み時の行間（フォントサイズに対する比率）
