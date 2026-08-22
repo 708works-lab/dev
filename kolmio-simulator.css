@@ -62,6 +62,10 @@
   align-items: center;
   flex-shrink: 0;
   width: 130px;
+  /* .top-areaのalign-items:stretchでctrl-colの高さに強制されると、末端パーツが
+     見切れて選択不能になる（overflow:autoな子はflexの自動最小サイズが0になるため）。
+     常に中身の全高をそのまま表示できるよう、stretchの対象から外す。 */
+  align-self: flex-start;
 }
 
 .kolmio-simulator .dir-tag {

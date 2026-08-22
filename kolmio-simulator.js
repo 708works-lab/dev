@@ -8,7 +8,7 @@ const KOLMIO_SHOPIFY_DOMAIN = '708works.jp';
 // ウロコの数レンジ：ウクレレの短めサイズ〜ギター用の長いサイズまでを1シミュレーターでカバー
 const KOLMIO_SCALE_MIN = 10;
 const KOLMIO_SCALE_MAX = 22;
-const KOLMIO_SCALE_DEFAULT = 20;
+const KOLMIO_SCALE_DEFAULT = 14; // ウクレレ用の標準に合わせる。ここから+/-で調整してもらう想定
 
 // 価格（標準=ウロコ14個・薄革のkolmio for ukuleleをベースに、ウロコ1個あたり既存Shopifyオプションの
 // 実績値+¥1,540を適用。厚革仕様(ギター向け)・名入れ刻印は別建てのアップチャージ）
