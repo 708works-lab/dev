@@ -233,22 +233,12 @@ function buildKolmioStrapSVG() {
   // 同じ表示幅では全長が入りきらない。.strap-scrollのmax-height(CSS側)による
   // 内部スクロールと組み合わせ、タップしやすい幅を優先して設定する。
   const dispW = 30;
-  const scale = dispW / KOLMIO_SVG_VW;
-
-  // viewBoxは末端(22番のパーツを現在のNのスロット位置までtranslateした後の実位置)から
-  // 前端(1番、常に固定位置)までをタイトに囲む。translate前の22番の元位置を使うと
-  // 空白がクロップに含まれてしまうため、必ずKOLMIO_PIECE_Y[kN]を使うこと。
-  const vbTop = KOLMIO_PIECE_Y[kN] - 5;
-  const yFront = KOLMIO_PIECE_Y[1];
-  const vbBottom = yFront + 90; // 前端パーツの下端余白
-  const vbH = vbBottom - vbTop;
-  const dispH = Math.round(vbH * scale);
 
   col.style.width = (dispW + 30) + 'px';
 
+  // 暫定viewBox（後でgetBBoxの実測値に置き換える）でいったん描画する
   scroll.innerHTML = `<svg id="kolmio-strap-svg"
-    viewBox="0 ${vbTop.toFixed(1)} ${KOLMIO_SVG_VW} ${vbH.toFixed(1)}"
-    width="${dispW}" height="${dispH}"
+    viewBox="0 0 ${KOLMIO_SVG_VW} 1800"
     style="display:block;margin:0 auto;cursor:pointer;touch-action:none;flex-shrink:0;"
     xmlns="http://www.w3.org/2000/svg">${KOLMIO_SVG_INNER}</svg>`;
 
@@ -268,6 +258,18 @@ function buildKolmioStrapSVG() {
     rear.setAttribute('transform', `translate(0, ${dy.toFixed(3)})`);
     rear.style.display = '';
   }
+
+  // 表示/非表示・translateを確定させた後、実際の描画範囲をgetBBoxで測ってviewBoxを
+  // タイトに合わせる。手計算の余白だと末端パーツ自体の実形状（穴の分の張り出し等）を
+  // 見誤って上端が切れることがあるため、必ず実測値を使う。
+  const pad = 4;
+  const bbox = svg.getBBox();
+  const vbX = bbox.x - pad, vbY = bbox.y - pad, vbW = bbox.width + pad * 2, vbH = bbox.height + pad * 2;
+  const scale = dispW / vbW;
+  const dispH = Math.round(vbH * scale);
+  svg.setAttribute('viewBox', `${vbX.toFixed(1)} ${vbY.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}`);
+  svg.setAttribute('width', dispW);
+  svg.setAttribute('height', dispH);
 
   // タップ/クリックイベント（表示順インデックスで扱う。範囲選択の連続性を表示順で担保するため）
   order.forEach((pieceNum, idx) => {
@@ -510,11 +512,14 @@ async function buildKolmioSaveCanvas() {
   const cv = document.createElement('canvas');
   const cw = 600;
   const svgSaveW = 56;
-  const scale = svgSaveW / KOLMIO_SVG_VW;
-
-  const vbTop = KOLMIO_PIECE_Y[kN] - 5;
-  const vbBottom = KOLMIO_PIECE_Y[1] + 90;
-  const vbH = vbBottom - vbTop;
+  // ライブのプレビューSVG（buildKolmioStrapSVGでgetBBoxにより実測済みのviewBoxを持つ）から
+  // そのままアスペクト比を引き継ぐ。ここで独自に余白を仮定し直すと、末端パーツの実形状に
+  // よっては上端が切れるおそれがあるため、必ず実測済みのviewBoxを使うこと。
+  const liveSvg = document.getElementById('kolmio-strap-svg');
+  const liveVb = liveSvg?.getAttribute('viewBox')?.split(' ').map(Number);
+  const vbW = liveVb ? liveVb[2] : KOLMIO_SVG_VW;
+  const vbH = liveVb ? liveVb[3] : 1700;
+  const scale = svgSaveW / vbW;
   const svgSaveH = Math.round(vbH * scale);
 
   const kokuin = window.KOLMIO_KOKUIN_STATE;

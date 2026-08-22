@@ -1,6 +1,7 @@
 /* Kolmio 名入れ刻印アドオン（有料オプション） */
 .kolmio-simulator .kokuin-toggle-area {
   width: 100%;
+  margin-top: 8px;
 }
 .kolmio-simulator .kokuin-toggle {
   display: flex; align-items: center; gap: 8px;
