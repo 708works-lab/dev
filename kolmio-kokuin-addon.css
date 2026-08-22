@@ -16,6 +16,14 @@
   color: #888; font-weight: 400;
 }
 
+/* ギターストラップ仕様トグルの直下に続く注意書き。チェックボックスと同じ白箱の
+   下半分として見えるよう、背景・角丸をトグル側と連続させる（別枠に見せない）。 */
+.kolmio-simulator .thick-caveat {
+  background: #fff; border-radius: 0 0 7px 7px;
+  padding: 0 12px 10px 36px;
+  font-size: 10px; color: #888; line-height: 1.6;
+}
+
 .kolmio-simulator .kokuin-section {
   width: 100%; margin: 6px 0 0;
 }
