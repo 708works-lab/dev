@@ -444,9 +444,10 @@ function wlRedrawSVG() {
     g.style.stroke = isSel ? '#ffd700' : '#000';
     g.style.strokeWidth = isSel ? '3.5' : '0.5';
   });
-  // ロゴ刻印は先端(1番=front)パーツに乗るため、frontの色のコントラストで自動計算
+  // ロゴ刻印はfront(1番)ではなくpiece3番の上に乗る（実測bboxで確認済み）ため、
+  // 3番パーツの色に対してコントラストが出る色を自動計算する
   const logo = svg.querySelector('#' + CSS.escape(branch.logoDomId));
-  if (logo) logo.style.fill = wlEngravingColor(st.colors[1]);
+  if (logo) logo.style.fill = wlEngravingColor(st.colors[3]);
 
   if (typeof applyWlKokuinColors === 'function') applyWlKokuinColors();
 }

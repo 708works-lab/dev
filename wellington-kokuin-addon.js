@@ -28,7 +28,11 @@
   // kokuin SVGは横長(719x479.53)でパーツがより大きく写っているため、文字の許容幅もその分広い。
   // 初期値は控えめに見積り、ローカル検証で輪郭内に収まるよう調整すること。
   const MAX_TEXT_WIDTH = 70;
-  const MIN_FONT_SIZE = 18;
+  // 1行表示を試みる際のフォントサイズ下限。18だと「708works」(8文字)のような短めの文字列でも
+  // 幅70に収まらず2段組みに落ちてしまっていたため、実測（Cabin Sketch 700での幅測定）に基づき
+  // 14まで下げた。2段組み時のHARD_FLOOR_FONT_SIZE(10)より高いので、本当に長い文字列（12〜15文字）
+  // は引き続き2段組みにフォールバックする。
+  const MIN_FONT_SIZE = 14;
   const HARD_FLOOR_FONT_SIZE = 10;
   const LINE_GAP_RATIO = 1.15;
 
@@ -164,9 +168,10 @@
   }
 
   function kokuinFillColor() {
-    // レーザー刻印は革の色に関わらず視認できるため、先端パーツ（色1）に対して
+    // 刻印テキストのANCHOR位置は実測bboxでpiece3番の上に乗ることを確認済み（front=1番ではない）。
+    // レーザー刻印は革の色に関わらず視認できるため、実際に乗っているpiece3番の色に対して
     // コントラストが出る色を使う
-    const baseHex = (typeof wlCurState === 'function') ? wlCurState().colors[1] : null;
+    const baseHex = (typeof wlCurState === 'function') ? wlCurState().colors[3] : null;
     return (baseHex && typeof wlEngravingColor === 'function') ? wlEngravingColor(baseHex) : '#2a1710';
   }
 
