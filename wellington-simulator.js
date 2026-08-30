@@ -70,15 +70,15 @@ function wlLengthCmForCount(branchKey, n) {
 // ウクレレ用のみ購入可能。ギター用は価格未定のため現時点でバリエーションを持たない。
 // create-wellington-color-order-template.mjs 実行後、実際のIDに置き換えること（現在は仮のnull）。
 const WL_VARIANT_MAP = {
-  16: { noeng: null, eng: null },
-  17: { noeng: null, eng: null },
-  18: { noeng: null, eng: null },
-  19: { noeng: null, eng: null },
-  20: { noeng: null, eng: null },
-  21: { noeng: null, eng: null },
-  22: { noeng: null, eng: null },
-  23: { noeng: null, eng: null },
-  24: { noeng: null, eng: null },
+  16: { noeng: 50199763583226, eng: 50199763615994 },
+  17: { noeng: 50199763648762, eng: 50199763681530 },
+  18: { noeng: 50199763714298, eng: 50199763747066 },
+  19: { noeng: 50199763779834, eng: 50199763812602 },
+  20: { noeng: 50199763845370, eng: 50199763878138 },
+  21: { noeng: 50199763910906, eng: 50199763943674 },
+  22: { noeng: 50199763976442, eng: 50199764009210 },
+  23: { noeng: 50199764041978, eng: 50199764074746 },
+  24: { noeng: 50199764107514, eng: 50199764140282 },
 };
 
 const WL_KOKUIN_PRICE_ADD = 1100; // 他ライン（Folklore/Kolmio/Triad/Duet/Courier）と同額を仮採用（要確認）
