@@ -24,15 +24,16 @@
   const ANCHOR = { x: 302.63, y: 192.63 };
   const ANGLE_DEG = -59.06;
   const BASE_FONT_SIZE = 30;
-  // Kolmioは719x479のうち片側だけ大きく使う縦長クローズアップだったのに対し、Wellingtonの
-  // kokuin SVGは横長(719x479.53)でパーツがより大きく写っているため、文字の許容幅もその分広い。
-  // 初期値は控えめに見積り、ローカル検証で輪郭内に収まるよう調整すること。
-  const MAX_TEXT_WIDTH = 70;
-  // 1行表示を試みる際のフォントサイズ下限。18だと「708works」(8文字)のような短めの文字列でも
-  // 幅70に収まらず2段組みに落ちてしまっていたため、実測（Cabin Sketch 700での幅測定）に基づき
-  // 14まで下げた。2段組み時のHARD_FLOOR_FONT_SIZE(10)より高いので、本当に長い文字列（12〜15文字）
-  // は引き続き2段組みにフォールバックする。
-  const MIN_FONT_SIZE = 14;
+  // 固定の幅の箱(旧MAX_TEXT_WIDTH)で判定すると、実際のパーツ輪郭（先端に向かって
+  // すぼまる形状）に対して安全マージンを大きく取りすぎたり、逆に輪郭スレスレになったり
+  // していた。piece3番の実際の輪郭に対してisPointInFillで幾何学的に内包判定するよう
+  // 変更し、輪郭からOUTLINE_MARGIN分は必ず離れるようにする（詳細はfitToOutline参照）。
+  const OUTLINE_MARGIN = 6; // SVG単位。輪郭からの安全マージン
+  // 1行表示を試みる際のフォントサイズ下限。実測（Cabin Sketch 700、輪郭内包判定）では
+  // MAX_LEN=15の英大文字でも13で1行に収まったため、12まで下げれば「10文字程度まで1行」
+  // という要件を余裕を持って満たせる。これを下回る場合のみ2段組みにフォールバックする
+  // （全角相当に幅広い文字が15文字続くような極端な入力のみ該当する想定）。
+  const MIN_FONT_SIZE = 12;
   const HARD_FLOOR_FONT_SIZE = 10;
   const LINE_GAP_RATIO = 1.15;
 
@@ -187,18 +188,41 @@
     return el;
   }
 
-  // el（SVGに追加済み）の文字列をmaxWidth以内に収まるまでfloorSizeを下限として縮小する
-  function fitKokuinFontSize(el, text, maxWidth, startSize, floorSize) {
-    el.textContent = text;
-    let size = startSize;
-    el.setAttribute('font-size', size);
-    let width = el.getBBox().width;
-    while (width > maxWidth && size > floorSize) {
-      size -= 1;
-      el.setAttribute('font-size', size);
-      width = el.getBBox().width;
+  // (x,y)を中心(cx,cy)まわりにdeg度回転させる
+  function rotatePoint(x, y, cx, cy, deg) {
+    const rad = deg * Math.PI / 180;
+    const cos = Math.cos(rad), sin = Math.sin(rad);
+    const dx = x - cx, dy = y - cy;
+    return { x: cx + dx * cos - dy * sin, y: cy + dx * sin + dy * cos };
+  }
+
+  // 幅w・高さhのテキスト外周（OUTLINE_MARGIN込み）を中心(cx,cy)・角度ANGLE_DEGで配置した際、
+  // 全周がpieceEl（piece3番）の輪郭内に収まるかを判定する。輪郭は先端に向かってすぼまる形状
+  // のため、四隅だけでなく上下辺を5分割してサンプリングし、途中でのはみ出しも検出する。
+  function textFitsInPiece(pieceEl, w, h, cx, cy) {
+    const hw = w / 2 + OUTLINE_MARGIN, hh = h / 2 + OUTLINE_MARGIN;
+    const localPts = [];
+    for (let t = -1; t <= 1.001; t += 0.5) {
+      localPts.push([t * hw, -hh]);
+      localPts.push([t * hw, hh]);
     }
-    return { size, width };
+    localPts.push([-hw, 0], [hw, 0]);
+    return localPts.every(([lx, ly]) => {
+      const p = rotatePoint(cx + lx, cy + ly, ANCHOR.x, ANCHOR.y, ANGLE_DEG);
+      return pieceEl.isPointInFill(new DOMPoint(p.x, p.y));
+    });
+  }
+
+  // el（SVGに追加済み）の文字列について、中心(cx,cy)に置いたときpieceElの輪郭内
+  // （マージン込み）に収まる最大フォントサイズをfloorSizeを下限として探す。見つからなければnull。
+  function fitKokuinFontSize(el, text, pieceEl, cx, cy, startSize, floorSize) {
+    el.textContent = text;
+    for (let size = startSize; size >= floorSize; size--) {
+      el.setAttribute('font-size', size);
+      const b = el.getBBox();
+      if (textFitsInPiece(pieceEl, b.width, b.height, cx, cy)) return size;
+    }
+    return null;
   }
 
   // 中央付近のスペースで分割。スペースがなければ文字数で半分に分割する
@@ -227,20 +251,29 @@
     if (!text) return;
 
     const font = currentFont();
+    const svg = kokuinShadowRoot.querySelector('svg');
+    const pieceEl = svg && svg.querySelector('#' + CSS.escape(KOKUIN_PIECE_IDS[3]));
+    if (!pieceEl) return;
 
-    // まず1行での配置を試みる（MIN_FONT_SIZEまで縮小して収まればそのまま採用）
+    // まず1行での配置を試みる。piece3番の実際の輪郭に対する幾何学的な内包判定
+    // （textFitsInPiece）で、マージンOUTLINE_MARGIN込みで収まる最大サイズを探す。
+    // 固定幅の箱で近似していた旧実装よりずっと正確で、MAX_LEN=15の英大文字でも
+    // 通常は1行に収まることを実測済み。
     const line1 = makeKokuinTextEl(font);
     group.appendChild(line1);
-    const singleFit = fitKokuinFontSize(line1, text, MAX_TEXT_WIDTH, BASE_FONT_SIZE, MIN_FONT_SIZE);
+    const singleSize = fitKokuinFontSize(line1, text, pieceEl, ANCHOR.x, ANCHOR.y, BASE_FONT_SIZE, MIN_FONT_SIZE);
 
-    if (singleFit.width <= MAX_TEXT_WIDTH) {
+    if (singleSize != null) {
+      line1.setAttribute('font-size', singleSize);
       line1.setAttribute('x', ANCHOR.x);
       line1.setAttribute('y', ANCHOR.y);
       line1.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
       return;
     }
 
-    // 1行では収まらないため2段組みに切り替える
+    // 1行では収まらない極端な入力（幅広い文字が15文字近く続く等）のみ2段組みにフォールバック。
+    // 各行の中心Y位置（ANCHOR.y ± gap/2）ごとに輪郭内包判定を行うため、上下で余白が
+    // 異なる先端付近の形状でも、両方が実際に輪郭内へ収まるサイズだけを採用する。
     group.innerHTML = '';
     const [textA, textB] = splitKokuinInHalf(text);
     const lineA = makeKokuinTextEl(font);
@@ -248,9 +281,16 @@
     group.appendChild(lineA);
     group.appendChild(lineB);
 
-    const fitA = fitKokuinFontSize(lineA, textA, MAX_TEXT_WIDTH, BASE_FONT_SIZE, HARD_FLOOR_FONT_SIZE);
-    const fitB = fitKokuinFontSize(lineB, textB, MAX_TEXT_WIDTH, BASE_FONT_SIZE, HARD_FLOOR_FONT_SIZE);
-    const sharedSize = Math.min(fitA.size, fitB.size);
+    let sharedSize = HARD_FLOOR_FONT_SIZE;
+    for (let size = MIN_FONT_SIZE; size >= HARD_FLOOR_FONT_SIZE; size--) {
+      const gap = size * LINE_GAP_RATIO;
+      lineA.setAttribute('font-size', size); lineA.textContent = textA;
+      lineB.setAttribute('font-size', size); lineB.textContent = textB;
+      const ba = lineA.getBBox(), bb = lineB.getBBox();
+      const okA = textFitsInPiece(pieceEl, ba.width, ba.height, ANCHOR.x, ANCHOR.y - gap / 2);
+      const okB = textFitsInPiece(pieceEl, bb.width, bb.height, ANCHOR.x, ANCHOR.y + gap / 2);
+      if (okA && okB) { sharedSize = size; break; }
+    }
     lineA.setAttribute('font-size', sharedSize);
     lineB.setAttribute('font-size', sharedSize);
 
