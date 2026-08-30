@@ -27,6 +27,7 @@ const WL_BRANCHES = {
     frontY: 1194.81,     // front(1番)の実測Y（常に固定・不動）
     nativeRearY: 68.53,  // rear(18番)の実測Y（N=18のときの本来位置。translateの基準点）
     pitch: 66.5,         // 隣接パーツ間の実測ピッチ（2〜17番で一貫）
+    nativeWidth: 58.01,  // getBBox実測のストラップ幅（SVG単位）。ukuleleとの比率で実サイズ差を表示に反映する
     min: 14, max: 22, standard: 18,
     // ギター用は未商品化のため価格・全長情報はすべてTBD（ユーザーから提供され次第埋める）
     purchasable: false,
@@ -46,6 +47,7 @@ const WL_BRANCHES = {
     frontY: 1063.52,
     nativeRearY: 189.68,
     pitch: 51.6,
+    nativeWidth: 45.03,  // ギター用の58.01に対し約77.6%。ギターの方が一回り大きい実サイズ差
     min: 16, max: 24, standard: 20,
     // 確定値：現行Wellington for ukulele商品ページ（¥21,560・標準20枚）と
     // 既存の長さ調整オプション（ウロコ1つ追加=+約4cm/+¥1,078）の実績値をそのまま採用
@@ -53,6 +55,12 @@ const WL_BRANCHES = {
     basePrice: 21560, perPiecePrice: 1078, perPieceCm: 4, baseLengthCm: 97,
   },
 };
+
+// 両ブランチで共通の縮尺（SVG単位→px）。ukulele幅(45.03)が従来のdispW=30pxになる比率を基準にする。
+// ブランチごとにscaleを再計算して表示幅を揃えてしまうと、ギター/ウクレレの実サイズ差
+// （幅・全長とも約1.29倍、guitar.nativeWidth/ukulele.nativeWidth）が見た目上消えてしまうため、
+// 固定スケールを両ブランチに適用して実寸差がそのまま伝わるようにする。
+const WL_PX_PER_UNIT = 30 / WL_BRANCHES.ukulele.nativeWidth;
 
 function wlPriceForCount(branchKey, n) {
   const b = WL_BRANCHES[branchKey];
@@ -311,7 +319,7 @@ function buildWlStrapSVG() {
   const n = st.n;
   const order = wlDisplayOrder(wlActiveBranch, n);
 
-  const dispW = 30;
+  const dispW = branch.nativeWidth * WL_PX_PER_UNIT; // ブランチ実寸に比例した表示幅（ギターの方が広く見える）
   col.style.width = (dispW + 30) + 'px';
 
   // 暫定viewBox（getBBoxの実測値で後から置き換える）
@@ -343,6 +351,7 @@ function buildWlStrapSVG() {
   // 物理17番を超える分はクローン合成（2番パーツの形状を複製してtranslateで配置）
   const cloneSource = svg.querySelector('#' + CSS.escape(branch.middleDomIds[2]));
   const rearEl = svg.querySelector('#' + CSS.escape(branch.rearDomId));
+  const clonesById = {};
   if (cloneSource && activeGroup) {
     for (let id = 18; id <= middlesNeeded + 1; id++) {
       const targetY = wlPieceY(branch, id, n);
@@ -352,8 +361,7 @@ function buildWlStrapSVG() {
       clone.removeAttribute('id');
       clone.setAttribute('data-wl-clone', id);
       clone.setAttribute('transform', `translate(0, ${ty.toFixed(3)})`);
-      if (rearEl && rearEl.parentNode === activeGroup) activeGroup.insertBefore(clone, rearEl);
-      else activeGroup.appendChild(clone);
+      clonesById[id] = clone;
     }
   }
 
@@ -365,16 +373,42 @@ function buildWlStrapSVG() {
     rearEl.style.display = '';
   }
 
+  // 重なり順（DOM順=描画順）を、元のSVGの重なり順（末端rearが最背面、先端frontが最前面、
+  // 各パーツが手前のパーツにわずかに隠れる「ウロコ」の向き）に一致させる。
+  // クローンパーツを末端(rear)の直前に挿入すると、rearより手前（＝上のレイヤー）に
+  // 来てしまい「追加したパーツが前面に出る」不具合になるため、order配列の並び
+  // （rear→大きい番号のクローン→…→18→物理17→…→2→front）通りに全パーツを
+  // appendChildし直してDOM順を再構築する。
+  if (activeGroup) {
+    order.forEach(logicalId => {
+      let el;
+      if (logicalId === 0) el = rearEl;
+      else if (logicalId === 1) el = svg.querySelector('#' + CSS.escape(branch.frontDomId));
+      else if (logicalId <= 17) el = svg.querySelector('#' + CSS.escape(branch.middleDomIds[logicalId]));
+      else el = clonesById[logicalId];
+      if (el) activeGroup.appendChild(el);
+    });
+    // logoは元のSVGの重なり順（物理3番の直後・2番の直前）に戻す
+    const logoEl = svg.querySelector('#' + CSS.escape(branch.logoDomId));
+    const piece2El = svg.querySelector('#' + CSS.escape(branch.middleDomIds[2]));
+    if (logoEl && piece2El) activeGroup.insertBefore(logoEl, piece2El);
+  }
+
   // 表示/非表示・translate確定後、getBBoxの実測値でviewBoxをタイトに合わせる
   // （手計算の余白だと末端パーツの実形状を見誤って見切れることがあるため必ず実測する）
+  // スケールはブランチ間で共通のWL_PX_PER_UNIT固定値を使うこと。dispW/vbWのように
+  // 都度正規化すると、ギター/ウクレレの実サイズ差（幅・全長とも約1.29倍）が
+  // 表示上は常に同じ大きさに揃ってしまい、実物のサイズ差が伝わらなくなる。
   const pad = 4;
   const bbox = svg.getBBox();
   const vbX = bbox.x - pad, vbY = bbox.y - pad, vbW = bbox.width + pad * 2, vbH = bbox.height + pad * 2;
-  const scale = dispW / vbW;
+  const scale = WL_PX_PER_UNIT;
+  const dispWpx = Math.round(vbW * scale);
   const dispH = Math.round(vbH * scale);
   svg.setAttribute('viewBox', `${vbX.toFixed(1)} ${vbY.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}`);
-  svg.setAttribute('width', dispW);
+  svg.setAttribute('width', dispWpx);
   svg.setAttribute('height', dispH);
+  col.style.width = (dispWpx + 30) + 'px';
 
   // タップ/クリックイベント（表示順インデックスで扱う）
   order.forEach((logicalId, idx) => {
@@ -634,13 +668,15 @@ async function wlSaveImage() {
 async function buildWlSaveCanvas() {
   const cv = document.createElement('canvas');
   const cw = 600;
-  const svgSaveW = 56;
   const liveSvg = document.getElementById('wl-strap-svg');
   const liveVb = liveSvg?.getAttribute('viewBox')?.split(' ').map(Number);
   const vbW = liveVb ? liveVb[2] : 46;
   const vbH = liveVb ? liveVb[3] : 1700;
-  const scale = svgSaveW / vbW;
-  const svgSaveH = Math.round(vbH * scale);
+  // 表示側と同じ固定スケールを使い、保存画像でもギター/ウクレレの実サイズ差を再現する
+  // （56 / ukulele.nativeWidth を基準比率とし、vbW/vbHはブランチ実測値に比例して伸縮する）
+  const saveScale = 56 / WL_BRANCHES.ukulele.nativeWidth;
+  const svgSaveW = Math.round(vbW * saveScale);
+  const svgSaveH = Math.round(vbH * saveScale);
 
   const branch = wlBranch();
   const st = wlCurState();
