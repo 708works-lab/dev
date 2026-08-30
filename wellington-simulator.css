@@ -1,0 +1,375 @@
+/* WELLINGTON Simulator - Scoped CSS (Kolmio(kolmio-simulator.css)を土台に移植) */
+.wellington-simulator {
+  background: #f0ede8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  padding: 20px 0;
+}
+
+.wellington-simulator * {
+  box-sizing: border-box;
+}
+
+.wellington-simulator header {
+  width: 100%;
+  background: #111;
+  color: #fff;
+  text-align: center;
+  padding: 10px 16px 7px;
+  margin: 0;
+}
+
+.wellington-simulator header h1 {
+  font-size: 15px;
+  letter-spacing: .25em;
+  font-weight: 400;
+  margin: 0;
+}
+
+.wellington-simulator header p {
+  font-size: 11px;
+  color: #666;
+  letter-spacing: .15em;
+  margin-top: 1px;
+}
+
+.wellington-simulator .app {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+/* ブランチ（ギター/ウクレレ）選択：ページ上部の大きな2択 */
+.wellington-simulator .branch-select {
+  width: 100%;
+  padding: 10px 10px 0;
+  display: flex;
+  gap: 8px;
+}
+
+.wellington-simulator .branch-bt {
+  flex: 1;
+  padding: 14px 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  transition: all .12s;
+}
+
+.wellington-simulator .branch-bt .branch-bt-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.wellington-simulator .branch-bt .branch-bt-sub {
+  font-size: 10px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.wellington-simulator .branch-bt.on {
+  border-color: #111;
+  background: #111;
+}
+
+.wellington-simulator .branch-bt.on .branch-bt-title {
+  color: #fff;
+}
+
+.wellington-simulator .branch-bt.on .branch-bt-sub {
+  color: #bbb;
+}
+
+/* ギター用選択時の「近日公開」バナー */
+.wellington-simulator .coming-soon-banner {
+  width: 100%;
+  margin: 8px 10px 0;
+  padding: 10px 12px;
+  background: #fff3cd;
+  border: 1px solid #f0dca0;
+  border-radius: 10px;
+  font-size: 11.5px;
+  color: #856404;
+  line-height: 1.6;
+}
+
+.wellington-simulator .coming-soon-banner strong {
+  color: #6b5100;
+}
+
+.wellington-simulator .top-area {
+  display: flex;
+  flex-direction: row;
+  padding: 10px 10px 0;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.wellington-simulator .ctrl-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.wellington-simulator .strap-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 130px;
+  /* .top-areaのalign-items:stretchでctrl-colの高さに強制されると、末端パーツが
+     見切れて選択不能になる（overflow:autoな子はflexの自動最小サイズが0になるため）。 */
+  align-self: flex-start;
+}
+
+.wellington-simulator .dir-tag {
+  width: 100%;
+  text-align: center;
+  padding: 6px 4px;
+  border-radius: 8px;
+  background: #333;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.wellington-simulator .dir-tag small {
+  display: block;
+  font-size: 9px;
+  color: #aaa;
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+.wellington-simulator .strap-scroll {
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 0;
+}
+
+.wellington-simulator .strap-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.wellington-simulator .count-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 6px 8px;
+}
+
+.wellington-simulator .cnt-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 20px;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wellington-simulator .cnt-btn:active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.wellington-simulator .cnt-num {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111;
+  text-align: center;
+}
+
+.wellington-simulator .cnt-sub {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 2px;
+  text-align: center;
+}
+
+.wellington-simulator .sel-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+.wellington-simulator .box-label {
+  font-size: 11px;
+  color: #aaa;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.wellington-simulator .sel-info {
+  font-size: 13px;
+  color: #444;
+  line-height: 1.4;
+}
+
+.wellington-simulator .sel-info b {
+  color: #111;
+}
+
+.wellington-simulator .mode-row {
+  display: flex;
+  gap: 4px;
+}
+
+.wellington-simulator .mbt {
+  flex: 1;
+  padding: 9px 2px;
+  border: 1px solid #e0e0e0;
+  border-radius: 7px;
+  background: #fff;
+  font-size: 11px;
+  color: #888;
+  cursor: pointer;
+  transition: all .12s;
+}
+
+.wellington-simulator .mbt.on {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.wellington-simulator .pal-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.wellington-simulator .palette {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.wellington-simulator .cb-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px !important;
+  border-radius: 10px !important;
+  cursor: pointer !important;
+  min-width: 0 !important;
+}
+
+.wellington-simulator .cb-wrap:active {
+  background: #f0ede8;
+}
+
+.wellington-simulator .cb {
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0 !important;
+  border-radius: 50% !important;
+  border: 3px solid transparent !important;
+  pointer-events: none !important;
+  display: block !important;
+  box-sizing: border-box !important;
+}
+
+.wellington-simulator .cb.on {
+  border-color: #111 !important;
+  box-shadow: 0 0 0 2px #fff inset !important;
+}
+
+.wellington-simulator .color-name {
+  font-size: 12px !important;
+  color: #444 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  pointer-events: none !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+  display: block !important;
+}
+
+.wellington-simulator .color-name.on {
+  font-weight: 600 !important;
+  color: #111 !important;
+}
+
+@media (max-width:360px) {
+  .wellington-simulator .palette { grid-template-columns: repeat(4,1fr); gap: 6px; }
+  .wellington-simulator .cb-wrap { justify-content: center; gap: 0; padding: 6px 2px; }
+  .wellington-simulator .cb { width: 36px; height: 36px; }
+  .wellington-simulator .color-name { display: none; }
+}
+
+@media (min-width:361px) and (max-width:400px) {
+  .wellington-simulator .cb { width: 28px; height: 28px; }
+  .wellington-simulator .color-name { font-size: 10px; }
+  .wellington-simulator .cb-wrap { gap: 6px; padding: 5px 4px; }
+}
+
+.wellington-simulator .grad-box { background: #fff; border-radius: 12px; padding: 10px 12px; }
+.wellington-simulator .grad-note { font-size: 10px; color: #c0392b; margin-bottom: 7px; line-height: 1.5; }
+.wellington-simulator .grad-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.wellington-simulator .gb { padding: 7px 11px; border-radius: 10px; border: 1px solid #e0e0e0; background: #fff; font-size: 11px; cursor: pointer; color: #666; white-space: nowrap; }
+.wellington-simulator .gb:active { background: #111; color: #fff; }
+.wellington-simulator .sum-box { background: #fff; border-radius: 12px; padding: 10px 12px; }
+.wellington-simulator .summary { font-size: 11px; color: #666; line-height: 2; display: flex; flex-wrap: wrap; gap: 1px 8px; }
+.wellington-simulator .si { display: flex; align-items: center; gap: 4px; }
+.wellington-simulator .sw { width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0,0,0,.12); flex-shrink: 0; }
+.wellington-simulator .share-area { width: 100%; max-width: 520px; padding: 10px 10px 0; margin: 0 auto; }
+.wellington-simulator .sbtn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 11px; border: 1px solid #e0e0e0; background: #fff; cursor: pointer; font-size: 12px; color: #444; }
+.wellington-simulator .sbtn:active { background: #111; color: #fff; }
+/* [hidden]属性は本来UAスタイルでdisplay:noneになるが、同じ要素に対する自クラスの
+   display指定（.price-barのdisplay:flexなど）が詳細度で勝ってしまい、
+   JSでhidden=trueにしても表示されたままになる問題があったため明示的に上書きする。 */
+.wellington-simulator [hidden] { display: none !important; }
+
+.wellington-simulator .price-bar { width: 100%; max-width: 500px; margin: 8px auto 0; display: flex; align-items: baseline; justify-content: space-between; background: #fff; border-radius: 7px; padding: 7px 10px; }
+.wellington-simulator .price-bar-label { font-size: 10px; color: #888; letter-spacing: .08em; font-weight: 500; text-transform: uppercase; }
+.wellington-simulator .price-bar-value { font-size: 15px; color: #222; font-weight: 700; }
+.wellington-simulator .order-note { font-size: 10px; color: #999; text-align: center; margin: 6px 10px 0; line-height: 1.5; }
+.wellington-simulator #wl-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 11px; opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap; z-index: 9999; }
+.wellington-simulator #wl-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.wellington-simulator .bottom-bar { width: 100%; max-width: 520px; padding: 8px 10px 24px; display: flex; gap: 6px; margin: 10px auto 0; }
+.wellington-simulator .btn-reset { flex: 1; padding: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 13px; color: #666; cursor: pointer; }
+.wellington-simulator .btn-undo { flex: 1; padding: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 13px; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.wellington-simulator .btn-undo:disabled { opacity: .35; cursor: default; }
+.wellington-simulator .btn-order { flex: 2.5; padding: 14px; border: none; border-radius: 10px; background: #111; color: #fff; font-size: 13px; cursor: pointer; font-weight: 500; letter-spacing: .04em; }
+.wellington-simulator .btn-order:active { opacity: .7; }
+.wellington-simulator .btn-order:disabled { opacity: .5; cursor: not-allowed; }
+.wellington-simulator .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.wellington-simulator .modal.show { display: flex; }
+.wellington-simulator .modal-content { background: #fff; border-radius: 16px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.wellington-simulator .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.wellington-simulator .modal-header h2 { font-size: 18px; margin: 0; }
+.wellington-simulator .modal-close { background: none; border: none; font-size: 24px; color: #999; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+.wellington-simulator .modal-close:hover { color: #333; }
+.wellington-simulator .modal-image { width: 100%; border-radius: 8px; margin-bottom: 16px; }
+.wellington-simulator .modal-info { font-size: 14px; color: #666; line-height: 1.8; }
+.wellington-simulator .modal-info strong { color: #111; font-weight: 600; }
+.wellington-simulator .modal-buttons { display: flex; gap: 8px; margin-top: 20px; }
+.wellington-simulator .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 500; }
+.wellington-simulator .modal-btn-secondary { background: #f0f0f0; color: #666; }
+.wellington-simulator .modal-btn-primary { background: #111; color: #fff; }
+.wellington-simulator .modal-btn:active { opacity: .7; }
+.wellington-simulator .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; }
+.wellington-simulator .loading-overlay.show { display: flex; }
+.wellington-simulator .loading-content { background: #fff; border-radius: 16px; padding: 32px; text-align: center; }
+.wellington-simulator .loading-spinner { width: 40px; height: 40px; border: 4px solid #f0f0f0; border-top-color: #111; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.wellington-simulator .loading-text { font-size: 14px; color: #666; }

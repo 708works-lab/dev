@@ -1,0 +1,145 @@
+
+<!-- Wellington Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/wellington-simulator.css">
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/wellington-kokuin-addon.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
+
+<div class="wellington-simulator">
+  <div class="app">
+    <div class="branch-select">
+      <button class="branch-bt on" data-branch="ukulele" onclick="setWlBranch('ukulele')">
+        <div class="branch-bt-title">ウクレレストラップ<br>として作る</div>
+        <div class="branch-bt-sub">標準20枚・¥21,560〜</div>
+      </button>
+      <button class="branch-bt" data-branch="guitar" onclick="setWlBranch('guitar')">
+        <div class="branch-bt-title">ギターストラップ<br>として作る</div>
+        <div class="branch-bt-sub">近日公開</div>
+      </button>
+    </div>
+
+    <div class="coming-soon-banner" id="wl-coming-soon" hidden>
+      <strong>ギター用は近日公開予定です。</strong><br>
+      価格・正確な全長は現在調整中のため、現時点ではご注文いただけません。カラー・ウロコ数のシミュレーションはお試しいただけます。
+    </div>
+
+    <div class="top-area">
+      <div class="ctrl-col">
+        <div class="count-row">
+          <button class="cnt-btn" onclick="wlChangeCount(-1)">−</button>
+          <div style="flex:1;">
+            <div class="cnt-num" id="wl-cnt-disp">20個</div>
+            <div class="cnt-sub" id="wl-cnt-sub">標準（全長 約97cm）</div>
+          </div>
+          <button class="cnt-btn" onclick="wlChangeCount(+1)">＋</button>
+        </div>
+        <div class="sel-box">
+          <div class="box-label">選択中</div>
+          <div class="sel-info" id="wl-sel-info">パーツをタップ</div>
+        </div>
+        <div class="mode-row">
+          <button class="mbt on" id="wl-m-single" onclick="setWlMode('single')">1枚ずつ</button>
+          <button class="mbt" id="wl-m-range" onclick="setWlMode('range')">範囲</button>
+          <button class="mbt" id="wl-m-all" onclick="setWlMode('all')">一括</button>
+        </div>
+        <div class="pal-box">
+          <div class="box-label">カラー</div>
+          <div class="palette" id="wl-palette"></div>
+        </div>
+        <div class="grad-box">
+          <div class="box-label">おすすめ配色</div>
+          <div class="grad-note">※ タップすると全色変更になりますのでご注意ください</div>
+          <div class="grad-row" id="wl-grad-row"></div>
+        </div>
+        <div class="sum-box">
+          <div class="box-label">カラーサマリー</div>
+          <div class="summary" id="wl-summary"></div>
+        </div>
+      </div>
+      <div class="strap-col" id="wl-strap-col">
+        <div class="dir-tag">後ろ<small>末端側</small></div>
+        <div class="strap-scroll" id="wl-strap-scroll"></div>
+        <div class="dir-tag">前<small>先端側</small></div>
+      </div>
+    </div>
+
+    <!-- 名入れ刻印オプション（有料アップチャージ） -->
+    <div class="kokuin-toggle-area">
+      <label class="kokuin-toggle">
+        <input type="checkbox" id="wl-kokuin-toggle">
+        <span>名入れ刻印を追加する <span class="kokuin-price">（+¥1,100 税込）</span></span>
+      </label>
+    </div>
+
+    <div class="kokuin-section" id="wl-kokuin-section" hidden>
+      <div class="kokuin-inner">
+        <div class="kokuin-preview-box">
+          <div class="kokuin-pv-caption">刻印イメージ</div>
+          <div class="kokuin-svg-wrap" id="wl-kokuin-svg-wrap"></div>
+          <div class="kokuin-font-swatch" id="wl-kokuin-font-swatch"></div>
+        </div>
+
+        <div class="kokuin-field-label">刻印する文字（半角英数字）</div>
+        <input type="text" id="wl-kokuin-text" maxlength="20" placeholder="例：Sample">
+        <div class="kokuin-char-count" id="wl-kokuin-char-count">0 / 15</div>
+        <div class="kokuin-warn" id="wl-kokuin-warn"></div>
+
+        <div class="kokuin-field-label">フォントを選択</div>
+        <select id="wl-kokuin-font-select"></select>
+
+        <div class="kokuin-notice">
+          <strong>ご注意</strong><br>
+          こちらはあくまで仕上がりイメージの確認用です。実際の刻印は、バランスを見て文字サイズや余白を弊社側で調整する場合があります。文字数や書体によっては、見栄えを考慮して2段配置に変更することもあります。あらかじめご了承ください。<br><br>
+          通常は先端のウロコの表面に708worksロゴが型押しされますが、名入れ刻印をご希望の場合は表面が名入れ刻印となり、708worksロゴは同じウロコの裏面に型押しされます。
+        </div>
+      </div>
+    </div>
+
+    <div class="price-bar" id="wl-price-bar">
+      <span class="price-bar-label">価格</span>
+      <span class="price-bar-value" id="wl-price-display"></span>
+    </div>
+
+    <div id="wl-order-area">
+      <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
+
+      <div class="bottom-bar">
+        <button class="btn-reset" onclick="wlResetAll()">リセット</button>
+        <button class="btn-undo" id="wl-btn-undo" onclick="wlUndo()" disabled>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+          </svg>戻る
+        </button>
+        <button class="btn-order" id="wl-btn-order" onclick="wlGoOrder()">
+          画像を保存してカートに入れる →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="wl-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeWlModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="wl-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="wl-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeWlModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="wlProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="wl-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text" id="wl-loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="wl-toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/wellington-simulator.js"></script>
+<script src="https://708works-lab.github.io/dev/wellington-kokuin-addon.js"></script>
