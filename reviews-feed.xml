@@ -12,6 +12,31 @@
   </publisher>
   <reviews>
     <review>
+      <review_id>1315086994</review_id>
+      <reviewer>
+        <name>R***</name>
+        <is_anonymous>false</is_anonymous>
+      </reviewer>
+      <review_timestamp>2026-08-30T08:33:58Z</review_timestamp>
+      <title>買って満足</title>
+      <content>長さ変更が瞬時にでき、質も丈夫でしなやかで買って満足してます。
+また担当の方の対応も早く親切でよかったです。</content>
+      <review_url type="singleton">https://708works.jp/products/courier</review_url>
+      <ratings>
+        <overall min="1" max="5">5</overall>
+      </ratings>
+      <products>
+        <product>
+          <product_ids>
+            <skus><sku>courier</sku></skus>
+            <brands><brand>708works</brand></brands>
+          </product_ids>
+          <product_name>Courier クーリエ｜片手で長さを調整できるギターストラップ</product_name>
+          <product_url>https://708works.jp/products/courier</product_url>
+        </product>
+      </products>
+    </review>
+    <review>
       <review_id>1306622509</review_id>
       <reviewer>
         <name>遼***</name>
