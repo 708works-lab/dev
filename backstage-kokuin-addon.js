@@ -18,7 +18,7 @@
     { id: 'F', family: 'Bebas Neue', weight: '400', google: true, googleParam: 'Bebas+Neue', category: 'モダン' },
     { id: 'G', family: 'UnifrakturMaguntia', weight: '400', google: true, googleParam: 'UnifrakturMaguntia', category: 'ゴシック' }
   ];
-  const MAX_LEN = 10;
+  const MAX_LEN = 15;
   const ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
   const ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
 
@@ -26,8 +26,8 @@
   // （プレート円の下、レザー面上。プレート円 cx=320.59/cy=98.4/r=20.63 とは重ならない）
   const ANCHOR = { x: 320.55, y: 148.08 };
   const ANGLE_DEG = 0;
-  const BASE_FONT_SIZE = 16;
-  const MAX_TEXT_WIDTH = 100;
+  const BASE_FONT_SIZE = 22;
+  const MAX_TEXT_WIDTH = 140;
 
   const KOKUIN_PRICE_ADD = 1100;
 
