@@ -42,7 +42,7 @@ const BACKSTAGE_HARDWARE_COLORS = [
 // SVG内のCSSクラス ⇔ ゾーンID の対応（backstage_color_order.svg / backstage_kokuin_base.svg 共通）
 const BACKSTAGE_ZONE_CLASS = { leather: 'st2', hardware: 'st4' };
 const BACKSTAGE_ZONES = ['leather', 'hardware'];
-const BACKSTAGE_ZONE_LABEL = { leather: 'レザー', hardware: '金具（カシメ・ナスカン）' };
+const BACKSTAGE_ZONE_LABEL = { leather: '革', hardware: '金具（カシメ・ナスカン）' };
 
 const BACKSTAGE_DEFAULT_COLORS = { leather: '#9e3820', hardware: '#e5b415' };
 
