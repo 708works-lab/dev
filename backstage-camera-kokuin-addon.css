@@ -1,0 +1,72 @@
+/* Backstage for Camera 名入れ刻印アドオン（有料オプション） */
+.backstage-camera-simulator .kokuin-toggle-area {
+  width: 100%; margin: 0 auto;
+  padding: 4px 0 0;
+}
+.backstage-camera-simulator .kokuin-toggle {
+  display: flex; align-items: center; gap: 8px;
+  background: #fff; border-radius: 7px; padding: 10px 12px;
+  cursor: pointer;
+  font-size: 11.5px; color: #333; font-weight: 500;
+}
+.backstage-camera-simulator .kokuin-toggle input[type="checkbox"] {
+  width: 16px; height: 16px; flex-shrink: 0; accent-color: #111; cursor: pointer;
+}
+.backstage-camera-simulator .kokuin-toggle .kokuin-price {
+  color: #888; font-weight: 400;
+}
+
+.backstage-camera-simulator .kokuin-section {
+  width: 100%; margin: 6px 0 0;
+}
+.backstage-camera-simulator .kokuin-section[hidden] { display: none; }
+.backstage-camera-simulator .kokuin-inner {
+  background: #fff; border-radius: 7px; padding: 10px;
+}
+
+.backstage-camera-simulator .kokuin-field-label {
+  font-size: 10px; color: #888; font-weight: 500;
+  letter-spacing: .05em; margin: 10px 0 5px;
+}
+.backstage-camera-simulator .kokuin-field-label:first-child { margin-top: 0; }
+.backstage-camera-simulator input#backstage-camera-kokuin-text {
+  width: 100%; font-size: 13px; padding: 8px 10px;
+  border: 1.5px solid #ddd; border-radius: 7px; background: #fff;
+}
+.backstage-camera-simulator input#backstage-camera-kokuin-text:focus {
+  outline: none; border-color: #222;
+}
+.backstage-camera-simulator .kokuin-char-count {
+  font-size: 10px; color: #999; text-align: right; margin-top: 3px;
+}
+.backstage-camera-simulator .kokuin-char-count.over { color: #c0392b; font-weight: 700; }
+
+.backstage-camera-simulator .kokuin-warn {
+  font-size: 11px; color: #856404; background: #fff3cd;
+  border-radius: 6px; padding: 7px 9px; margin-top: 6px; line-height: 1.6;
+  display: none;
+}
+.backstage-camera-simulator .kokuin-warn.show { display: block; }
+
+.backstage-camera-simulator select#backstage-camera-kokuin-font-select {
+  width: 100%; font-size: 12px; padding: 8px 10px;
+  border: 1.5px solid #ddd; border-radius: 7px; background: #fff;
+}
+.backstage-camera-simulator select#backstage-camera-kokuin-font-select:focus {
+  outline: none; border-color: #222;
+}
+
+.backstage-camera-simulator .kokuin-font-swatch {
+  margin-top: 8px; padding: 10px 12px;
+  background: #f7f5f1; border-radius: 7px;
+  font-size: 17px; color: #1a1a1a; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-height: 1.3em;
+}
+.backstage-camera-simulator .kokuin-font-swatch:empty { padding: 0; min-height: 0; }
+
+.backstage-camera-simulator .kokuin-notice {
+  font-size: 10px; color: #666; background: #f5f2ec; border: 1px solid #e2ddd0;
+  border-radius: 6px; padding: 8px 10px; margin-top: 10px; line-height: 1.7;
+}
+.backstage-camera-simulator .kokuin-notice strong { color: #856404; }

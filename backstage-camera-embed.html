@@ -1,0 +1,112 @@
+
+<!-- Backstage for Camera Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/backstage-camera-simulator.css">
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/backstage-camera-kokuin-addon.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
+
+<div class="backstage-camera-simulator">
+  <div class="app">
+
+    <!-- 左：コントロール（パレット・サマリー・刻印） -->
+    <div class="ctrl-left">
+      <div class="box-label">革の色を選択</div>
+      <div class="pal-box">
+        <div class="palette" id="backstage-camera-leather-palette"></div>
+      </div>
+
+      <div class="box-label" style="margin-top:8px;">金具の色を選択</div>
+      <div class="pal-box">
+        <div class="palette" id="backstage-camera-hardware-palette"></div>
+      </div>
+
+      <div class="sum-box">
+        <div class="box-label">配色サマリー</div>
+        <div id="backstage-camera-summary"></div>
+      </div>
+
+      <!-- 名入れ刻印オプション（有料アップチャージ） -->
+      <div class="kokuin-toggle-area">
+        <label class="kokuin-toggle">
+          <input type="checkbox" id="backstage-camera-kokuin-toggle">
+          <span>名入れ刻印を追加する <span class="kokuin-price">（+¥1,100 税込）</span></span>
+        </label>
+      </div>
+
+      <div class="kokuin-section" id="backstage-camera-kokuin-section" hidden>
+        <div class="kokuin-inner">
+          <div class="kokuin-field-label">刻印する文字（半角英数字）</div>
+          <input type="text" id="backstage-camera-kokuin-text" maxlength="15" placeholder="例：ABC">
+          <div class="kokuin-char-count" id="backstage-camera-kokuin-char-count">0 / 15</div>
+          <div class="kokuin-warn" id="backstage-camera-kokuin-warn"></div>
+
+          <div class="kokuin-field-label">フォントを選択</div>
+          <select id="backstage-camera-kokuin-font-select"></select>
+          <div class="kokuin-font-swatch" id="backstage-camera-kokuin-font-swatch"></div>
+
+          <div class="kokuin-notice">
+            <strong>ご注意</strong><br>
+            右のカラーイメージ内に刻印イメージを直接反映しています。実際の刻印は、プレートのサイズに合わせて弊社側で文字サイズや配置を調整する場合があります。プレートが小さいため、長い文字列は大幅に縮小されます。あらかじめご了承ください。<br><br>
+            2個1セットのパーツは同じ形状のため、実際の商品に「右用」「左用」の区別はありません（シミュレーターでは分かりやすさのため左に708worksロゴ、右に名入れ刻印のイメージを表示しています）。名入れ刻印をご希望の場合、708worksロゴが型押しされる側とは反対のパーツに、お好きな文字を刻印します。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：カラーイメージプレビュー（商品イメージ＋使用イメージ） -->
+    <div class="preview-col">
+      <div class="dir-tag-v">カラーイメージ<small>商品イメージ（上）／使用イメージ（下）</small></div>
+      <div id="backstage-camera-svg-wrap" class="strap-wrap"></div>
+    </div>
+
+  </div>
+
+  <!-- 価格表示 -->
+  <div class="price-bar">
+    <span class="price-bar-label">価格</span>
+    <span class="price-bar-value" id="backstage-camera-price-display"></span>
+  </div>
+
+  <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
+
+  <!-- 下部ボタンバー -->
+  <div class="bottom-bar">
+    <button class="btn-reset" onclick="backstageCameraReset()">リセット</button>
+    <button class="btn-undo" id="backstage-camera-btn-undo" onclick="backstageCameraUndo()" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+      </svg>戻る
+    </button>
+    <button class="btn-order" onclick="backstageCameraGoOrder()">
+      <span id="backstage-camera-cart-label">画像を保存してカートに入れる →</span>
+    </button>
+  </div>
+
+  <!-- 注文確認モーダル -->
+  <div class="modal" id="backstage-camera-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeBackstageCameraModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="backstage-camera-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="backstage-camera-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeBackstageCameraModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="backstageCameraProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-overlay" id="backstage-camera-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="backstage-camera-toast" class="toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/backstage-camera-simulator.js"></script>
+<script src="https://708works-lab.github.io/dev/backstage-camera-kokuin-addon.js"></script>
