@@ -1,0 +1,246 @@
+/* Backstage 名入れ刻印アドオン（有料オプション、+¥1,100税込）
+   既存の backstage-simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
+   カラー選択のグローバル状態（backstageColors, BACKSTAGE_ZONES, engravingColor）をそのまま参照する。
+   backstage_kokuin_base.svg は backstage_color_order.svg の「right」パーツ（名入れ側の刻印プレート）
+   を切り出し、サンプル文字「ABCDEFGHIJK」だけを取り除いて作った派生ファイル。クラス名(st0〜st4)は
+   本体SVGと共通のため、色反映のクラス対応表もそのまま流用できる。 */
+(function () {
+  const FONTS = [
+    { id: 'A', family: 'Cabin Sketch', weight: '700', google: true, googleParam: 'Cabin+Sketch:wght@700', category: '手書き' },
+    { id: 'B', family: 'Special Elite', weight: '400', google: true, googleParam: 'Special+Elite', category: 'スタンプ風' },
+    { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, localUrl: 'https://708works-lab.github.io/dev/fonts/AG-Stencil.ttf', category: 'スタンプ風' },
+    { id: 'C', family: 'Lobster', weight: '400', google: true, googleParam: 'Lobster', category: '筆記体' },
+    { id: 'D', family: 'Playball', weight: '400', google: true, googleParam: 'Playball', category: '筆記体' },
+    { id: 'H', family: 'Great Vibes', weight: '400', google: true, googleParam: 'Great+Vibes', category: '筆記体' },
+    { id: 'F', family: 'Bebas Neue', weight: '400', google: true, googleParam: 'Bebas+Neue', category: 'モダン' },
+    { id: 'G', family: 'UnifrakturMaguntia', weight: '400', google: true, googleParam: 'UnifrakturMaguntia', category: 'ゴシック' }
+  ];
+  const MAX_LEN = 10;
+  const ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
+  const ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
+
+  // backstage_kokuin_base.svg内のプレート円の中心（cx=320.59, cy=98.4, r=20.63）に合わせた配置基準
+  const ANCHOR = { x: 320.59, y: 98.4 };
+  const ANGLE_DEG = 0;
+  const BASE_FONT_SIZE = 13;
+  const MAX_TEXT_WIDTH = 33;
+
+  // backstage_kokuin_base.svgは本体SVGと同じクラス名（st2=レザー, st4=金具）を使っている
+  const KOKUIN_ZONE_CLASS = { leather: 'st2', hardware: 'st4' };
+
+  const KOKUIN_PRICE_ADD = 1100;
+
+  let state = { enabled: false, text: '', fontId: 'A' };
+  let svgLoaded = false;
+  let kokuinShadowRoot = null;
+
+  window.BACKSTAGE_KOKUIN_STATE = { enabled: false, text: '', fontFamily: '', valid: false };
+
+  function currentFont() {
+    return FONTS.find(f => f.id === state.fontId);
+  }
+
+  function isValid(text, font) {
+    if (!text) return false;
+    if (text.length > MAX_LEN) return false;
+    if (!ALLOWED_PATTERN.test(text)) return false;
+    if (font.noUppercase && /[A-Z]/.test(text)) return false;
+    return true;
+  }
+
+  async function loadFonts() {
+    const agStencil = FONTS.find(f => f.id === 'E');
+    const localFont = new FontFace('AG Stencil', `url(${agStencil.localUrl})`);
+    document.fonts.add(localFont);
+    const specs = FONTS.map(f => `${f.weight} 40px "${f.family}"`);
+    await Promise.all(specs.map(spec => document.fonts.load(spec).catch(() => {})));
+    await localFont.load().catch(() => {});
+  }
+
+  async function loadBaseSvg() {
+    const wrap = document.getElementById('backstage-kokuin-svg-wrap');
+    if (!wrap || svgLoaded) return;
+    const res = await fetch('https://708works-lab.github.io/dev/backstage_kokuin_base.svg');
+    const svgText = await res.text();
+    // Shadow DOMで隔離する。カラーシミュレーター本体のSVGも同じ st0〜st4 のクラス名を
+    // 使っており、light DOMにそのまま挿入すると<style>がページ全体に漏れて色が混線するため。
+    kokuinShadowRoot = wrap.attachShadow({ mode: 'open' });
+    kokuinShadowRoot.innerHTML = `<style>svg{width:100%;height:auto;display:block;}</style>${svgText}`;
+    // Shopifyテーマのbase.cssに div:empty{display:none} があり、shadow rootを持つだけの
+    // （light DOM上は子を持たない）divが非表示にされてしまうため、インラインで明示的に上書きする。
+    wrap.style.display = 'block';
+    svgLoaded = true;
+    applyBackstageKokuinColors();
+  }
+
+  // カラーシミュレーター本体で選ばれた色を、刻印プレビューSVGにも反映する
+  function applyBackstageKokuinColors() {
+    const svg = kokuinShadowRoot?.querySelector('svg');
+    if (!svg || typeof backstageColors === 'undefined') return;
+    const styleEl = svg.querySelector('defs style');
+    if (styleEl) {
+      let css = styleEl.textContent;
+      Object.entries(KOKUIN_ZONE_CLASS).forEach(([zone, cls]) => {
+        const hex = backstageColors[zone];
+        if (!hex) return;
+        const re = new RegExp(`(\\.${cls}\\s*{[^}]*fill:\\s*)#[0-9a-fA-F]{3,6}`);
+        css = css.replace(re, `$1${hex}`);
+      });
+      styleEl.textContent = css;
+    }
+    drawKokuinText();
+  }
+  window.applyBackstageKokuinColors = applyBackstageKokuinColors;
+
+  function buildFontSelect() {
+    const select = document.getElementById('backstage-kokuin-font-select');
+    if (!select) return;
+    select.innerHTML = '';
+    FONTS.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = `フォント${f.id}（${f.category}）${f.noUppercase ? '・大文字非対応' : ''}`;
+      if (f.id === state.fontId) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.addEventListener('change', () => {
+      state.fontId = select.value;
+      validateAndDraw();
+    });
+  }
+
+  function validateAndDraw() {
+    const input = document.getElementById('backstage-kokuin-text');
+    const countEl = document.getElementById('backstage-kokuin-char-count');
+    const warnEl = document.getElementById('backstage-kokuin-warn');
+    if (!input) return;
+    const text = input.value;
+
+    const overLen = text.length > MAX_LEN;
+    if (countEl) {
+      countEl.textContent = `${text.length} / ${MAX_LEN}`;
+      countEl.classList.toggle('over', overLen);
+    }
+
+    const font = currentFont();
+    const warnings = [];
+    if (!ALLOWED_PATTERN.test(text)) warnings.push(ALLOWED_HINT);
+    if (font.noUppercase && /[A-Z]/.test(text)) warnings.push(`フォント${font.id}は大文字に対応していません。小文字でご入力ください。`);
+    if (overLen) warnings.push(`文字数の上限は${MAX_LEN}文字です。`);
+    if (!text) warnings.push('刻印する文字を入力してください。');
+    if (warnEl) {
+      warnEl.innerHTML = warnings.join('<br>');
+      warnEl.classList.toggle('show', warnings.length > 0);
+    }
+
+    const valid = isValid(text, font);
+    state.text = text;
+
+    window.BACKSTAGE_KOKUIN_STATE = {
+      enabled: state.enabled,
+      text: state.text,
+      fontId: font.id,
+      fontFamily: font.family,
+      fontWeight: font.weight,
+      // 注文properties用：スタッフがサンプルシートの「フォントA」等とすぐ照合できるよう記号名も併記
+      fontLabel: `フォント${font.id}：${font.family}`,
+      valid: state.enabled ? valid : true
+    };
+
+    drawKokuinText();
+    updateFontSwatch();
+  }
+
+  function updateFontSwatch() {
+    const swatch = document.getElementById('backstage-kokuin-font-swatch');
+    if (!swatch) return;
+    const font = currentFont();
+    swatch.textContent = state.text || '';
+    swatch.style.fontFamily = `'${font.family}'`;
+    swatch.style.fontWeight = font.weight;
+  }
+
+  function drawKokuinText() {
+    const mainGroup = document.querySelector('#backstage-svg-wrap svg #kokuin');
+    const shadowGroup = kokuinShadowRoot?.getElementById('kokuin');
+    [shadowGroup, mainGroup].forEach(group => drawKokuinTextInto(group));
+  }
+
+  // 刻印プレビュー（Shadow DOM内の拡大プレビュー）と、商品イメージ本体のSVGの
+  // 両方に同じ内容を描画する。商品イメージ側は縮尺が異なるため、要素ごとに
+  // フィットする文字サイズをそれぞれ計測して決める。
+  function drawKokuinTextInto(group) {
+    if (!group) return;
+    group.innerHTML = '';
+    // SVG内では #kokuin グループがプレート円(circle.st4)より先に描画されており、
+    // そのままだと刻印文字が円の下に隠れてしまう。最後尾に動かして円の上に出す。
+    if (group.parentNode && group.parentNode.lastElementChild !== group) {
+      group.parentNode.appendChild(group);
+    }
+
+    const text = state.text || '';
+    if (!text) return;
+
+    const font = currentFont();
+    const ns = 'http://www.w3.org/2000/svg';
+    const textEl = document.createElementNS(ns, 'text');
+    textEl.setAttribute('x', ANCHOR.x);
+    textEl.setAttribute('y', ANCHOR.y);
+    textEl.setAttribute('text-anchor', 'middle');
+    textEl.setAttribute('dominant-baseline', 'central');
+    if (ANGLE_DEG) textEl.setAttribute('transform', `rotate(${ANGLE_DEG} ${ANCHOR.x} ${ANCHOR.y})`);
+    textEl.setAttribute('font-family', font.family);
+    textEl.setAttribute('font-weight', font.weight);
+    textEl.setAttribute('font-size', BASE_FONT_SIZE);
+    // 刻印は金具色のプレート円の上に乗るため、プレート（金具）色に対してコントラストが出る色を使う
+    const baseHex = (typeof backstageColors !== 'undefined') ? backstageColors.hardware : null;
+    const fillColor = (baseHex && typeof engravingColor === 'function') ? engravingColor(baseHex) : '#2a1710';
+    textEl.setAttribute('fill', fillColor);
+    textEl.setAttribute('fill-opacity', '0.82');
+    textEl.textContent = text;
+    group.appendChild(textEl);
+
+    let fontSize = BASE_FONT_SIZE;
+    let measuredWidth = textEl.getBBox().width;
+    while (measuredWidth > MAX_TEXT_WIDTH && fontSize > 3) {
+      fontSize -= 0.5;
+      textEl.setAttribute('font-size', fontSize);
+      measuredWidth = textEl.getBBox().width;
+    }
+  }
+
+  async function onToggleChange() {
+    const toggle = document.getElementById('backstage-kokuin-toggle');
+    const section = document.getElementById('backstage-kokuin-section');
+    state.enabled = toggle.checked;
+    if (section) section.hidden = !state.enabled;
+
+    if (state.enabled && !svgLoaded) {
+      await Promise.all([loadFonts(), loadBaseSvg()]);
+    } else if (state.enabled) {
+      applyBackstageKokuinColors();
+    }
+
+    validateAndDraw();
+    if (typeof updateBackstagePriceDisplay === 'function') updateBackstagePriceDisplay();
+  }
+
+  function init() {
+    const toggle = document.getElementById('backstage-kokuin-toggle');
+    const input = document.getElementById('backstage-kokuin-text');
+    if (!toggle || !input) return;
+
+    toggle.addEventListener('change', onToggleChange);
+    input.addEventListener('input', validateAndDraw);
+    buildFontSelect();
+    validateAndDraw();
+  }
+
+  window.BACKSTAGE_KOKUIN_PRICE_ADD = KOKUIN_PRICE_ADD;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
