@@ -1,0 +1,101 @@
+
+<!-- Guitar Nametag Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/nametag-simulator.css">
+
+<div class="nametag-simulator">
+  <div class="app">
+
+    <!-- 左：コントロール（形状・革色・ギター柄刻印・名入れ刻印・サマリー） -->
+    <div class="ctrl-left">
+      <div class="box-label">形状を選択</div>
+      <div class="shape-box" id="nametag-shapes"></div>
+
+      <div class="box-label" style="margin-top:8px;">革の色を選択</div>
+      <div class="pal-box">
+        <div class="palette" id="nametag-leather-palette"></div>
+      </div>
+
+      <div class="guitar-toggle-area" style="margin-top:8px;">
+        <label class="guitar-toggle">
+          <input type="checkbox" id="nametag-guitar-pattern-toggle">
+          <span>ギター柄の刻印をなしにする <span class="guitar-toggle-note">（-¥220 税込）</span></span>
+        </label>
+      </div>
+
+      <div class="kokuin-box" style="margin-top:8px;">
+        <div class="kokuin-field-label" id="nametag-kokuin-area1-label">刻印する文字（Area1・サウンドホール下）</div>
+        <input type="text" id="nametag-kokuin-area1" maxlength="12" placeholder="空欄の場合は刻印なしで製作します">
+        <div class="kokuin-char-count" id="nametag-kokuin-area1-count">0 / 12</div>
+
+        <div class="kokuin-area-row" id="nametag-kokuin-area2-row">
+          <div class="kokuin-field-label">刻印する文字（Area2）</div>
+          <input type="text" id="nametag-kokuin-area2" maxlength="12" placeholder="空欄の場合は刻印なしで製作します">
+          <div class="kokuin-char-count" id="nametag-kokuin-area2-count">0 / 12</div>
+        </div>
+
+        <div class="kokuin-hint">半角英数字（数字・アルファベット大文字小文字）でご入力ください。空欄の場合は刻印なしで製作します。名入れ刻印の有無は価格に影響しません。</div>
+      </div>
+
+      <div class="sum-box" style="margin-top:8px;">
+        <div class="box-label">選択内容</div>
+        <div id="nametag-summary"></div>
+      </div>
+    </div>
+
+    <!-- 右：カラーイメージプレビュー -->
+    <div class="preview-col">
+      <div class="dir-tag-v">カラーイメージ</div>
+      <div id="nametag-svg-wrap" class="strap-wrap"></div>
+    </div>
+
+  </div>
+
+  <!-- 価格表示 -->
+  <div class="price-bar">
+    <span class="price-bar-label">価格</span>
+    <span class="price-bar-value" id="nametag-price-display"></span>
+  </div>
+
+  <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
+
+  <!-- 下部ボタンバー -->
+  <div class="bottom-bar">
+    <button class="btn-reset" onclick="nametagReset()">リセット</button>
+    <button class="btn-undo" id="nametag-btn-undo" onclick="nametagUndo()" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+      </svg>戻る
+    </button>
+    <button class="btn-order" onclick="nametagGoOrder()">
+      <span id="nametag-cart-label">画像を保存してカートに入れる →</span>
+    </button>
+  </div>
+
+  <!-- 注文確認モーダル -->
+  <div class="modal" id="nametag-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeNametagModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="nametag-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="nametag-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeNametagModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="nametagProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-overlay" id="nametag-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="nametag-toast" class="toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/nametag-simulator.js"></script>
