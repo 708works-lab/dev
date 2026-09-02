@@ -515,18 +515,51 @@ async function nametagSaveImage() {
   showNametagToast('画像を保存しました ✓　カートに進めます');
 }
 
+// 保存画像に含める選択内容の行（Backstageシリーズと同じく、SVGの横に
+// 配色・仕様サマリーを添える。これが無いと保存画像だけでは何を選んだか
+// 分からずスタッフ側の製作確認に使えないため）
+function buildNametagSummaryLines() {
+  const lines = [
+    { label: '形状', value: NAMETAG_SHAPE_LABEL[nametagShape] },
+    { label: '革', value: nametagLeatherColorName(nametagLeatherColor), dot: nametagLeatherColor },
+    { label: 'ギター柄の刻印', value: nametagGuitarPattern ? 'あり' : 'なし' }
+  ];
+  const area1 = (nametagKokuinText.area1 || '').trim();
+  const area2 = (nametagKokuinText.area2 || '').trim();
+  if (area1) lines.push({ label: nametagShape === 'ag' ? '刻印文字(Area1)' : '刻印文字', value: area1 });
+  if (nametagShape === 'ag' && area2) lines.push({ label: '刻印文字(Area2)', value: area2 });
+  if (area1 || (nametagShape === 'ag' && area2)) {
+    const font = nametagCurrentFont();
+    lines.push({ label: '刻印フォント', value: `フォント${font.id}：${font.family}` });
+  }
+  return lines;
+}
+
 async function buildNametagSaveCanvas() {
   const SVG_VW = 247.78, SVG_VH = 811.14;
   const svgSaveW = 220;
   const scale = svgSaveW / SVG_VW;
   const svgSaveH = Math.round(SVG_VH * scale);
 
+  const lines = buildNametagSummaryLines();
+  const measureCtx = document.createElement('canvas').getContext('2d');
+  let labelColW = 70;
+  lines.forEach(line => {
+    measureCtx.font = '13px sans-serif';
+    const valueW = measureCtx.measureText(line.value).width;
+    measureCtx.font = '10px sans-serif';
+    const labelW = measureCtx.measureText(line.label).width;
+    labelColW = Math.max(labelColW, 20 + Math.max(valueW, labelW));
+  });
+
   const margin = 32;
+  const gap = 22;
   const headerH = 60;
   const svgY0 = headerH + 14;
   const footerH = 30;
-  const ch = svgY0 + svgSaveH + footerH + 40;
-  const cw = svgSaveW + margin * 2;
+  const svgH = svgSaveH;
+  const ch = svgY0 + svgH + footerH + 24;
+  const cw = margin + svgSaveW + gap + labelColW + margin;
 
   const cv = document.createElement('canvas');
   cv.width = cw; cv.height = ch;
@@ -559,6 +592,33 @@ async function buildNametagSaveCanvas() {
       img.src = dataUri;
     });
   }
+
+  // 右側：選択内容サマリー（等間隔に配置）
+  const labelX = margin + svgSaveW + gap;
+  const rowGap = svgH / (lines.length + 1);
+  lines.forEach((line, i) => {
+    const y = svgY0 + rowGap * (i + 1);
+
+    if (line.dot) {
+      ctx.beginPath();
+      ctx.arc(labelX + 7, y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = line.dot;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    const textX = labelX + (line.dot ? 20 : 0);
+
+    ctx.fillStyle = '#999';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(line.label, textX, y - 3);
+
+    ctx.fillStyle = '#333';
+    ctx.font = '13px sans-serif';
+    ctx.fillText(line.value, textX, y + 14);
+  });
 
   ctx.fillStyle = 'rgba(0,0,0,.1)';
   ctx.fillRect(0, ch - footerH, cw, footerH);
