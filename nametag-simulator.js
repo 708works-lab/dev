@@ -47,16 +47,18 @@ const NAMETAG_SHAPE_LABEL = { ag: 'アコースティックギター型', tl: '�
 // AGは横書きでArea1/Area2の2箇所、TLは縦書き（-90度回転）でArea1相当の1箇所のみ。
 const NAMETAG_KOKUIN_SPEC = {
   ag: {
-    area1: { anchor: { x: 123.89,  y: 679.43 }, angle: 0,   maxWidth: 64 },
-    area2: { anchor: { x: 123.905, y: 764.55 }, angle: 0,   maxWidth: 68 }
+    area1: { anchor: { x: 123.89,  y: 679.43 }, angle: 0,   maxWidth: 150 },
+    area2: { anchor: { x: 123.905, y: 764.55 }, angle: 0,   maxWidth: 150 }
   },
   tl: {
-    area1: { anchor: { x: 52.955,  y: 711.03 }, angle: -90, maxWidth: 64 }
+    area1: { anchor: { x: 52.955,  y: 711.03 }, angle: -90, maxWidth: 150 }
   }
 };
-const NAMETAG_KOKUIN_BASE_FONT_SIZE = 19;
+const NAMETAG_KOKUIN_BASE_FONT_SIZE = 26;
 const NAMETAG_KOKUIN_MAX_LEN = 12;
+// Backstageシリーズ等と同じバリデーションルールを踏襲
 const NAMETAG_KOKUIN_ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
+const NAMETAG_KOKUIN_ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
 // レーザー刻印はレザー色に関わらず焼け焦げたような一定の濃い色になるため、
 // 革色から自動計算せずkokuin-guitarの刻印線色（#352200）と合わせた固定色を使う
 const NAMETAG_KOKUIN_COLOR = '#352200';
@@ -114,7 +116,7 @@ function initNametagSimulator() {
       nametagKokuinText[area] = input.value;
       nametagImageSaved = false;
       drawNametagKokuinText();
-      updateNametagCharCount(area);
+      validateNametagKokuinField(area);
       updateNametagSummary();
     });
   });
@@ -237,12 +239,33 @@ function drawNametagKokuinText() {
   });
 }
 
-function updateNametagCharCount(area) {
+// Backstageシリーズと同じバリデーション（許可文字パターン・文字数上限）を行い、
+// 文字数カウンターと注意メッセージを更新する
+function validateNametagKokuinField(area) {
+  const text = nametagKokuinText[area] || '';
   const countEl = document.getElementById(`nametag-kokuin-${area}-count`);
-  if (!countEl) return;
-  const len = (nametagKokuinText[area] || '').length;
-  countEl.textContent = `${len} / ${NAMETAG_KOKUIN_MAX_LEN}`;
-  countEl.classList.toggle('over', len > NAMETAG_KOKUIN_MAX_LEN);
+  const warnEl  = document.getElementById(`nametag-kokuin-${area}-warn`);
+
+  const overLen = text.length > NAMETAG_KOKUIN_MAX_LEN;
+  if (countEl) {
+    countEl.textContent = `${text.length} / ${NAMETAG_KOKUIN_MAX_LEN}`;
+    countEl.classList.toggle('over', overLen);
+  }
+
+  const warnings = [];
+  if (!NAMETAG_KOKUIN_ALLOWED_PATTERN.test(text)) warnings.push(NAMETAG_KOKUIN_ALLOWED_HINT);
+  if (overLen) warnings.push(`文字数の上限は${NAMETAG_KOKUIN_MAX_LEN}文字です。`);
+  if (warnEl) {
+    warnEl.innerHTML = warnings.join('<br>');
+    warnEl.classList.toggle('show', warnings.length > 0);
+  }
+}
+
+function nametagKokuinHasError() {
+  return ['area1', 'area2'].some(area => {
+    const text = nametagKokuinText[area] || '';
+    return text.length > NAMETAG_KOKUIN_MAX_LEN || !NAMETAG_KOKUIN_ALLOWED_PATTERN.test(text);
+  });
 }
 
 // ============================================================================
@@ -479,6 +502,10 @@ function updateNametagCartButtonState() {
 }
 
 async function nametagGoOrder() {
+  if (nametagKokuinHasError()) {
+    showNametagToast('刻印する文字をご確認ください');
+    return;
+  }
   if (!nametagImageSaved) {
     await nametagSaveImage();
   }

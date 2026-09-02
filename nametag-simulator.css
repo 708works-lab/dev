@@ -138,6 +138,12 @@
   font-size: 10px; color: #999; text-align: right; margin-top: 3px;
 }
 .nametag-simulator .kokuin-char-count.over { color: #c0392b; font-weight: 700; }
+.nametag-simulator .kokuin-warn {
+  font-size: 11px; color: #856404; background: #fff3cd;
+  border-radius: 6px; padding: 7px 9px; margin-top: 6px; line-height: 1.6;
+  display: none;
+}
+.nametag-simulator .kokuin-warn.show { display: block; }
 .nametag-simulator .kokuin-hint {
   font-size: 10px; color: #999; line-height: 1.6; margin-top: 6px;
 }
