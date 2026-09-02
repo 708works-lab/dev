@@ -59,6 +59,19 @@ const NAMETAG_KOKUIN_MAX_LEN = 12;
 // Backstageシリーズ等と同じバリデーションルールを踏襲
 const NAMETAG_KOKUIN_ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
 const NAMETAG_KOKUIN_ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
+
+// 刻印フォント（Backstageシリーズと同じフォント構成を踏襲。Area1/Area2共通で
+// 1つのフォントを選ぶ方式）
+const NAMETAG_KOKUIN_FONTS = [
+  { id: 'A', family: 'Cabin Sketch', weight: '700', google: true, category: '手書き' },
+  { id: 'B', family: 'Special Elite', weight: '400', google: true, category: 'スタンプ風' },
+  { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, localUrl: 'https://708works-lab.github.io/dev/fonts/AG-Stencil.ttf', category: 'スタンプ風' },
+  { id: 'C', family: 'Lobster', weight: '400', google: true, category: '筆記体' },
+  { id: 'D', family: 'Playball', weight: '400', google: true, category: '筆記体' },
+  { id: 'H', family: 'Great Vibes', weight: '400', google: true, category: '筆記体' },
+  { id: 'F', family: 'Bebas Neue', weight: '400', google: true, category: 'モダン' },
+  { id: 'G', family: 'UnifrakturMaguntia', weight: '400', google: true, category: 'ゴシック' }
+];
 // 焼印は実物では革色に関わらず焦げたような濃色になるが、シミュレーターとしては
 // どの革色でも視認できることの方が重要なため、革色から自動計算したコントラスト色
 // を使う（濃色レザーで刻印が全く見えなくなる問題への対応）
@@ -73,9 +86,43 @@ let nametagShape        = 'ag';
 let nametagLeatherColor = NAMETAG_DEFAULT_LEATHER;
 let nametagGuitarPattern = true;
 let nametagKokuinText    = { area1: '', area2: '' };
+let nametagKokuinFontId  = 'A';
 let nametagImageSaved    = false;
 let nametagHistory       = [];
 let nametagLastUploadedImage = null;
+
+function nametagCurrentFont() {
+  return NAMETAG_KOKUIN_FONTS.find(f => f.id === nametagKokuinFontId) || NAMETAG_KOKUIN_FONTS[0];
+}
+
+async function loadNametagKokuinFonts() {
+  const agStencil = NAMETAG_KOKUIN_FONTS.find(f => f.id === 'E');
+  const localFont = new FontFace('AG Stencil', `url(${agStencil.localUrl})`);
+  document.fonts.add(localFont);
+  const specs = NAMETAG_KOKUIN_FONTS.map(f => `${f.weight} 40px "${f.family}"`);
+  await Promise.all(specs.map(spec => document.fonts.load(spec).catch(() => {})));
+  await localFont.load().catch(() => {});
+}
+
+function buildNametagFontSelect() {
+  const select = document.getElementById('nametag-kokuin-font-select');
+  if (!select) return;
+  select.innerHTML = '';
+  NAMETAG_KOKUIN_FONTS.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.id;
+    opt.textContent = `フォント${f.id}（${f.category}）${f.noUppercase ? '・大文字非対応' : ''}`;
+    if (f.id === nametagKokuinFontId) opt.selected = true;
+    select.appendChild(opt);
+  });
+  select.addEventListener('change', () => {
+    nametagKokuinFontId = select.value;
+    nametagImageSaved = false;
+    drawNametagKokuinText();
+    validateNametagKokuinField('area1');
+    validateNametagKokuinField('area2');
+  });
+}
 
 // ============================================================================
 // 初期化
@@ -90,11 +137,13 @@ function initNametagSimulator() {
 
   buildNametagShapeButtons();
   buildNametagLeatherPalette();
+  buildNametagFontSelect();
   updateNametagKokuinFieldsVisibility();
   updateNametagSummary();
   updateNametagPriceDisplay();
   updateNametagCartButtonState();
   loadNametagSVG();
+  loadNametagKokuinFonts().then(() => drawNametagKokuinText());
 
   const guitarToggle = document.getElementById('nametag-guitar-pattern-toggle');
   if (guitarToggle) {
@@ -223,8 +272,9 @@ function drawNametagKokuinText() {
     textEl.setAttribute('text-anchor', 'middle');
     textEl.setAttribute('dominant-baseline', 'central');
     if (cfg.angle) textEl.setAttribute('transform', `rotate(${cfg.angle} ${cfg.anchor.x} ${cfg.anchor.y})`);
-    textEl.setAttribute('font-family', '-apple-system, "Helvetica Neue", Arial, sans-serif');
-    textEl.setAttribute('font-weight', '600');
+    const font = nametagCurrentFont();
+    textEl.setAttribute('font-family', font.family);
+    textEl.setAttribute('font-weight', font.weight);
     textEl.setAttribute('font-size', NAMETAG_KOKUIN_BASE_FONT_SIZE);
     textEl.setAttribute('fill', engravingColor(nametagLeatherColor));
     textEl.setAttribute('fill-opacity', '0.95');
@@ -254,8 +304,10 @@ function validateNametagKokuinField(area) {
     countEl.classList.toggle('over', overLen);
   }
 
+  const font = nametagCurrentFont();
   const warnings = [];
   if (!NAMETAG_KOKUIN_ALLOWED_PATTERN.test(text)) warnings.push(NAMETAG_KOKUIN_ALLOWED_HINT);
+  if (font.noUppercase && /[A-Z]/.test(text)) warnings.push(`フォント${font.id}は大文字に対応していません。小文字でご入力ください。`);
   if (overLen) warnings.push(`文字数の上限は${NAMETAG_KOKUIN_MAX_LEN}文字です。`);
   if (warnEl) {
     warnEl.innerHTML = warnings.join('<br>');
@@ -264,9 +316,14 @@ function validateNametagKokuinField(area) {
 }
 
 function nametagKokuinHasError() {
+  const font = nametagCurrentFont();
   return ['area1', 'area2'].some(area => {
     const text = nametagKokuinText[area] || '';
-    return text.length > NAMETAG_KOKUIN_MAX_LEN || !NAMETAG_KOKUIN_ALLOWED_PATTERN.test(text);
+    if (!text) return false;
+    if (text.length > NAMETAG_KOKUIN_MAX_LEN) return true;
+    if (!NAMETAG_KOKUIN_ALLOWED_PATTERN.test(text)) return true;
+    if (font.noUppercase && /[A-Z]/.test(text)) return true;
+    return false;
   });
 }
 
@@ -344,6 +401,12 @@ function setNametagLeatherColor(hex) {
 
 // 革色に対してコントラストが出る焼印色を計算する（明るい革には濃い焼印色、
 // 暗い革には明るめの焼印色）。Backstage/Triad等と同じロジック
+// 濃色レザーの場合、単純に明るくすると白っぽくなり「白色インクで刻印できる」と
+// 誤認されかねない（実際はレーザーによる焼き入れのみで、白色や有色インクでの
+// 刻印はできない）。そのため濃色レザーには常に琥珀色〜飴色の固定トーンを使い、
+// 「焼け跡」らしさを保ちつつ視認性も確保する
+const NAMETAG_ENGRAVE_ON_DARK = '#c9924a';
+
 function engravingColor(hex) {
   const h = hex.replace('#','');
   const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
@@ -351,7 +414,7 @@ function engravingColor(hex) {
   if (lum > 0.45) {
     return `rgb(${Math.floor(r*.4)},${Math.floor(g*.4)},${Math.floor(b*.4)})`;
   } else {
-    return `rgb(${Math.min(255,r+Math.floor((255-r)*.6))},${Math.min(255,g+Math.floor((255-g)*.6))},${Math.min(255,b+Math.floor((255-b)*.6))})`;
+    return NAMETAG_ENGRAVE_ON_DARK;
   }
 }
 
@@ -560,9 +623,12 @@ function showNametagConfirmModal(result) {
   const img = document.getElementById('nametag-modal-image');
   if (img) img.src = result.imageUrl;
 
+  const font = nametagCurrentFont();
+  const hasKokuinText = !!(nametagKokuinText.area1 || (nametagShape === 'ag' && nametagKokuinText.area2));
   const kokuinRows = [];
   if (nametagKokuinText.area1) kokuinRows.push(`<div class="modal-color-row"><span class="modal-zone-label">刻印文字${nametagShape === 'ag' ? '（Area1）' : ''}</span><span>「${nametagKokuinText.area1}」</span></div>`);
   if (nametagShape === 'ag' && nametagKokuinText.area2) kokuinRows.push(`<div class="modal-color-row"><span class="modal-zone-label">刻印文字（Area2）</span><span>「${nametagKokuinText.area2}」</span></div>`);
+  if (hasKokuinText) kokuinRows.push(`<div class="modal-color-row"><span class="modal-zone-label">刻印フォント</span><span>フォント${font.id}：${font.family}</span></div>`);
 
   const info = document.getElementById('nametag-modal-info');
   if (info) info.innerHTML = `
@@ -608,6 +674,10 @@ async function nametagProceedToCart() {
   }
   if (nametagShape === 'ag' && nametagKokuinText.area2) {
     properties['刻印文字(Area2)'] = nametagKokuinText.area2;
+  }
+  if (nametagKokuinText.area1 || (nametagShape === 'ag' && nametagKokuinText.area2)) {
+    const font = nametagCurrentFont();
+    properties['刻印フォント'] = `フォント${font.id}：${font.family}`;
   }
   Object.entries(properties)
     .forEach(([k,v]) => {

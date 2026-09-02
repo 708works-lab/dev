@@ -134,6 +134,13 @@
 .nametag-simulator .kokuin-box input[type="text"]:focus {
   outline: none; border-color: #222;
 }
+.nametag-simulator .kokuin-box select {
+  width: 100%; font-size: 12px; padding: 8px 10px;
+  border: 1.5px solid #ddd; border-radius: 7px; background: #fff;
+}
+.nametag-simulator .kokuin-box select:focus {
+  outline: none; border-color: #222;
+}
 .nametag-simulator .kokuin-char-count {
   font-size: 10px; color: #999; text-align: right; margin-top: 3px;
 }
