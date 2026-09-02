@@ -59,9 +59,9 @@ const NAMETAG_KOKUIN_MAX_LEN = 12;
 // Backstageシリーズ等と同じバリデーションルールを踏襲
 const NAMETAG_KOKUIN_ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
 const NAMETAG_KOKUIN_ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
-// レーザー刻印はレザー色に関わらず焼け焦げたような一定の濃い色になるため、
-// 革色から自動計算せずkokuin-guitarの刻印線色（#352200）と合わせた固定色を使う
-const NAMETAG_KOKUIN_COLOR = '#352200';
+// 焼印は実物では革色に関わらず焦げたような濃色になるが、シミュレーターとしては
+// どの革色でも視認できることの方が重要なため、革色から自動計算したコントラスト色
+// を使う（濃色レザーで刻印が全く見えなくなる問題への対応）
 
 const NAMETAG_DEFAULT_LEATHER = '#9e3820';
 
@@ -170,12 +170,14 @@ function applyNametagState() {
 
   // 革色：.st2 は nametag-tl / nametag-ag 両方の leather グループで共有されている
   // ため、一括置換すれば両形状に同時に反映される（非表示側にも適用しておいて
-  // 損はない）
+  // 損はない）。.st0（ギター柄の刻印線）は革色に対してコントラストが出る色に
+  // 自動計算する（濃色レザーで刻印線が見えなくなる問題への対応）
   const styleEl = svg.querySelector('defs style');
   if (styleEl) {
     let css = styleEl.textContent;
-    const re = /(\.st2\s*{[^}]*fill:\s*)#[0-9a-fA-F]{3,6}/;
-    css = css.replace(re, `$1${nametagLeatherColor}`);
+    css = css.replace(/(\.st2\s*{[^}]*fill:\s*)#[0-9a-fA-F]{3,6}/, `$1${nametagLeatherColor}`);
+    const engraveHex = engravingColor(nametagLeatherColor);
+    css = css.replace(/(\.st0\s*{[^}]*stroke:\s*)#[0-9a-fA-F]{3,6}/, `$1${engraveHex}`);
     styleEl.textContent = css;
   }
 
@@ -224,8 +226,8 @@ function drawNametagKokuinText() {
     textEl.setAttribute('font-family', '-apple-system, "Helvetica Neue", Arial, sans-serif');
     textEl.setAttribute('font-weight', '600');
     textEl.setAttribute('font-size', NAMETAG_KOKUIN_BASE_FONT_SIZE);
-    textEl.setAttribute('fill', NAMETAG_KOKUIN_COLOR);
-    textEl.setAttribute('fill-opacity', '0.85');
+    textEl.setAttribute('fill', engravingColor(nametagLeatherColor));
+    textEl.setAttribute('fill-opacity', '0.95');
     textEl.textContent = text;
     svg.appendChild(textEl);
 
@@ -338,6 +340,19 @@ function setNametagLeatherColor(hex) {
   buildNametagLeatherPalette();
   updateNametagSummary();
   applyNametagState();
+}
+
+// 革色に対してコントラストが出る焼印色を計算する（明るい革には濃い焼印色、
+// 暗い革には明るめの焼印色）。Backstage/Triad等と同じロジック
+function engravingColor(hex) {
+  const h = hex.replace('#','');
+  const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  const lum = (r*0.299 + g*0.587 + b*0.114) / 255;
+  if (lum > 0.45) {
+    return `rgb(${Math.floor(r*.4)},${Math.floor(g*.4)},${Math.floor(b*.4)})`;
+  } else {
+    return `rgb(${Math.min(255,r+Math.floor((255-r)*.6))},${Math.min(255,g+Math.floor((255-g)*.6))},${Math.min(255,b+Math.floor((255-b)*.6))})`;
+  }
 }
 
 function nametagLeatherColorName(hex) {
