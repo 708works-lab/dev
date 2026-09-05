@@ -7,7 +7,7 @@ const BACKSTAGE_SHOPIFY_DOMAIN = '708works.jp';
 
 // 価格（名入れ刻印の有無のみでバリアントが変わる。長さ等の構造的な選択肢は無し）
 const BACKSTAGE_PRICE = 4400;
-const BACKSTAGE_VARIANT_IDS = { noeng: '50208138625274', eng: '50208138658042' };
+const BACKSTAGE_VARIANT_IDS = { noeng: '46634546594042', eng: '50230346940666' };
 
 // レザーカラー（Folklore/Kolmioと共通の20色パレット）
 const BACKSTAGE_LEATHER_COLORS = [
