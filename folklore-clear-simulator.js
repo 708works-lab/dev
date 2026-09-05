@@ -255,7 +255,9 @@ function fcBuildZoneButtons(){
   if(!container) return;
   container.innerHTML='';
 
-  const zones = fcLinked ? ['pvc','leather'] : ['pvc','front','rear'];
+  // イラスト（ストラップ図）は後ろ（エンドピン側）が上、前（ボディ上部側）が下なので、
+  // タブの並びもそれに合わせて「後端」を上、「前端」を下にする
+  const zones = fcLinked ? ['pvc','leather'] : ['pvc','rear','front'];
   zones.forEach(zone=>{
     const btn=document.createElement('button');
     btn.className='fc-zone-btn'+(zone===fcActiveZone?' active':'');
@@ -287,7 +289,7 @@ function fcToggleLeatherSplit(){
     fcRearColor=fcFrontColor;
     fcActiveZone='leather';
   }else{
-    fcActiveZone='front';
+    fcActiveZone='rear'; // タブ表示順の一番上（イラストの後ろ側）に合わせる
   }
   fcBuildZoneButtons();
   fcBuildPalette();
@@ -369,9 +371,9 @@ function fcUpdateSummary(){
         {label:FC_ZONE_LABEL.leather, hex:fcFrontColor.hex, name:fcFrontColor.name},
       ]
     : [
-        {label:FC_ZONE_LABEL.pvc,   hex:fcPvcColor.hex,   name:fcPvcColor.name},
-        {label:FC_ZONE_LABEL.front, hex:fcFrontColor.hex, name:fcFrontColor.name},
+        {label:FC_ZONE_LABEL.pvc,  hex:fcPvcColor.hex,  name:fcPvcColor.name},
         {label:FC_ZONE_LABEL.rear,  hex:fcRearColor.hex,  name:fcRearColor.name},
+        {label:FC_ZONE_LABEL.front, hex:fcFrontColor.hex, name:fcFrontColor.name},
       ];
   el.innerHTML = rows.map(r=>`
     <div class="fc-summary-row">
@@ -660,8 +662,8 @@ async function fcBuildSaveCanvas(){
   if(fcLinked){
     drawLabel(fcFrontColor.hex, `本革(前後共通): ${fcFrontColor.name}`);
   }else{
-    drawLabel(fcFrontColor.hex, `本革(前端): ${fcFrontColor.name}`);
     drawLabel(fcRearColor.hex, `本革(後端): ${fcRearColor.name}`);
+    drawLabel(fcFrontColor.hex, `本革(前端): ${fcFrontColor.name}`);
   }
 
   if(kokuinEnabled){
@@ -766,7 +768,7 @@ function fcColorSummaryLine(){
   if(fcLinked){
     return `本体(PVC): ${fcPvcColor.name}<br>本革(前後共通): ${fcFrontColor.name}`;
   }
-  return `本体(PVC): ${fcPvcColor.name}<br>本革(前端): ${fcFrontColor.name}<br>本革(後端): ${fcRearColor.name}`;
+  return `本体(PVC): ${fcPvcColor.name}<br>本革(後端): ${fcRearColor.name}<br>本革(前端): ${fcFrontColor.name}`;
 }
 
 function showConfirmModal(uploadResult){
