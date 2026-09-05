@@ -62,7 +62,7 @@
   }
 
   async function loadBaseSvg() {
-    const wrap = document.getElementById('wc-kokuin-svg-wrap');
+    const wrap = document.getElementById('wl-kokuin-svg-wrap');
     if (!wrap || svgLoaded) return;
     const res = await fetch('https://708works-lab.github.io/dev/wellington_kokuin_base.svg');
     const svgText = await res.text();
@@ -103,7 +103,7 @@
   window.applyWcKokuinColors = applyWcKokuinColors;
 
   function buildFontSelect() {
-    const select = document.getElementById('wc-kokuin-font-select');
+    const select = document.getElementById('wl-kokuin-font-select');
     if (!select) return;
     select.innerHTML = '';
     FONTS.forEach(f => {
@@ -120,9 +120,9 @@
   }
 
   function validateAndDraw() {
-    const input = document.getElementById('wc-kokuin-text');
-    const countEl = document.getElementById('wc-kokuin-char-count');
-    const warnEl = document.getElementById('wc-kokuin-warn');
+    const input = document.getElementById('wl-kokuin-text');
+    const countEl = document.getElementById('wl-kokuin-char-count');
+    const warnEl = document.getElementById('wl-kokuin-warn');
     if (!input) return;
     const text = input.value;
 
@@ -161,7 +161,7 @@
   }
 
   function updateFontSwatch() {
-    const swatch = document.getElementById('wc-kokuin-font-swatch');
+    const swatch = document.getElementById('wl-kokuin-font-swatch');
     if (!swatch) return;
     const font = currentFont();
     swatch.textContent = state.text || '';
@@ -298,8 +298,8 @@
   }
 
   async function onToggleChange() {
-    const toggle = document.getElementById('wc-kokuin-toggle');
-    const section = document.getElementById('wc-kokuin-section');
+    const toggle = document.getElementById('wl-kokuin-toggle');
+    const section = document.getElementById('wl-kokuin-section');
     state.enabled = toggle.checked;
     if (section) section.hidden = !state.enabled;
 
@@ -314,8 +314,8 @@
   }
 
   function init() {
-    const toggle = document.getElementById('wc-kokuin-toggle');
-    const input = document.getElementById('wc-kokuin-text');
+    const toggle = document.getElementById('wl-kokuin-toggle');
+    const input = document.getElementById('wl-kokuin-text');
     if (!toggle || !input) return;
 
     toggle.addEventListener('change', onToggleChange);
