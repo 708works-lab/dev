@@ -11,8 +11,8 @@ const NAMETAG_SHOPIFY_DOMAIN = '708works.jp';
 const NAMETAG_PRICE_WITH_GUITAR = 2200;
 const NAMETAG_PRICE_PLAIN       = 1980;
 const NAMETAG_VARIANT_IDS = {
-  ag: { guitar: '50213688869114', plain: '50213688901882' },
-  tl: { guitar: '50213688934650', plain: '50213688967418' }
+  ag: { guitar: '46634550821114', plain: '50230412411130' },
+  tl: { guitar: '50230412443898', plain: '50230412476666' }
 };
 
 // レザーカラー（Backstage/Folklore/Kolmioと共通の20色パレット）
