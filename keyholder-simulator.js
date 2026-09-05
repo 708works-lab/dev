@@ -317,6 +317,12 @@ function khBuildSvg() {
   const pad = 6;
   svg.setAttribute('viewBox', `${(b.x - pad).toFixed(1)} ${(b.y - pad).toFixed(1)} ${(b.width + pad * 2).toFixed(1)} ${(b.height + pad * 2).toFixed(1)}`);
 
+  // Area1〜3のプレースホルダーは、この直後の描画処理で非表示にされてしまうため、
+  // まだ元のまま見えているこの時点（SVGを丸ごと新規生成した直後）でbboxを実測してキャッシュしておく。
+  // 一度非表示にすると getBBox() は0を返すため、以後の再描画（テキスト入力・フォント変更等、
+  // SVGを作り直さない呼び出し）はこのキャッシュを使い回す。
+  khAreaBoxesCache = khMeasureAreaBoxes(svg);
+
   khRedrawSvg();
 }
 
@@ -340,6 +346,8 @@ function khRedrawSvg() {
 // 名入れ刻印（Area1〜3、刻印面のみ表示される）
 // ============================================================================
 
+let khAreaBoxesCache = null;
+
 function khMeasureAreaBoxes(svg) {
   const boxes = {};
   KH_AREA_IDS.forEach(id => {
@@ -357,8 +365,9 @@ function khRedrawKokuin() {
   const image02 = svg.querySelector('#image02');
   if (!image02) return;
 
-  // プレースホルダーpath（"Area 1"等の文字アウトライン）は常に非表示にし、
-  // 自前で生成したtext要素に置き換える
+  // プレースホルダーpath（"Area 1"等の文字アウトライン）を非表示にする。bboxは
+  // khBuildSvg()でSVGを新規生成した直後（まだ非表示にする前）にキャッシュ済みのものを使う
+  // （一度でも非表示にした後だとgetBBox()は0を返すため、ここで再測定してはいけない）。
   KH_AREA_IDS.forEach(id => {
     const el = svg.querySelector('#' + id);
     if (el) el.style.display = 'none';
@@ -373,7 +382,8 @@ function khRedrawKokuin() {
   kokuinGroup.innerHTML = '';
   if (!khKokuinEnabled) return;
 
-  const boxes = khMeasureAreaBoxes(svg);
+  const boxes = khAreaBoxesCache || khMeasureAreaBoxes(svg);
+
   const font = khCurrentFont();
   const fillColor = khContrastColor(khPick2Color.hex);
 
