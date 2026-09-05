@@ -73,6 +73,16 @@
     // Shopifyテーマのbase.cssに div:empty{display:none} があり、shadow rootを持つだけの
     // （light DOM上は子を持たない）divが非表示にされてしまうため、インラインで明示的に上書きする。
     wrap.style.display = 'block';
+
+    // 元のsvgのDOM順は _x35_,_x34_,_x33_,#kokuin,_x32_,front の順（本革版は3番目パーツの
+    // 領域に刻印を乗せる設計だったため、#kokuinがそこで前面に出れば十分だった）。
+    // Clear ver.は刻印をfrontの上に乗せるが、frontは#kokuinより後ろ（＝手前）に描画される
+    // ため、そのままだと刻印テキストがfrontの不透明な塗りで完全に隠れてしまう。
+    // #kokuinをsvgの最後（＝最前面）に移動し、常にfrontより手前に表示されるようにする。
+    const svg = kokuinShadowRoot.querySelector('svg');
+    const kokuinGroup = svg?.querySelector('#kokuin');
+    if (svg && kokuinGroup) svg.appendChild(kokuinGroup);
+
     svgLoaded = true;
     applyWcKokuinColors();
   }
