@@ -8,10 +8,10 @@ const TRIAD_SHOPIFY_DOMAIN = '708works.jp';
 // 価格（長さ × 名入れ刻印 のバリアントマトリクス。8バリアント）
 const TRIAD_PRICE = 27170;
 const TRIAD_LENGTHS = [
-  { label: '短くする', range: '最短約95cm～最長約120cm',  add: 0,    variantIds: { noeng: '50107308245242', eng: '50107308343546' } },
-  { label: '標準',     range: '最短約105cm～最長約130cm', add: 0,    variantIds: { noeng: '50079425396986', eng: '50087819804922' } },
-  { label: '長くする', range: '最短約105cm～最長約140cm', add: 1100, variantIds: { noeng: '50107308278010', eng: '50107308376314' } },
-  { label: '長くする', range: '最短約105cm～最長約150cm', add: 2200, variantIds: { noeng: '50107308310778', eng: '50107308409082' } }
+  { label: '短くする', range: '最短約95cm～最長約120cm',  add: 0,    variantIds: { noeng: '46634549608698', eng: '50231130226938' } },
+  { label: '標準',     range: '最短約105cm～最長約130cm', add: 0,    variantIds: { noeng: '50231130128634', eng: '50231130259706' } },
+  { label: '長くする', range: '最短約105cm～最長約140cm', add: 1100, variantIds: { noeng: '50231130161402', eng: '50231130292474' } },
+  { label: '長くする', range: '最短約105cm～最長約150cm', add: 2200, variantIds: { noeng: '50231130194170', eng: '50231130325242' } }
 ];
 const TRIAD_DEFAULT_LENGTH_INDEX = 1; // 標準
 let triadLengthIndex = TRIAD_DEFAULT_LENGTH_INDEX;
