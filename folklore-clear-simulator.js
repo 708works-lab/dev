@@ -86,11 +86,20 @@ let fcN=20;
 let fcPvcColor=FC_PVC_COLORS[0];
 let fcFrontColor=FC_LEATHER_COLORS.find(c=>c.id==='camel');
 let fcRearColor=FC_LEATHER_COLORS.find(c=>c.id==='camel');
-let fcSyncEnds=true;
+let fcLinked=true; // true=前後（前端・後端）を同じ色にする（デフォルト）／false=別々の色にする
+let fcActiveZone='pvc'; // 'pvc' | 'leather' | 'front' | 'rear'
 let fcPartColors=[]; // 表示順(index0=後ろ/20枚目 … indexN-1=前/1枚目)に対応する実際のhex配列
 let fcHistory=[];
 let fcLastUploadedImage=null;
 let fcHasDownloadedImage=false;
+
+// courier-simulator.jsの「パーツを選択」ゾーンタブ＋前後分離トグルと同じUIパターンを採用
+const FC_ZONE_LABEL = {
+  pvc:     '本体（PVC）',
+  leather: '本革（前後共通）',
+  front:   '前端（革）',
+  rear:    '後端（革）',
+};
 
 const FC_PIECE_PITCH=52.593, FC_SVG_VTOP=265, FC_SVG_VLEFT=211, FC_SVG_VW=72;
 const FC_SVG_ID_TO_PIECE={
@@ -123,41 +132,17 @@ function fcRebuildPartColors(){
 
 function initializeFCSimulator(){
   if (window.fcSimulatorInitialized) return;
-  const paletteEl=document.getElementById('fc-pvc-palette');
+  const zonesEl=document.getElementById('fc-zones');
   const strapScrollEl=document.getElementById('strap-scroll');
-  if(!paletteEl||!strapScrollEl){
+  if(!zonesEl||!strapScrollEl){
     setTimeout(initializeFCSimulator,100);
     return;
   }
   window.fcSimulatorInitialized=true;
   fcRebuildPartColors();
-  fcBuildPvcPalette();
-  fcBuildLeatherPalette('fc-leather-palette-front', fcFrontColor, c=>{
-    fcFrontColor=c;
-    if(fcSyncEnds) fcRearColor=c;
-    fcOnColorChange();
-  });
-  fcBuildLeatherPalette('fc-leather-palette-rear', fcRearColor, c=>{
-    fcRearColor=c;
-    fcOnColorChange();
-  });
-  const syncToggle=document.getElementById('fc-sync-toggle');
-  if(syncToggle){
-    syncToggle.checked=fcSyncEnds;
-    syncToggle.addEventListener('change',()=>{
-      fcSyncEnds=syncToggle.checked;
-      const rearBox=document.getElementById('fc-leather-rear-box');
-      if(rearBox) rearBox.hidden=fcSyncEnds;
-      fcUpdateFrontLabel();
-      if(fcSyncEnds){
-        fcRearColor=fcFrontColor;
-        fcOnColorChange();
-      }
-    });
-    const rearBox=document.getElementById('fc-leather-rear-box');
-    if(rearBox) rearBox.hidden=fcSyncEnds;
-  }
-  fcUpdateFrontLabel();
+  fcBuildZoneButtons();
+  fcBuildPalette();
+  fcUpdatePaletteLabel();
   fcUpdateSummary();
   fcBuildStrapSVG();
   fcUpdatePriceDisplay();
@@ -174,14 +159,7 @@ window.addEventListener('resize', () => {
   if (window.fcSimulatorInitialized) fcBuildStrapSVG();
 });
 
-function fcUpdateFrontLabel(){
-  const label=document.getElementById('fc-leather-front-label');
-  if(!label) return;
-  label.textContent = fcSyncEnds ? '本革の色（前後共通）' : '本革の色（前／ボディ上部側・1枚目）';
-}
-
 function fcOnColorChange(){
-  fcSaveHistory();
   fcRebuildPartColors();
   fcRedrawSVG();
   fcUpdateSummary();
@@ -228,7 +206,7 @@ function changeCount(d){
 // ============================================================================
 
 function fcSaveHistory(){
-  fcHistory.push({n:fcN, pvc:fcPvcColor, front:fcFrontColor, rear:fcRearColor, sync:fcSyncEnds});
+  fcHistory.push({n:fcN, pvc:fcPvcColor, front:fcFrontColor, rear:fcRearColor, linked:fcLinked, zone:fcActiveZone});
   if(fcHistory.length>30) fcHistory.shift();
   const btn=document.getElementById('btn-undo');
   if(btn) btn.disabled=false;
@@ -237,18 +215,15 @@ function fcSaveHistory(){
 function undo(){
   if(!fcHistory.length) return;
   const prev=fcHistory.pop();
-  fcN=prev.n; fcPvcColor=prev.pvc; fcFrontColor=prev.front; fcRearColor=prev.rear; fcSyncEnds=prev.sync;
+  fcN=prev.n; fcPvcColor=prev.pvc; fcFrontColor=prev.front; fcRearColor=prev.rear; fcLinked=prev.linked; fcActiveZone=prev.zone;
   fcRebuildPartColors();
   fcUpdateCountDisplay();
   fcUpdatePriceDisplay();
   fcBuildStrapSVG();
-  fcSyncPaletteSelection();
+  fcBuildZoneButtons();
+  fcBuildPalette();
+  fcUpdatePaletteLabel();
   fcUpdateSummary();
-  const rearBox=document.getElementById('fc-leather-rear-box');
-  if(rearBox) rearBox.hidden=fcSyncEnds;
-  const syncToggle=document.getElementById('fc-sync-toggle');
-  if(syncToggle) syncToggle.checked=fcSyncEnds;
-  fcUpdateFrontLabel();
   const btn=document.getElementById('btn-undo');
   if(!fcHistory.length && btn) btn.disabled=true;
 }
@@ -258,95 +233,123 @@ function resetAll(){
   fcPvcColor=FC_PVC_COLORS[0];
   fcFrontColor=FC_LEATHER_COLORS.find(c=>c.id==='camel');
   fcRearColor=FC_LEATHER_COLORS.find(c=>c.id==='camel');
-  fcSyncEnds=true;
+  fcLinked=true;
+  fcActiveZone='pvc';
   fcRebuildPartColors();
   fcBuildStrapSVG();
-  fcSyncPaletteSelection();
+  fcBuildZoneButtons();
+  fcBuildPalette();
+  fcUpdatePaletteLabel();
   fcUpdateSummary();
-  const rearBox=document.getElementById('fc-leather-rear-box');
-  if(rearBox) rearBox.hidden=true;
-  const syncToggle=document.getElementById('fc-sync-toggle');
-  if(syncToggle) syncToggle.checked=true;
-  fcUpdateFrontLabel();
 }
 
 // ============================================================================
-// カラーピッカー（PVC本体／前後の本革）
+// パーツ選択（ゾーンタブ）＋前後分離トグル
+// courier-simulator.js（Courierページ）と同じUI・挙動パターン：
+// デフォルトは前端・後端の本革が同じ色（リンク状態）。トグルで分離すると
+// 「前端（革）」「後端（革）」の2ゾーンに分かれて個別に色を選べるようになる。
 // ============================================================================
 
-function fcBuildPvcPalette(){
-  const p=document.getElementById('fc-pvc-palette');
+function fcBuildZoneButtons(){
+  const container=document.getElementById('fc-zones');
+  if(!container) return;
+  container.innerHTML='';
+
+  const zones = fcLinked ? ['pvc','leather'] : ['pvc','front','rear'];
+  zones.forEach(zone=>{
+    const btn=document.createElement('button');
+    btn.className='fc-zone-btn'+(zone===fcActiveZone?' active':'');
+    btn.onclick=()=>fcSelectZone(zone);
+
+    const dot=document.createElement('span');
+    dot.className='fc-zone-dot';
+    const hex = zone==='pvc' ? fcPvcColor.hex
+              : zone==='rear' ? fcRearColor.hex
+              : fcFrontColor.hex; // 'leather'・'front'はどちらも前端色を表示
+    dot.style.background=hex;
+    btn.appendChild(dot);
+    btn.appendChild(document.createTextNode(' '+FC_ZONE_LABEL[zone]));
+    container.appendChild(btn);
+  });
+
+  const toggle=document.createElement('button');
+  toggle.className='fc-split-toggle'+(fcLinked?'':' active');
+  toggle.onclick=fcToggleLeatherSplit;
+  toggle.innerHTML = fcLinked
+    ? '<span class="fc-toggle-icon">⊕</span> 前後を別の色にする'
+    : '<span class="fc-toggle-icon">⊖</span> 前後を同じ色に戻す';
+  container.appendChild(toggle);
+}
+
+function fcToggleLeatherSplit(){
+  fcLinked=!fcLinked;
+  if(fcLinked){
+    fcRearColor=fcFrontColor;
+    fcActiveZone='leather';
+  }else{
+    fcActiveZone='front';
+  }
+  fcBuildZoneButtons();
+  fcBuildPalette();
+  fcUpdatePaletteLabel();
+  fcUpdateSummary();
+  fcOnColorChange();
+}
+
+function fcSelectZone(zone){
+  fcActiveZone=zone;
+  fcBuildZoneButtons();
+  fcBuildPalette();
+  fcUpdatePaletteLabel();
+}
+
+function fcUpdatePaletteLabel(){
+  const label=document.getElementById('fc-palette-label');
+  if(label) label.textContent='カラー（'+FC_ZONE_LABEL[fcActiveZone]+'）';
+}
+
+// ============================================================================
+// カラーパレット（ゾーン連動・単一パレット）
+// ============================================================================
+
+function fcCurrentZoneColor(){
+  if(fcActiveZone==='pvc') return fcPvcColor;
+  if(fcActiveZone==='rear') return fcRearColor;
+  return fcFrontColor; // 'leather'・'front'
+}
+
+function fcBuildPalette(){
+  const p=document.getElementById('fc-palette');
   if(!p) return;
   p.innerHTML='';
-  FC_PVC_COLORS.forEach(c=>{
-    const wrap=document.createElement('div');
-    wrap.className='cb-wrap';
-    wrap.dataset.id=c.id;
-    const dot=document.createElement('div');
-    dot.className='cb'+(c.id===fcPvcColor.id?' on':'');
-    dot.style.cssText=`background:${c.hex} !important;width:32px;height:32px;border-radius:50%;display:block;flex-shrink:0;border:3px solid ${c.id===fcPvcColor.id?'#111':'transparent'};`;
-    const nm=document.createElement('div');
-    nm.className='color-name'+(c.id===fcPvcColor.id?' on':'');
-    nm.textContent=c.name;
-    wrap.appendChild(dot); wrap.appendChild(nm);
-    wrap.onclick=()=>{
-      fcPvcColor=c;
-      fcSaveHistory();
-      fcRebuildPartColors();
-      p.querySelectorAll('.cb-wrap').forEach(w=>{
-        const isOn=w.dataset.id===c.id;
-        w.querySelector('.cb').classList.toggle('on',isOn);
-        w.querySelector('.cb').style.border=`3px solid ${isOn?'#111':'transparent'}`;
-        w.querySelector('.color-name').classList.toggle('on',isOn);
-      });
-      fcRedrawSVG();
-      fcUpdateSummary();
-      fcHasDownloadedImage=false;
-    };
-    p.appendChild(wrap);
+
+  const colors = fcActiveZone==='pvc' ? FC_PVC_COLORS : FC_LEATHER_COLORS;
+  const current = fcCurrentZoneColor();
+
+  colors.forEach(c=>{
+    const sw=document.createElement('div');
+    sw.className='fc-swatch'+(c.id===current.id?' selected':'');
+    sw.style.background=c.hex;
+    sw.title=c.name;
+    sw.onclick=()=>fcSetColor(c);
+    p.appendChild(sw);
   });
 }
 
-function fcBuildLeatherPalette(elId, currentColor, onPick){
-  const p=document.getElementById(elId);
-  if(!p) return;
-  p.innerHTML='';
-  FC_LEATHER_COLORS.forEach(c=>{
-    const wrap=document.createElement('div');
-    wrap.className='cb-wrap';
-    wrap.dataset.id=c.id;
-    const dot=document.createElement('div');
-    dot.className='cb'+(c.id===currentColor.id?' on':'');
-    dot.style.cssText=`background:${c.hex} !important;width:32px;height:32px;border-radius:50%;display:block;flex-shrink:0;border:3px solid ${c.id===currentColor.id?'#111':'transparent'};`;
-    const nm=document.createElement('div');
-    nm.className='color-name'+(c.id===currentColor.id?' on':'');
-    nm.textContent=c.name;
-    wrap.appendChild(dot); wrap.appendChild(nm);
-    wrap.onclick=()=>{
-      p.querySelectorAll('.cb-wrap').forEach(w=>{
-        const isOn=w.dataset.id===c.id;
-        w.querySelector('.cb').classList.toggle('on',isOn);
-        w.querySelector('.cb').style.border=`3px solid ${isOn?'#111':'transparent'}`;
-        w.querySelector('.color-name').classList.toggle('on',isOn);
-      });
-      onPick(c);
-    };
-    p.appendChild(wrap);
-  });
-}
-
-// 元に戻す/リセット後にパレットのハイライトを再同期
-function fcSyncPaletteSelection(){
-  fcBuildPvcPalette();
-  fcBuildLeatherPalette('fc-leather-palette-front', fcFrontColor, c=>{
+function fcSetColor(c){
+  fcSaveHistory();
+  if(fcActiveZone==='pvc'){
+    fcPvcColor=c;
+  }else if(fcActiveZone==='leather'){
+    fcFrontColor=c; fcRearColor=c;
+  }else if(fcActiveZone==='front'){
     fcFrontColor=c;
-    if(fcSyncEnds) fcRearColor=c;
-    fcOnColorChange();
-  });
-  fcBuildLeatherPalette('fc-leather-palette-rear', fcRearColor, c=>{
+  }else{
     fcRearColor=c;
-    fcOnColorChange();
-  });
+  }
+  fcBuildZoneButtons();
+  fcBuildPalette();
+  fcOnColorChange();
 }
 
 // ============================================================================
@@ -356,16 +359,22 @@ function fcSyncPaletteSelection(){
 function fcUpdateSummary(){
   const el=document.getElementById('summary');
   if(!el) return;
-  const rows=[
-    `<span class="si"><span class="sw" style="background:${fcPvcColor.hex}"></span>本体(PVC)：${fcPvcColor.name}</span>`
-  ];
-  if(fcSyncEnds){
-    rows.push(`<span class="si"><span class="sw" style="background:${fcFrontColor.hex}"></span>本革（前後共通）：${fcFrontColor.name}</span>`);
-  }else{
-    rows.push(`<span class="si"><span class="sw" style="background:${fcFrontColor.hex}"></span>本革（前／ボディ上部側）：${fcFrontColor.name}</span>`);
-    rows.push(`<span class="si"><span class="sw" style="background:${fcRearColor.hex}"></span>本革（後ろ／エンドピン側）：${fcRearColor.name}</span>`);
-  }
-  el.innerHTML=rows.join('');
+  const rows = fcLinked
+    ? [
+        {label:FC_ZONE_LABEL.pvc,     hex:fcPvcColor.hex,   name:fcPvcColor.name},
+        {label:FC_ZONE_LABEL.leather, hex:fcFrontColor.hex, name:fcFrontColor.name},
+      ]
+    : [
+        {label:FC_ZONE_LABEL.pvc,   hex:fcPvcColor.hex,   name:fcPvcColor.name},
+        {label:FC_ZONE_LABEL.front, hex:fcFrontColor.hex, name:fcFrontColor.name},
+        {label:FC_ZONE_LABEL.rear,  hex:fcRearColor.hex,  name:fcRearColor.name},
+      ];
+  el.innerHTML = rows.map(r=>`
+    <div class="fc-summary-row">
+      <span class="fc-summary-label">${r.label}</span>
+      <span class="fc-summary-dot" style="background:${r.hex}"></span>
+      <span class="fc-summary-name">${r.name}</span>
+    </div>`).join('');
 }
 
 // ============================================================================
@@ -520,10 +529,15 @@ function fcRedrawSVG(){
     const g=svg.querySelector(`[data-piece="${pn}"]`);
     if(!g) return;
     const isEnd = (i===0 || i===N-1); // 0=後ろ(20枚目) / N-1=前(1枚目) は本革
+    const isFront = (i===N-1); // 708worksロゴ／名入れ刻印は前(1枚目・本革)にのみ入る
     const hex=fcPartColors[i];
     const logoCol=fcGetLogoColor(hex);
     g.querySelectorAll('path').forEach(p=>{
-      if(p.id==='logo'){ p.setAttribute('fill',logoCol); p.removeAttribute('fill-opacity'); return; }
+      if(p.id==='logo'){
+        if(isFront){ p.setAttribute('fill',logoCol); p.setAttribute('fill-opacity','1'); }
+        else{ p.setAttribute('fill-opacity','0'); }
+        return;
+      }
       if(isEnd){
         p.setAttribute('fill',hex);
         p.removeAttribute('fill-opacity');
@@ -632,11 +646,11 @@ async function fcBuildSaveCanvas(){
     ly+=22;
   };
   drawLabel(fcPvcColor.hex, `本体(PVC): ${fcPvcColor.name}`);
-  if(fcSyncEnds){
+  if(fcLinked){
     drawLabel(fcFrontColor.hex, `本革(前後共通): ${fcFrontColor.name}`);
   }else{
-    drawLabel(fcFrontColor.hex, `本革(前): ${fcFrontColor.name}`);
-    drawLabel(fcRearColor.hex, `本革(後ろ): ${fcRearColor.name}`);
+    drawLabel(fcFrontColor.hex, `本革(前端): ${fcFrontColor.name}`);
+    drawLabel(fcRearColor.hex, `本革(後端): ${fcRearColor.name}`);
   }
 
   if(kokuinEnabled){
@@ -738,10 +752,10 @@ async function goOrder(){
 }
 
 function fcColorSummaryLine(){
-  if(fcSyncEnds){
+  if(fcLinked){
     return `本体(PVC): ${fcPvcColor.name}<br>本革(前後共通): ${fcFrontColor.name}`;
   }
-  return `本体(PVC): ${fcPvcColor.name}<br>本革(前/ボディ上部側): ${fcFrontColor.name}<br>本革(後ろ/エンドピン側): ${fcRearColor.name}`;
+  return `本体(PVC): ${fcPvcColor.name}<br>本革(前端): ${fcFrontColor.name}<br>本革(後端): ${fcRearColor.name}`;
 }
 
 function showConfirmModal(uploadResult){

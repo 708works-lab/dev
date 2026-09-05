@@ -1,0 +1,66 @@
+/* folklore Clear ver. 専用スタイル（ゾーンタブ・前後分離トグル・パレット・サマリー）
+   courier-simulator.cssの同名パターンを.folklore-simulatorスコープに移植したもの */
+
+.folklore-simulator .fc-zones {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.folklore-simulator .fc-zone-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 9px;
+  border: 1.5px solid #ddd; border-radius: 7px;
+  background: #fff; cursor: pointer;
+  font-size: 11px; color: #444; font-weight: 400;
+  text-align: left;
+  width: 100%;
+}
+.folklore-simulator .fc-zone-btn.active {
+  border-color: #222; background: #222; color: #fff; font-weight: 500;
+}
+.folklore-simulator .fc-zone-dot {
+  width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,.15);
+}
+
+/* 前後分離トグル */
+.folklore-simulator .fc-split-toggle {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 8px;
+  border: 1px dashed #bbb; border-radius: 6px;
+  background: transparent; cursor: pointer;
+  font-size: 10px; color: #888;
+  margin-top: 2px;
+}
+.folklore-simulator .fc-split-toggle.active {
+  border-color: #555; color: #333; font-weight: 500;
+}
+.folklore-simulator .fc-toggle-icon {
+  font-size: 13px; line-height: 1;
+}
+
+/* ゾーン連動カラーパレット */
+.folklore-simulator .fc-swatch {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  border: 1.5px solid rgba(0,0,0,.12);
+  transition: transform .1s;
+}
+.folklore-simulator .fc-swatch:hover { transform: scale(1.15); }
+.folklore-simulator .fc-swatch.selected {
+  border: 2.5px solid #111;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111;
+}
+
+/* サマリー */
+.folklore-simulator .fc-summary-row {
+  display: flex; align-items: center; gap: 5px;
+  padding: 2px 0; font-size: 10.5px;
+}
+.folklore-simulator .fc-summary-label {
+  color: #888; font-size: 9.5px; min-width: 0; flex: 1;
+}
+.folklore-simulator .fc-summary-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.12); flex-shrink: 0;
+}
+.folklore-simulator .fc-summary-name {
+  color: #333; font-weight: 500; font-size: 10.5px;
+}
