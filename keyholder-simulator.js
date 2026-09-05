@@ -50,13 +50,19 @@ const KH_FONTS = [
   { id: 'C', family: 'Lobster', weight: '400', googleParam: 'Lobster', category: '筆記体' },
   { id: 'D', family: 'Playball', weight: '400', googleParam: 'Playball', category: '筆記体' },
 ];
-const KH_MAX_LEN = 20;
+// Areaごとに上限文字数を変える（Area1=名前想定でやや長め、Area3=短め）
+const KH_AREA_MAX_LEN = { area1: 18, area2: 15, area3: 10 };
 const KH_ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
 
 // Area1〜3のプレースホルダーpath（id="area1"|"area2"|"area3"）のbbox実測値。
 // 3行とも幅・高さはほぼ共通（x≈99.7, w≈65, h≈15.5）で、yのみ約42ずつ増える等間隔配置。
 // SVG読み込み後に実測し直すため、ここではキー名の対応関係のみ定義する。
 const KH_AREA_IDS = ['area1', 'area2', 'area3'];
+
+// フォントサイズの探索範囲（SVG単位）。3行とも同じサイズで揃えるため、各行を個別に
+// この範囲でフィットさせた上で最小値を採用する（詳細はkhComputeSharedFontSize参照）。
+const KH_BASE_FONT_SIZE = 26;
+const KH_MIN_FONT_SIZE = 8;
 
 // ============================================================================
 // グローバル状態
@@ -66,7 +72,7 @@ let khPick1Color = KH_COLORS.find(c => c.id === 'camel');
 let khPick2Color = KH_COLORS.find(c => c.id === 'natural');
 let khActiveZone = 'pick1'; // 'pick1' | 'pick2'
 let khActiveView = 'front'; // 'front'(表面/ロゴ面=image01) | 'back'(刻印面=image02)
-let khKokuinEnabled = false;
+const khKokuinEnabled = true; // 名入れ刻印は常時オン（希望しない人はまずいないため、チェックボックスは撤去）
 let khAreaText = { area1: '', area2: '', area3: '' };
 let khFontId = 'A';
 let khHistory = [];
@@ -82,7 +88,7 @@ function khCurrentFont() {
 // 初期化
 // ============================================================================
 
-function initializeKHSimulator() {
+async function initializeKHSimulator() {
   if (window.khSimulatorInitialized) return;
   const zonesEl = document.getElementById('kh-zones');
   const svgScrollEl = document.getElementById('kh-svg-scroll');
@@ -92,9 +98,12 @@ function initializeKHSimulator() {
   khBuildPalette();
   khUpdatePaletteLabel();
   khUpdateSummary();
-  khBuildSvg();
   khUpdatePriceDisplay();
   khBuildFontSelect();
+  // 名入れ刻印は常時オンなので、フォント読み込み前に描画すると幅計測がずれる。
+  // 読み込みを待ってから初回のSVG構築（＝刻印テキストの描画も含む）を行う。
+  await khLoadFonts();
+  khBuildSvg();
 }
 
 if (document.readyState === 'loading') {
@@ -130,7 +139,7 @@ function khUpdatePriceDisplay() {
 function khSaveHistory() {
   khHistory.push({
     pick1: khPick1Color, pick2: khPick2Color, zone: khActiveZone, view: khActiveView,
-    kokuinEnabled: khKokuinEnabled, areaText: { ...khAreaText }, fontId: khFontId,
+    areaText: { ...khAreaText }, fontId: khFontId,
   });
   if (khHistory.length > 30) khHistory.shift();
   const btn = document.getElementById('kh-btn-undo');
@@ -141,7 +150,7 @@ function khUndo() {
   if (!khHistory.length) return;
   const prev = khHistory.pop();
   khPick1Color = prev.pick1; khPick2Color = prev.pick2; khActiveZone = prev.zone; khActiveView = prev.view;
-  khKokuinEnabled = prev.kokuinEnabled; khAreaText = { ...prev.areaText }; khFontId = prev.fontId;
+  khAreaText = { ...prev.areaText }; khFontId = prev.fontId;
   khBuildZoneButtons();
   khBuildPalette();
   khUpdatePaletteLabel();
@@ -158,7 +167,6 @@ function khResetAll() {
   khPick2Color = KH_COLORS.find(c => c.id === 'natural');
   khActiveZone = 'pick1';
   khActiveView = 'front';
-  khKokuinEnabled = false;
   khAreaText = { area1: '', area2: '', area3: '' };
   khFontId = 'A';
   khBuildZoneButtons();
@@ -380,12 +388,37 @@ function khRedrawKokuin() {
     image02.appendChild(kokuinGroup);
   }
   kokuinGroup.innerHTML = '';
-  if (!khKokuinEnabled) return;
 
   const boxes = khAreaBoxesCache || khMeasureAreaBoxes(svg);
-
   const font = khCurrentFont();
   const fillColor = khContrastColor(khPick2Color.hex);
+
+  // 計測専用のtext要素（画面には出さない）。3行それぞれ「その行の文字列が自分のエリア幅に
+  // 収まる最大サイズ」を個別に求め、3行とも同じサイズ（＝その中の最小値）で描画する。
+  // こうすることで、1箇所だけ文字数が多くても3行全体で見た目のサイズが揃う。
+  const measureEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  measureEl.setAttribute('font-family', font.family);
+  measureEl.setAttribute('font-weight', font.weight);
+  measureEl.style.visibility = 'hidden';
+  kokuinGroup.appendChild(measureEl);
+
+  let sharedSize = KH_BASE_FONT_SIZE;
+  KH_AREA_IDS.forEach(id => {
+    const text = khAreaText[id];
+    const box = boxes[id];
+    if (!text || !box) return;
+    let size = KH_BASE_FONT_SIZE;
+    measureEl.setAttribute('font-size', size);
+    measureEl.textContent = text;
+    let w = measureEl.getBBox().width;
+    while (w > box.width && size > KH_MIN_FONT_SIZE) {
+      size -= 0.5;
+      measureEl.setAttribute('font-size', size);
+      w = measureEl.getBBox().width;
+    }
+    if (size < sharedSize) sharedSize = size;
+  });
+  measureEl.remove();
 
   KH_AREA_IDS.forEach(id => {
     const text = khAreaText[id];
@@ -396,30 +429,17 @@ function khRedrawKokuin() {
     el.setAttribute('dominant-baseline', 'central');
     el.setAttribute('font-family', font.family);
     el.setAttribute('font-weight', font.weight);
+    el.setAttribute('font-size', sharedSize);
     el.setAttribute('fill', fillColor);
     el.setAttribute('fill-opacity', '0.85');
-    el.textContent = text;
-    kokuinGroup.appendChild(el);
-
-    // box.width（実測エリア幅）に収まる最大フォントサイズを探す
-    let size = box.height * 0.8;
-    el.setAttribute('font-size', size);
-    let w = el.getBBox().width;
-    while (w > box.width && size > 6) {
-      size -= 0.5;
-      el.setAttribute('font-size', size);
-      w = el.getBBox().width;
-    }
     el.setAttribute('x', box.x);
     el.setAttribute('y', box.y + box.height / 2);
+    el.textContent = text;
+    kokuinGroup.appendChild(el);
   });
 }
 
 function khSyncKokuinUI() {
-  const toggle = document.getElementById('kh-kokuin-toggle');
-  const section = document.getElementById('kh-kokuin-section');
-  if (toggle) toggle.checked = khKokuinEnabled;
-  if (section) section.hidden = !khKokuinEnabled;
   ['area1', 'area2', 'area3'].forEach((id, i) => {
     const input = document.getElementById('kh-' + id + '-text');
     if (input) input.value = khAreaText[id] || '';
@@ -459,7 +479,7 @@ function khBuildFontSelect() {
 }
 
 function khValidateAndRedraw() {
-  ['area1', 'area2', 'area3'].forEach(id => {
+  KH_AREA_IDS.forEach(id => {
     const input = document.getElementById('kh-' + id + '-text');
     if (!input) return;
     let text = input.value;
@@ -467,26 +487,15 @@ function khValidateAndRedraw() {
       text = text.replace(/[^A-Za-z0-9\-_.,:;$!\s]/g, '');
       input.value = text;
     }
-    if (text.length > KH_MAX_LEN) {
-      text = text.slice(0, KH_MAX_LEN);
+    const maxLen = KH_AREA_MAX_LEN[id];
+    if (text.length > maxLen) {
+      text = text.slice(0, maxLen);
       input.value = text;
     }
     khAreaText[id] = text;
   });
   khRedrawKokuin();
   khHasDownloadedImage = false;
-}
-
-async function khOnKokuinToggleChange() {
-  const toggle = document.getElementById('kh-kokuin-toggle');
-  const section = document.getElementById('kh-kokuin-section');
-  khKokuinEnabled = toggle.checked;
-  if (section) section.hidden = !khKokuinEnabled;
-  if (khKokuinEnabled) {
-    await khLoadFonts();
-    if (khActiveView !== 'back') khSetView('back');
-  }
-  khRedrawKokuin();
 }
 
 // ============================================================================
