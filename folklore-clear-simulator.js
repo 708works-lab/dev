@@ -322,6 +322,9 @@ function fcBuildPalette(){
   const p=document.getElementById('fc-palette');
   if(!p) return;
   p.innerHTML='';
+  // Shopifyテーマのdiv:empty{display:none}対策：中身を持たない色スウォッチdivは
+  // display:blockを明示しないと本番でだけ非表示になる（Triad/Kolmio等で既知の罠）
+  p.style.cssText='display:flex;flex-wrap:wrap;gap:5px;';
 
   const colors = fcActiveZone==='pvc' ? FC_PVC_COLORS : FC_LEATHER_COLORS;
   const current = fcCurrentZoneColor();
@@ -329,7 +332,8 @@ function fcBuildPalette(){
   colors.forEach(c=>{
     const sw=document.createElement('div');
     sw.className='fc-swatch'+(c.id===current.id?' selected':'');
-    sw.style.background=c.hex;
+    const isSel=c.id===current.id;
+    sw.style.cssText=`display:block;background:${c.hex};width:22px;height:22px;border-radius:50%;cursor:pointer;box-sizing:border-box;border:${isSel?'2.5px solid #111;box-shadow:0 0 0 2px #fff,0 0 0 4px #111':'1.5px solid rgba(0,0,0,.12)'};`;
     sw.title=c.name;
     sw.onclick=()=>fcSetColor(c);
     p.appendChild(sw);
@@ -475,6 +479,13 @@ function fcBuildStrapSVG(){
     const g=svg.querySelector(`#${id}`);
     if(g) g.setAttribute('data-piece',pn);
   });
+
+  // 708worksロゴ（id="logo"のpath）はSVGアセット内に3枚目のパーツ1箇所にしか存在しない。
+  // 本革版では刻印もロゴも3枚目に固定だったが、PVC版では前(1枚目・本革)に移す必要があるため、
+  // 描画のたびにDOM上でpiece3の子からpiece1の子へ付け替える
+  const logoPath=svg.querySelector('[data-piece="3"] #logo, [data-piece="3"] [id="logo"]');
+  const piece1Group=svg.querySelector('[data-piece="1"]');
+  if(logoPath && piece1Group) piece1Group.appendChild(logoPath);
 
   for(let p=10;p<=19;p++){
     const g=svg.querySelector(`[data-piece="${p}"]`);
