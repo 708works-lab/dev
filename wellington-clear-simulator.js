@@ -552,22 +552,25 @@ function wcRedrawSVG() {
     else g = svg.querySelector(`[data-wc-clone="${logicalId}"]`);
     if (!g) return;
 
+    // WL_SVG_INNER内の各パーツは class="st1" 等のCSSクラスで.st1{fill:#995200;...}が
+    // <defs><style>に定義されているため、setAttribute('fill',...)（プレゼンテーション属性）
+    // ではCSSクラスの方が優先されてしまい反映されない。inline style（.style.fill）で
+    // 上書きする必要がある（本革版wellington-simulator.jsのwlRedrawSVGと同じ手法）。
     const isEnd = (logicalId === 0 || logicalId === 1); // 末端・先端＝本革
     if (isEnd) {
       const hex = logicalId === 1 ? wcFrontColor.hex : wcRearColor.hex;
-      g.setAttribute('fill', hex);
-      g.removeAttribute('fill-opacity');
+      g.style.fill = hex;
+      g.style.removeProperty('fill-opacity');
     } else {
-      g.setAttribute('fill', `url(#wc-pvc-grad-${wcPvcColor.id})`);
-      g.setAttribute('fill-opacity', '0.9');
+      g.style.fill = `url(#wc-pvc-grad-${wcPvcColor.id})`;
+      g.style.fillOpacity = '0.9';
     }
-    g.setAttribute('stroke', '#000');
-    g.setAttribute('stroke-width', '0.5');
-    g.setAttribute('stroke-miterlimit', '10');
+    g.style.stroke = '#000';
+    g.style.strokeWidth = '0.5';
   });
 
   const logo = svg.querySelector('#' + CSS.escape(branch.logoDomId));
-  if (logo) logo.setAttribute('fill', wcGetLogoColor(wcFrontColor.hex));
+  if (logo) logo.style.fill = wcGetLogoColor(wcFrontColor.hex);
 
   if (typeof applyWcKokuinColors === 'function') applyWcKokuinColors();
 }
