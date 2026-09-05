@@ -76,15 +76,17 @@
 
     const svg = kokuinShadowRoot.querySelector('svg');
 
-    // P5（_x35_）がviewBoxの左上端ぎりぎりに接しており、.kokuin-preview-boxのoverflow:hiddenで
-    // 角がわずかに切れて見えてしまう。全ピースを内包する余白を追加してviewBoxを広げる
+    // P5（_x35_）はsvgアセット自体の時点で左上が欠けた不完全な形状で書き出されており
+    // （viewBoxを広げても復元できない＝元データがそこで途切れている）、そのまま表示すると
+    // 中途半端な断片が見えてしまう。P5は非表示にし、P1〜P4の4枚だけがきれいに収まる
+    // viewBoxへ絞り込むことで、違和感のないクローズアップ表示にする
     if (svg) {
-      const vb = svg.getAttribute('viewBox');
-      if (vb) {
-        const [x, y, w, h] = vb.split(/\s+/).map(Number);
-        const margin = 20;
-        svg.setAttribute('viewBox', `${x - margin} ${y - margin} ${w + margin * 2} ${h + margin * 2}`);
-      }
+      const p5 = svg.querySelector('#_x35_');
+      if (p5) p5.style.display = 'none';
+      const margin = 15;
+      const x = 91.29 - margin, y = 51.19 - margin;
+      const w = (712.57 - 91.29) + margin * 2, h = (473.55 - 51.19) + margin * 2;
+      svg.setAttribute('viewBox', `${x} ${y} ${w} ${h}`);
     }
 
     // 空の#kokuinグループを、刻印位置であるP1（_x31_）の子要素へ付け替える
