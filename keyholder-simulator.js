@@ -356,13 +356,44 @@ function khRedrawSvg() {
 
 let khAreaBoxesCache = null;
 
+// Area1〜3のプレースホルダー自体の幅（実測65前後）はテキスト用にかなり狭く作られていた
+// （ユーザー確認済み：「leather2レイヤーからはみ出ない程度であれば刻印可能」）。
+// そのため、プレースホルダーの幅をそのまま使わず、各行の高さ中央のY座標において
+// 実際のピック2形状（leather02）が横方向にどこまで続いているかをisPointInFillで
+// 左右にスキャンして実測し、そこから安全マージンを引いた範囲を刻印可能な幅として使う。
+const KH_AREA_EDGE_MARGIN = 5; // 輪郭線に文字が触れないようにする安全マージン（SVG単位）
+
+function khScanShapeHorizontalExtent(svg, shapeEl, y, startX) {
+  const pt = svg.createSVGPoint();
+  pt.y = y;
+  let left = startX, right = startX;
+  for (let x = startX; x >= 0; x -= 1) {
+    pt.x = x;
+    if (shapeEl.isPointInFill(pt)) left = x; else break;
+  }
+  for (let x = startX; x <= 285.68; x += 1) {
+    pt.x = x;
+    if (shapeEl.isPointInFill(pt)) right = x; else break;
+  }
+  return { left, right };
+}
+
 function khMeasureAreaBoxes(svg) {
   const boxes = {};
+  const pickShape = svg.querySelector('#leather02');
   KH_AREA_IDS.forEach(id => {
     const el = svg.querySelector('#' + id);
     if (!el) return;
     const b = el.getBBox();
-    boxes[id] = { x: b.x, y: b.y, width: b.width, height: b.height };
+    const yCenter = b.y + b.height / 2;
+    const startX = b.x + b.width / 2; // プレースホルダー自体の中心は必ずピック内部にあるはずの起点
+    const { left, right } = khScanShapeHorizontalExtent(svg, pickShape, yCenter, startX);
+    boxes[id] = {
+      y: b.y,
+      height: b.height,
+      centerX: (left + right) / 2,
+      width: Math.max(10, (right - left) - KH_AREA_EDGE_MARGIN * 2),
+    };
   });
   return boxes;
 }
@@ -425,14 +456,14 @@ function khRedrawKokuin() {
     const box = boxes[id];
     if (!text || !box) return;
     const el = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    el.setAttribute('text-anchor', 'start');
+    el.setAttribute('text-anchor', 'middle');
     el.setAttribute('dominant-baseline', 'central');
     el.setAttribute('font-family', font.family);
     el.setAttribute('font-weight', font.weight);
     el.setAttribute('font-size', sharedSize);
     el.setAttribute('fill', fillColor);
     el.setAttribute('fill-opacity', '0.85');
-    el.setAttribute('x', box.x);
+    el.setAttribute('x', box.centerX);
     el.setAttribute('y', box.y + box.height / 2);
     el.textContent = text;
     kokuinGroup.appendChild(el);
