@@ -3,17 +3,17 @@
   <!-- ベースは folklore_kokuin_simulator.svg（708works提供・2026-08-18差し替え版：余白を詰めた再構成）。サンプル文字「ABCDEFGHIJK」のパスのみ除去し、#kokuin を空グループとして残してある -->
   <defs>
     <style>
+      .st0, .st1, .st2 {
+        stroke: #000;
+        stroke-miterlimit: 10;
+      }
+
       .st0 {
         fill: none;
       }
 
       .st1, .st2 {
         fill: #995200;
-      }
-
-      .st2 {
-        stroke: #000;
-        stroke-miterlimit: 10;
       }
     </style>
   </defs>
