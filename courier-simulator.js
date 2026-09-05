@@ -7,9 +7,9 @@ const COURIER_SHOPIFY_DOMAIN = '708works.jp';
 
 // 長さバリアント
 const COURIER_LENGTHS = [
-  { id:'short',    label:'短め',  desc:'最短約85cm〜最長約130cm',  price: 9130, priceAdj:    0, variantIds:{ noeng:'49001055092986', eng:'50127995437306' } },
-  { id:'standard', label:'標準',  desc:'最短約95cm〜最長約145cm',  price: 9130, priceAdj:    0, variantIds:{ noeng:'49000891351290', eng:'50127995470074' } },
-  { id:'long',     label:'長め',  desc:'最短約95cm〜最長約160cm',  price: 9680, priceAdj: +550, variantIds:{ noeng:'49001055125754', eng:'50127995502842' } },
+  { id:'short',    label:'短め',  desc:'最短約85cm〜最長約130cm',  price: 9130, priceAdj:    0, variantIds:{ noeng:'46634546921722', eng:'50231160209658' } },
+  { id:'standard', label:'標準',  desc:'最短約95cm〜最長約145cm',  price: 9130, priceAdj:    0, variantIds:{ noeng:'50231160242426', eng:'50231160275194' } },
+  { id:'long',     label:'長め',  desc:'最短約95cm〜最長約160cm',  price: 9680, priceAdj: +550, variantIds:{ noeng:'50231160307962', eng:'50231160340730' } },
 ];
 
 // 革パーツ用カラー（20色）
