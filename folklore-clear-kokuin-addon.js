@@ -74,9 +74,21 @@
     // Shopifyテーマのdiv:empty{display:none}対策（Shadow DOM内の内容はlight DOM上は「空」判定される）
     wrap.style.display = 'block';
 
+    const svg = kokuinShadowRoot.querySelector('svg');
+
+    // P5（_x35_）がviewBoxの左上端ぎりぎりに接しており、.kokuin-preview-boxのoverflow:hiddenで
+    // 角がわずかに切れて見えてしまう。全ピースを内包する余白を追加してviewBoxを広げる
+    if (svg) {
+      const vb = svg.getAttribute('viewBox');
+      if (vb) {
+        const [x, y, w, h] = vb.split(/\s+/).map(Number);
+        const margin = 20;
+        svg.setAttribute('viewBox', `${x - margin} ${y - margin} ${w + margin * 2} ${h + margin * 2}`);
+      }
+    }
+
     // 空の#kokuinグループを、刻印位置であるP1（_x31_）の子要素へ付け替える
     // （元のsvgファイルはP3=_x33_の子として持っているため、本革版とは異なりここで移設が必要）
-    const svg = kokuinShadowRoot.querySelector('svg');
     const kokuinGroup = svg?.querySelector('#kokuin');
     const p1Group = svg?.querySelector('#_x31_');
     if (kokuinGroup && p1Group) p1Group.appendChild(kokuinGroup);

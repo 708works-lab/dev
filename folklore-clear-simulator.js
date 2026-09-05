@@ -483,11 +483,21 @@ function fcBuildStrapSVG(){
   });
 
   // 708worksロゴ（id="logo"のpath）はSVGアセット内に3枚目のパーツ1箇所にしか存在しない。
-  // 本革版では刻印もロゴも3枚目に固定だったが、PVC版では前(1枚目・本革)に移す必要があるため、
-  // 描画のたびにDOM上でpiece3の子からpiece1の子へ付け替える
-  const logoPath=svg.querySelector('[data-piece="3"] #logo, [data-piece="3"] [id="logo"]');
+  // 本革版では刻印もロゴも3枚目に固定だったが、PVC版では前(1枚目・本革)に移す必要がある。
+  // piece1とpiece3は座標系が異なる（本体SVGは刻印プレビュー用SVGと違い単純な平行移動関係ではない）ため、
+  // 単純にDOM上で付け替えるだけだと元のpiece3の位置のまま描画されてしまう。
+  // 両グループのbboxから中心座標の差分を求め、その分だけtranslateしてから付け替える。
+  const piece3Group=svg.querySelector('[data-piece="3"]');
   const piece1Group=svg.querySelector('[data-piece="1"]');
-  if(logoPath && piece1Group) piece1Group.appendChild(logoPath);
+  const logoPath=piece3Group ? piece3Group.querySelector('#logo, [id="logo"]') : null;
+  if(logoPath && piece1Group && piece3Group){
+    const b3=piece3Group.getBBox();
+    const b1=piece1Group.getBBox();
+    const dx=(b1.x+b1.width/2)-(b3.x+b3.width/2);
+    const dy=(b1.y+b1.height/2)-(b3.y+b3.height/2);
+    logoPath.setAttribute('transform',`translate(${dx.toFixed(3)},${dy.toFixed(3)})`);
+    piece1Group.appendChild(logoPath);
+  }
 
   for(let p=10;p<=19;p++){
     const g=svg.querySelector(`[data-piece="${p}"]`);
