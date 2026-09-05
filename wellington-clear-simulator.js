@@ -37,15 +37,15 @@ function wcLengthCmForCount(n) {
 
 // ウロコ数とVariant IDのマッピング（刻印なし/あり）。商品のネイティブバリアント作成後に実IDへ差し替える。
 const WC_VARIANT_MAP = {
-  16: { noeng: null, eng: null },
-  17: { noeng: null, eng: null },
-  18: { noeng: null, eng: null },
-  19: { noeng: null, eng: null },
-  20: { noeng: null, eng: null },
-  21: { noeng: null, eng: null },
-  22: { noeng: null, eng: null },
-  23: { noeng: null, eng: null },
-  24: { noeng: null, eng: null },
+  16: { noeng: '46634549739770', eng: '50232052809978' },
+  17: { noeng: '50232052842746', eng: '50232052875514' },
+  18: { noeng: '50232052908282', eng: '50232052941050' },
+  19: { noeng: '50232052973818', eng: '50232053006586' },
+  20: { noeng: '50232053039354', eng: '50232053072122' },
+  21: { noeng: '50232053104890', eng: '50232053137658' },
+  22: { noeng: '50232053170426', eng: '50232053203194' },
+  23: { noeng: '50232053235962', eng: '50232053268730' },
+  24: { noeng: '50232053301498', eng: '50232053334266' },
 };
 
 const WC_KOKUIN_PRICE_ADD = 1100;
