@@ -75,19 +75,8 @@
     wrap.style.display = 'block';
 
     const svg = kokuinShadowRoot.querySelector('svg');
-
-    // P5（_x35_）はsvgアセット自体の時点で左上が欠けた不完全な形状で書き出されており
-    // （viewBoxを広げても復元できない＝元データがそこで途切れている）、そのまま表示すると
-    // 中途半端な断片が見えてしまう。P5は非表示にし、P1〜P4の4枚だけがきれいに収まる
-    // viewBoxへ絞り込むことで、違和感のないクローズアップ表示にする
-    if (svg) {
-      const p5 = svg.querySelector('#_x35_');
-      if (p5) p5.style.display = 'none';
-      const margin = 15;
-      const x = 91.29 - margin, y = 51.19 - margin;
-      const w = (712.57 - 91.29) + margin * 2, h = (473.55 - 51.19) + margin * 2;
-      svg.setAttribute('viewBox', `${x} ${y} ${w} ${h}`);
-    }
+    // viewBox・P5の表示は本革版（folklore-kokuin-addon.js）と同一のまま変更しない
+    // （P5が左上で一部欠けて見えるのはsvgアセット自体の仕様で、本革版も同じ見え方）
 
     // 空の#kokuinグループを、刻印位置であるP1（_x31_）の子要素へ付け替える
     // （元のsvgファイルはP3=_x33_の子として持っているため、本革版とは異なりここで移設が必要）
