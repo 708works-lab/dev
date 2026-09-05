@@ -7,7 +7,7 @@ const BACKSTAGE_CAMERA_SHOPIFY_DOMAIN = '708works.jp';
 
 // 価格（名入れ刻印の有無のみでバリアントが変わる。長さ等の構造的な選択肢は無し）
 const BACKSTAGE_CAMERA_PRICE = 4400;
-const BACKSTAGE_CAMERA_VARIANT_IDS = { noeng: '50210846998778', eng: '50210847031546' };
+const BACKSTAGE_CAMERA_VARIANT_IDS = { noeng: '46634546659578', eng: '50230322561274' };
 
 // レザーカラー（Backstage for Bag / Folklore / Kolmioと共通の20色パレット）
 const BACKSTAGE_CAMERA_LEATHER_COLORS = [
