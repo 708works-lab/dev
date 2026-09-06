@@ -74,6 +74,18 @@
 }
 .keyholder-simulator input.kh-area-input:focus { outline: none; border-color: #222; }
 
+.keyholder-simulator .kh-char-count {
+  font-size: 10px; color: #999; text-align: right; margin-top: 3px;
+}
+.keyholder-simulator .kh-char-count.over { color: #c0392b; font-weight: 700; }
+
+.keyholder-simulator .kh-warn {
+  font-size: 11px; color: #856404; background: #fff3cd;
+  border-radius: 6px; padding: 7px 9px; margin-top: 6px; line-height: 1.6;
+  display: none;
+}
+.keyholder-simulator .kh-warn.show { display: block; }
+
 .keyholder-simulator select#kh-kokuin-font-select {
   width: 100%; font-size: 12px; padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 7px; background: #fff;
 }

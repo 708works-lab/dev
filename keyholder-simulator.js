@@ -42,17 +42,21 @@ const KH_ZONE_LABEL = {
   pick2: '刻印面',
 };
 
-// フォント（他ラインの名入れ刻印アドオンと共通の5書体）
+// フォント（他ラインの名入れ刻印アドオンと共通の8書体）
 const KH_FONTS = [
   { id: 'A', family: 'Cabin Sketch', weight: '700', googleParam: 'Cabin+Sketch:wght@700', category: '手書き' },
   { id: 'B', family: 'Special Elite', weight: '400', googleParam: 'Special+Elite', category: 'スタンプ風' },
   { id: 'E', family: 'AG Stencil', weight: '400', google: false, noUppercase: true, localUrl: 'https://708works-lab.github.io/dev/fonts/AG-Stencil.ttf', category: 'スタンプ風' },
   { id: 'C', family: 'Lobster', weight: '400', googleParam: 'Lobster', category: '筆記体' },
   { id: 'D', family: 'Playball', weight: '400', googleParam: 'Playball', category: '筆記体' },
+  { id: 'H', family: 'Great Vibes', weight: '400', googleParam: 'Great+Vibes', category: '筆記体' },
+  { id: 'F', family: 'Bebas Neue', weight: '400', googleParam: 'Bebas+Neue', category: 'モダン' },
+  { id: 'G', family: 'UnifrakturMaguntia', weight: '400', googleParam: 'UnifrakturMaguntia', category: 'ゴシック' },
 ];
 // Areaごとに上限文字数を変える（Area1=名前想定でやや長め、Area3=短め）
 const KH_AREA_MAX_LEN = { area1: 18, area2: 15, area3: 10 };
 const KH_ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
+const KH_ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
 
 // Area1〜3のプレースホルダーpath（id="area1"|"area2"|"area3"）のbbox実測値。
 // 3行とも幅・高さはほぼ共通（x≈99.7, w≈65, h≈15.5）で、yのみ約42ずつ増える等間隔配置。
@@ -74,6 +78,7 @@ let khActiveZone = 'pick1'; // 'pick1' | 'pick2'
 let khActiveView = 'front'; // 'front'(表面/ロゴ面=image01) | 'back'(刻印面=image02)
 const khKokuinEnabled = true; // 名入れ刻印は常時オン（希望しない人はまずいないため、チェックボックスは撤去）
 let khAreaText = { area1: '', area2: '', area3: '' };
+let khAreaValid = { area1: true, area2: true, area3: true };
 let khFontId = 'A';
 let khHistory = [];
 let khLastUploadedImage = null;
@@ -482,7 +487,12 @@ function khSyncKokuinUI() {
   ['area1', 'area2', 'area3'].forEach((id, i) => {
     const input = document.getElementById('kh-' + id + '-text');
     if (input) input.value = khAreaText[id] || '';
+    const countEl = document.getElementById('kh-' + id + '-char-count');
+    if (countEl) countEl.textContent = `${(khAreaText[id] || '').length} / ${KH_AREA_MAX_LEN[id]}`;
+    const warnEl = document.getElementById('kh-' + id + '-warn');
+    if (warnEl) { warnEl.innerHTML = ''; warnEl.classList.remove('show'); }
   });
+  khAreaValid = { area1: true, area2: true, area3: true };
   const fontSelect = document.getElementById('kh-kokuin-font-select');
   if (fontSelect) fontSelect.value = khFontId;
 }
@@ -518,20 +528,32 @@ function khBuildFontSelect() {
 }
 
 function khValidateAndRedraw() {
+  const font = khCurrentFont();
   KH_AREA_IDS.forEach(id => {
     const input = document.getElementById('kh-' + id + '-text');
     if (!input) return;
-    let text = input.value;
-    if (!KH_ALLOWED_PATTERN.test(text)) {
-      text = text.replace(/[^A-Za-z0-9\-_.,:;$!\s]/g, '');
-      input.value = text;
-    }
+    const text = input.value;
     const maxLen = KH_AREA_MAX_LEN[id];
-    if (text.length > maxLen) {
-      text = text.slice(0, maxLen);
-      input.value = text;
+
+    const countEl = document.getElementById('kh-' + id + '-char-count');
+    if (countEl) {
+      const overLen = text.length > maxLen;
+      countEl.textContent = `${text.length} / ${maxLen}`;
+      countEl.classList.toggle('over', overLen);
     }
+
+    const warnings = [];
+    if (text && !KH_ALLOWED_PATTERN.test(text)) warnings.push(KH_ALLOWED_HINT);
+    if (text && font.noUppercase && /[A-Z]/.test(text)) warnings.push(`フォント${font.id}は大文字に対応していません。小文字でご入力ください。`);
+    if (text.length > maxLen) warnings.push(`文字数の上限は${maxLen}文字です。`);
+    const warnEl = document.getElementById('kh-' + id + '-warn');
+    if (warnEl) {
+      warnEl.innerHTML = warnings.join('<br>');
+      warnEl.classList.toggle('show', warnings.length > 0);
+    }
+
     khAreaText[id] = text;
+    khAreaValid[id] = warnings.length === 0;
   });
   khRedrawKokuin();
   khHasDownloadedImage = false;
@@ -683,6 +705,10 @@ async function khUploadOrderImage(canvas) {
 }
 
 async function khGoOrder() {
+  if (Object.values(khAreaValid).some(v => !v)) {
+    showKhToast('刻印する文字を正しく入力してください');
+    return;
+  }
   if (!khHasDownloadedImage) await khSaveImage();
   showKhLoading('画像をアップロード中...');
   try {
