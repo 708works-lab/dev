@@ -317,19 +317,27 @@ function khBuildSvg() {
   const image01 = svg.querySelector('#image01'); // 表面（ロゴ面）
   const image02 = svg.querySelector('#image02'); // 刻印面
 
+  // Area1〜3のプレースホルダー・leather02形状（isPointInFillでのスキャン）の実測は、
+  // image01/image02のどちらも非表示にする前に必ず済ませておく。Chromeではdisplay:noneの
+  // 祖先を持つ要素でもgetBBox()/isPointInFill()が動くことがあるが、Safari（実機iPhone）
+  // では正しく動作せず0を返す・例外を投げるなどして以降の描画が丸ごと止まってしまう
+  // （実機でイメージ図が全く表示されない不具合の原因だった）。
+  khAreaBoxesCache = khMeasureAreaBoxes(svg);
+
   image01.style.display = khActiveView === 'front' ? '' : 'none';
   image02.style.display = khActiveView === 'back' ? '' : 'none';
 
   const activeGroup = khActiveView === 'front' ? image01 : image02;
   const b = activeGroup.getBBox();
   const pad = 6;
-  svg.setAttribute('viewBox', `${(b.x - pad).toFixed(1)} ${(b.y - pad).toFixed(1)} ${(b.width + pad * 2).toFixed(1)} ${(b.height + pad * 2).toFixed(1)}`);
-
-  // Area1〜3のプレースホルダーは、この直後の描画処理で非表示にされてしまうため、
-  // まだ元のまま見えているこの時点（SVGを丸ごと新規生成した直後）でbboxを実測してキャッシュしておく。
-  // 一度非表示にすると getBBox() は0を返すため、以後の再描画（テキスト入力・フォント変更等、
-  // SVGを作り直さない呼び出し）はこのキャッシュを使い回す。
-  khAreaBoxesCache = khMeasureAreaBoxes(svg);
+  const vbX = b.x - pad, vbY = b.y - pad, vbW = b.width + pad * 2, vbH = b.height + pad * 2;
+  svg.setAttribute('viewBox', `${vbX.toFixed(1)} ${vbY.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}`);
+  // 一部のモバイルブラウザでviewBoxのみだと高さが0扱いになることがあるための保険として、
+  // 実測アスペクト比から明示的にwidth/heightも設定する
+  const dispW = 260;
+  const dispH = Math.round(dispW * (vbH / vbW));
+  svg.setAttribute('width', dispW);
+  svg.setAttribute('height', dispH);
 
   khRedrawSvg();
 }
