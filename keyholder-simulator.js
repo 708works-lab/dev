@@ -361,7 +361,7 @@ let khAreaBoxesCache = null;
 // そのため、プレースホルダーの幅をそのまま使わず、各行の高さ中央のY座標において
 // 実際のピック2形状（leather02）が横方向にどこまで続いているかをisPointInFillで
 // 左右にスキャンして実測し、そこから安全マージンを引いた範囲を刻印可能な幅として使う。
-const KH_AREA_EDGE_MARGIN = 5; // 輪郭線に文字が触れないようにする安全マージン（SVG単位）
+const KH_AREA_EDGE_MARGIN = 14; // 輪郭線に文字が触れないようにする安全マージン（SVG単位）
 
 function khScanShapeHorizontalExtent(svg, shapeEl, y, startX) {
   const pt = svg.createSVGPoint();
