@@ -248,9 +248,13 @@ function shcApplyDiameter() {
   if (!svg) return;
   const sizeGroup = svg.getElementById('size');
   if (!sizeGroup) return;
-  const digits = String(shcDiameter).padStart(2, '0').split('');
+  const digitsStr = String(shcDiameter);
   const paths = Array.from(sizeGroup.children);
-  // 先頭2パス（"X" "X"）を隠し、代わりに実際の数字をtextで重ねる
+  // 先頭2パス（"X" "X"）を隠し、代わりに実際の数字をtextで重ねる。
+  // 直径が3桁になる商品（ギター用soundhole-cover-ag: 70〜110mm）もあるため、2つの
+  // プレースホルダーの合計幅を1つの表示エリアとみなし、桁数に応じて均等割り＋
+  // フォントサイズを自動調整する（2桁固定で実装するとSHC_SIZE_DIGIT_BOXES[2]が
+  // undefinedになり例外で処理が止まるため、soundhole-cover-ag開発時に修正）。
   paths[0].style.display = 'none';
   paths[1].style.display = 'none';
   let overlay = sizeGroup.querySelector('#shc-size-digits');
@@ -260,12 +264,22 @@ function shcApplyDiameter() {
     sizeGroup.appendChild(overlay);
   }
   overlay.innerHTML = '';
-  digits.forEach((d, i) => {
-    const box = SHC_SIZE_DIGIT_BOXES[i];
+
+  const box0 = SHC_SIZE_DIGIT_BOXES[0];
+  const box1 = SHC_SIZE_DIGIT_BOXES[1];
+  const areaX = box0.x;
+  const areaW = (box1.x + box1.w) - box0.x;
+  const areaY = box0.y;
+  const areaH = box0.h;
+  const n = digitsStr.length;
+  const slotW = areaW / n;
+  const fontSize = Math.min(areaH * 0.98, slotW * 1.05);
+
+  digitsStr.split('').forEach((d, i) => {
     const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    t.setAttribute('x', box.x + box.w / 2);
-    t.setAttribute('y', box.y + box.h / 2);
-    t.setAttribute('font-size', box.h * 0.98);
+    t.setAttribute('x', areaX + slotW * (i + 0.5));
+    t.setAttribute('y', areaY + areaH / 2);
+    t.setAttribute('font-size', fontSize);
     t.setAttribute('font-family', 'Arial, "Hiragino Sans", sans-serif');
     t.setAttribute('font-weight', '700');
     t.setAttribute('fill', '#000');

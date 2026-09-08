@@ -1,0 +1,155 @@
+/* サウンドホールカバー｜アコースティックギター用（soundhole-cover-ag）カラーシミュレーター専用スタイル
+   soundhole-cover-uk-simulator.css を完全に踏襲（クラス名・構造は共通のためデータ変更なし）。 */
+
+.shc-simulator {
+  background: #f0ede8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  padding: 20px 0;
+}
+.shc-simulator * { box-sizing: border-box; }
+
+.shc-simulator .app {
+  width: 100%; max-width: 520px; display: flex; flex-direction: column; margin: 0 auto;
+}
+
+/* スマホ（デフォルト）は1カラム縦積み。PC幅では2カラム横並びにする。
+   このSVGはクローズアップ＋本体装着イメージが縦に連結された縦長画像（比率約1:2.6）のため、
+   横並びにする際は align-items を stretch にしないこと——丈の短いctrl-colがSVGの高さまで
+   引き伸ばされて下部に大きな余白ができてしまう（2026-09-08に一度踏んだ不具合）。 */
+.shc-simulator .top-area {
+  display: flex; flex-direction: column; padding: 10px 10px 0; gap: 10px;
+}
+.shc-simulator .ctrl-col { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.shc-simulator .svg-col {
+  display: flex; flex-direction: column; align-items: center; width: 100%;
+}
+
+@media (min-width: 860px) {
+  .shc-simulator .app { max-width: 920px; }
+  .shc-simulator .top-area { flex-direction: row; align-items: flex-start; gap: 20px; }
+  .shc-simulator .ctrl-col { width: 340px; flex-shrink: 0; }
+  .shc-simulator .svg-col { flex: 1; }
+  .shc-simulator .kokuin-section,
+  .shc-simulator .price-bar,
+  .shc-simulator .order-note,
+  .shc-simulator .bottom-bar {
+    max-width: 920px;
+  }
+}
+
+.shc-simulator .shc-handedness-buttons { display: flex; gap: 6px; width: 100%; margin-bottom: 8px; }
+.shc-simulator .shc-handedness-btn {
+  flex: 1; padding: 8px 4px; border: 1.5px solid #e0e0e0; border-radius: 8px;
+  background: #fff; font-size: 11px; color: #666; cursor: pointer; transition: all .12s;
+}
+.shc-simulator .shc-handedness-btn.active { background: #111; color: #fff; border-color: #111; }
+
+.shc-simulator .svg-scroll { width: 100%; display: flex; justify-content: center; }
+
+.shc-simulator .pal-box { background: #fff; border-radius: 12px; padding: 10px 12px; }
+.shc-simulator .box-label { font-size: 11px; color: #aaa; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+.shc-simulator .sum-box { background: #fff; border-radius: 12px; padding: 10px 12px; }
+.shc-simulator .summary { font-size: 11px; color: #666; line-height: 2; }
+
+.shc-simulator .palette { display: flex; flex-wrap: wrap; gap: 5px; }
+.shc-simulator .shc-box-note { font-size: 10px; color: #999; margin-top: 6px; }
+.shc-simulator .shc-swatch {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+  border: 1.5px solid rgba(0,0,0,.12); transition: transform .1s;
+}
+.shc-simulator .shc-swatch:hover { transform: scale(1.15); }
+.shc-simulator .shc-swatch.selected { border: 2.5px solid #111; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111; }
+
+.shc-simulator .shc-summary-row { display: flex; align-items: center; gap: 5px; padding: 2px 0; font-size: 10.5px; }
+.shc-simulator .shc-summary-label { color: #888; font-size: 9.5px; min-width: 0; flex: 1; }
+.shc-simulator .shc-summary-dot { width: 11px; height: 11px; border-radius: 50%; border: 1px solid rgba(0,0,0,.12); flex-shrink: 0; }
+.shc-simulator .shc-summary-name { color: #333; font-weight: 500; font-size: 10.5px; }
+
+.shc-simulator select#shc-diameter-select {
+  width: 100%; font-size: 13px; padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 7px; background: #fff;
+}
+.shc-simulator select#shc-diameter-select:focus { outline: none; border-color: #222; }
+
+/* 名入れ刻印（+1,100円） */
+.shc-simulator .kokuin-section { width: 100%; margin-top: 8px; padding: 0 10px; box-sizing: border-box; }
+.shc-simulator .kokuin-inner { background: #fff; border-radius: 7px; padding: 10px; }
+.shc-simulator .kokuin-section-title {
+  font-size: 12.5px; color: #333; font-weight: 600; margin-bottom: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+.shc-simulator .kokuin-section-title .kokuin-price { color: #888; font-weight: 400; }
+.shc-simulator .kokuin-toggle { width: 17px; height: 17px; margin-left: auto; }
+
+.shc-simulator .kokuin-field-label { font-size: 10px; color: #888; font-weight: 500; letter-spacing: .05em; margin: 10px 0 5px; }
+.shc-simulator .kokuin-field-label:first-child { margin-top: 0; }
+.shc-simulator input.shc-kokuin-input {
+  width: 100%; font-size: 13px; padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 7px; background: #fff;
+}
+.shc-simulator input.shc-kokuin-input:focus { outline: none; border-color: #222; }
+
+.shc-simulator .shc-char-count { font-size: 10px; color: #999; text-align: right; margin-top: 3px; }
+.shc-simulator .shc-char-count.over { color: #c0392b; font-weight: 700; }
+
+.shc-simulator .shc-warn {
+  font-size: 11px; color: #856404; background: #fff3cd;
+  border-radius: 6px; padding: 7px 9px; margin-top: 6px; line-height: 1.6;
+  display: none;
+}
+.shc-simulator .shc-warn.show { display: block; }
+
+/* 刻印入力欄の直下に、選択中フォントで文字列を大きく表示するプレビュー。
+   円弧上の実際の刻印は小さく読み取りづらいため、書体の違いが分かりやすいように補助する。 */
+.shc-simulator .shc-font-preview {
+  margin-top: 8px; padding: 14px 10px;
+  background: #faf9f6; border: 1.5px dashed #ddd; border-radius: 7px;
+  font-size: 22px; line-height: 1.3; text-align: center; color: #1a1a1a;
+  min-height: 32px; word-break: break-word;
+}
+.shc-simulator .shc-font-preview.shc-font-preview-placeholder { color: #bbb; }
+
+.shc-simulator select#shc-kokuin-font-select {
+  width: 100%; font-size: 12px; padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 7px; background: #fff;
+}
+.shc-simulator select#shc-kokuin-font-select:focus { outline: none; border-color: #222; }
+
+.shc-simulator .kokuin-notice {
+  font-size: 10px; color: #666; background: #f5f2ec; border: 1px solid #e2ddd0;
+  border-radius: 6px; padding: 8px 10px; margin-top: 10px; line-height: 1.7;
+}
+.shc-simulator .kokuin-notice strong { color: #856404; }
+
+/* 価格・下部バー・モーダル・ローディング（他ラインと共通パターン） */
+.shc-simulator [hidden] { display: none !important; }
+.shc-simulator .price-bar { width: 100%; max-width: 500px; margin: 8px auto 0; display: flex; align-items: baseline; justify-content: space-between; background: #fff; border-radius: 7px; padding: 7px 10px; }
+.shc-simulator .price-bar-label { font-size: 10px; color: #888; letter-spacing: .08em; font-weight: 500; text-transform: uppercase; }
+.shc-simulator .price-bar-value { font-size: 15px; color: #222; font-weight: 700; }
+.shc-simulator .order-note { font-size: 10px; color: #999; text-align: center; margin: 6px 10px 0; line-height: 1.5; }
+.shc-simulator #shc-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 11px; opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap; z-index: 9999; }
+.shc-simulator #shc-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.shc-simulator .bottom-bar { width: 100%; max-width: 520px; padding: 8px 10px 24px; display: flex; gap: 6px; margin: 10px auto 0; }
+.shc-simulator .btn-reset { flex: 1; padding: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 13px; color: #666; cursor: pointer; }
+.shc-simulator .btn-undo { flex: 1; padding: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 13px; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.shc-simulator .btn-undo:disabled { opacity: .35; cursor: default; }
+.shc-simulator .btn-order { flex: 2.5; padding: 14px; border: none; border-radius: 10px; background: #111; color: #fff; font-size: 13px; cursor: pointer; font-weight: 500; letter-spacing: .04em; }
+.shc-simulator .btn-order:active { opacity: .7; }
+.shc-simulator .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.shc-simulator .modal.show { display: flex; }
+.shc-simulator .modal-content { background: #fff; border-radius: 16px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.shc-simulator .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.shc-simulator .modal-header h2 { font-size: 18px; margin: 0; }
+.shc-simulator .modal-close { background: none; border: none; font-size: 24px; color: #999; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+.shc-simulator .modal-close:hover { color: #333; }
+.shc-simulator .modal-image { width: 100%; border-radius: 8px; margin-bottom: 16px; }
+.shc-simulator .modal-info { font-size: 14px; color: #666; line-height: 1.8; }
+.shc-simulator .modal-info strong { color: #111; font-weight: 600; }
+.shc-simulator .modal-buttons { display: flex; gap: 8px; margin-top: 20px; }
+.shc-simulator .modal-btn { flex: 1; padding: 14px; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 500; }
+.shc-simulator .modal-btn-secondary { background: #f0f0f0; color: #666; }
+.shc-simulator .modal-btn-primary { background: #111; color: #fff; }
+.shc-simulator .modal-btn:active { opacity: .7; }
+.shc-simulator .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; }
+.shc-simulator .loading-overlay.show { display: flex; }
+.shc-simulator .loading-content { background: #fff; border-radius: 16px; padding: 32px; text-align: center; }
+.shc-simulator .loading-spinner { width: 40px; height: 40px; border: 4px solid #f0f0f0; border-top-color: #111; border-radius: 50%; animation: shc-spin 1s linear infinite; margin: 0 auto 16px; }
+@keyframes shc-spin { to { transform: rotate(360deg); } }
+.shc-simulator .loading-text { font-size: 14px; color: #666; }
