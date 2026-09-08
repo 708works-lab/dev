@@ -135,6 +135,7 @@ async function initializeSHCSimulator() {
   document.getElementById('shc-btn-order')?.addEventListener('click', shcGoOrder);
   document.getElementById('shc-kokuin-toggle')?.addEventListener('change', shcOnKokuinToggleChange);
   document.getElementById('shc-kokuin-text')?.addEventListener('input', shcValidateAndRedraw);
+  shcSetupFloatingBar();
 }
 
 // ============================================================================
@@ -450,7 +451,68 @@ function shcUpdatePriceDisplay() {
   const el = document.getElementById('shc-price-display');
   if (!el) return;
   const price = SHC_PRICE_BASE + (shcKokuinEnabled ? SHC_PRICE_KOKUIN_ADD : 0);
-  el.textContent = `¥${price.toLocaleString()}（税込）`;
+  const text = `¥${price.toLocaleString()}（税込）`;
+  el.textContent = text;
+  const floatPriceEl = document.getElementById('shc-float-price-value');
+  if (floatPriceEl) floatPriceEl.textContent = text;
+}
+
+// ============================================================================
+// モバイル用フローティングCTAバー
+// スマホ閲覧時、シミュレーターに到達するまでの距離が長い（ヒーロー・商品説明を経由する）ことと、
+// 「画像を保存してカートに入れる」ボタンがシミュレーター最下部にしか無く見つけにくいことへの対策。
+// PC（2カラムレイアウト、CSS側の@media (min-width:860px)）では非表示にする——PCでは一目で
+// 全体が見渡せるため、常時表示のバーはむしろ邪魔になる。
+// ============================================================================
+
+function shcSetupFloatingBar() {
+  const bar = document.getElementById('shc-float-bar');
+  const jumpMode = document.getElementById('shc-float-jump-mode');
+  const orderMode = document.getElementById('shc-float-order-mode');
+  const jumpBtn = document.getElementById('shc-float-jump-btn');
+  const orderBtn = document.getElementById('shc-float-order-btn');
+  const simEl = document.querySelector('.shc-simulator');
+  const realOrderBtn = document.getElementById('shc-btn-order');
+  if (!bar || !jumpMode || !orderMode || !simEl || !realOrderBtn) return;
+
+  jumpBtn?.addEventListener('click', () => {
+    simEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  orderBtn?.addEventListener('click', () => realOrderBtn.click());
+
+  let ticking = false;
+  function update() {
+    ticking = false;
+    const simRect = simEl.getBoundingClientRect();
+    const btnRect = realOrderBtn.getBoundingClientRect();
+    const vh = window.innerHeight;
+
+    // シミュレーター自体を通り過ぎた（ご注文の流れ・注意事項エリア等）→常に非表示
+    if (simRect.bottom < 0) { bar.classList.remove('show'); return; }
+
+    // シミュレーターにまだ到達していない（ヒーロー・商品説明の途中）→「今すぐ選ぶ」ジャンプボタン
+    const notReachedYet = simRect.top > vh * 0.7;
+    if (notReachedYet) {
+      if (window.scrollY < 200) { bar.classList.remove('show'); return; }
+      jumpMode.hidden = false; orderMode.hidden = true;
+      bar.classList.add('show');
+      return;
+    }
+
+    // シミュレーター内で、実物の「カートに入れる」ボタンが画面内に見えていれば重複表示しない
+    const realBtnVisible = btnRect.top < vh && btnRect.bottom > 0;
+    if (realBtnVisible) { bar.classList.remove('show'); return; }
+
+    // シミュレーター内で実ボタンが見えていない→価格＋カートボタンを常時表示
+    jumpMode.hidden = true; orderMode.hidden = false;
+    bar.classList.add('show');
+  }
+  function onScroll() {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  update();
 }
 
 // ============================================================================
