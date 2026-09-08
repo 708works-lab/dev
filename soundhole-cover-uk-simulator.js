@@ -123,6 +123,7 @@ async function initializeSHCSimulator() {
   shcBuildFontSelect();
   shcUpdateSummary();
   shcUpdatePriceDisplay();
+  shcUpdateFontPreview();
   await shcLoadFonts();
   shcBuildSvg();
 
@@ -313,7 +314,20 @@ function shcValidateAndRedraw() {
   shcKokuinText = text;
   shcKokuinValid = warnings.length === 0;
   shcRedrawKokuin();
+  shcUpdateFontPreview();
   shcHasDownloadedImage = false;
+}
+
+// 刻印入力欄の直下に、選択中のフォントで実際の文字列を大きく表示するプレビュー。
+// 円弧上の実際の刻印は小さく読み取りづらいため、書体の違いを分かりやすくする目的。
+function shcUpdateFontPreview() {
+  const el = document.getElementById('shc-kokuin-font-preview');
+  if (!el) return;
+  const font = shcCurrentFont();
+  el.textContent = shcKokuinText || 'Sample';
+  el.style.fontFamily = `'${font.family}'`;
+  el.style.fontWeight = font.weight;
+  el.classList.toggle('shc-font-preview-placeholder', !shcKokuinText);
 }
 
 function shcRedrawKokuin() {
@@ -492,6 +506,7 @@ function shcSyncUI() {
   if (fontSelect) fontSelect.value = shcFontId;
   shcUpdateSummary();
   shcUpdatePriceDisplay();
+  shcUpdateFontPreview();
 }
 
 // ============================================================================
@@ -519,9 +534,26 @@ function hideShcLoading() {
 // 画像保存
 // ============================================================================
 
+// キャンバス上の長いラベル行が右端で見切れないよう、maxWidthに収まるように折り返す
+function shcWrapCanvasText(ctx, text, maxWidth) {
+  const lines = [];
+  let line = '';
+  for (const ch of text) {
+    const test = line + ch;
+    if (line && ctx.measureText(test).width > maxWidth) {
+      lines.push(line);
+      line = ch;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
 async function shcBuildSaveCanvas() {
   const cv = document.createElement('canvas');
-  const cw = 600;
+  const cw = 680;
 
   const liveSvg = document.getElementById('shc-svg');
   const vbW = 319.75, vbH = 832.24;
@@ -559,26 +591,31 @@ async function shcBuildSaveCanvas() {
   }
 
   const labelX = svgX + svgSaveW + 18;
+  const labelMaxWidth = cw - labelX - 16;
   let ly = svgY0 + 16;
+
+  const drawWrappedLine = (text, indent = 0) => {
+    ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+    const lines = shcWrapCanvasText(ctx, text, labelMaxWidth - indent);
+    lines.forEach((line) => {
+      ctx.fillText(line, labelX + indent, ly + 3);
+      ly += 16;
+    });
+    ly += 6;
+  };
+
   ctx.beginPath(); ctx.arc(labelX + 6, ly, 5, 0, Math.PI * 2);
   ctx.fillStyle = shcColor.hex; ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7; ctx.stroke();
-  ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText(`表面の色: ${shcColor.name}`, labelX + 16, ly + 3);
-  ly += 22;
+  drawWrappedLine(`表面の色: ${shcColor.name}`, 16);
 
   ctx.beginPath(); ctx.arc(labelX + 6, ly, 5, 0, Math.PI * 2);
   ctx.fillStyle = SHC_BACK_COLOR.hex; ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7; ctx.stroke();
-  ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText(`裏面: ${SHC_BACK_COLOR.name}（固定）`, labelX + 16, ly + 3);
-  ly += 22;
+  drawWrappedLine(`裏面: ${SHC_BACK_COLOR.name}（固定）`, 16);
 
-  ctx.fillStyle = '#333'; ctx.font = '10px sans-serif';
-  ctx.fillText(`装着予定の楽器: ${shcHandedness === 'left' ? '左利き用' : '右利き用'}`, labelX, ly + 3);
-  ly += 18;
-  ctx.fillText(`サウンドホール適応サイズ: ${shcDiameter}mm`, labelX, ly + 3);
-  ly += 18;
+  drawWrappedLine(`装着予定の楽器: ${shcHandedness === 'left' ? '左利き用' : '右利き用'}`);
+  drawWrappedLine(`サウンドホール適応サイズ: ${shcDiameter}mm`);
 
   if (shcKokuinEnabled && shcKokuinText) {
     ctx.fillStyle = '#999'; ctx.font = '10px sans-serif';
@@ -587,7 +624,11 @@ async function shcBuildSaveCanvas() {
     const font = shcCurrentFont();
     await document.fonts.load(`${font.weight} 16px "${font.family}"`).catch(() => {});
     ctx.fillStyle = '#1a1a1a'; ctx.font = `${font.weight} 15px "${font.family}"`;
-    ctx.fillText(shcKokuinText, labelX, ly + 3);
+    const kokuinLines = shcWrapCanvasText(ctx, shcKokuinText, labelMaxWidth);
+    kokuinLines.forEach((line) => {
+      ctx.fillText(line, labelX, ly + 3);
+      ly += 20;
+    });
   }
 
   ctx.fillStyle = 'rgba(0,0,0,.1)'; ctx.fillRect(0, ch - footerH, cw, footerH);
