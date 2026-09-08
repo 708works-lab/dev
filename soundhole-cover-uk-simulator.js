@@ -47,6 +47,10 @@ const SHC_COLORS = [
   { id: 'black', name: 'Black', hex: '#2b2a30' },
 ];
 
+// サウンドホールカバーは表革・裏革の2枚を縫い合わせた構造。表面の色は選べるが、
+// 裏面はBlack固定（縫製・強度の都合上、色選択の対象外）。カラーサマリー等で明示する。
+const SHC_BACK_COLOR = { name: 'Black', hex: '#2b2a30' };
+
 // フォント（他ラインの名入れ刻印アドオンと共通の8書体）
 const SHC_FONTS = [
   { id: 'A', family: 'Cabin Sketch', weight: '700', googleParam: 'Cabin+Sketch:wght@700', category: '手書き' },
@@ -170,6 +174,10 @@ function shcUpdateSummary() {
   if (nameEl) nameEl.textContent = shcColor.name;
   const dotEl = document.getElementById('shc-summary-color-dot');
   if (dotEl) dotEl.style.background = shcColor.hex;
+  const backNameEl = document.getElementById('shc-summary-back-color-name');
+  if (backNameEl) backNameEl.textContent = `${SHC_BACK_COLOR.name}（固定）`;
+  const backDotEl = document.getElementById('shc-summary-back-color-dot');
+  if (backDotEl) backDotEl.style.background = SHC_BACK_COLOR.hex;
 }
 
 // ============================================================================
@@ -343,7 +351,7 @@ function shcRedrawKokuin() {
     const angleRad = (angleDeg * Math.PI) / 180;
     const x = arc.cx + arc.r * Math.cos(angleRad);
     const y = arc.cy + arc.r * Math.sin(angleRad);
-    const rot = angleDeg + 90;
+    const rot = angleDeg - 90; // 文字の上端が円の中心を向くように（+90だと外向きになってしまう）
     const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     t.setAttribute('x', x);
     t.setAttribute('y', y);
@@ -556,7 +564,14 @@ async function shcBuildSaveCanvas() {
   ctx.fillStyle = shcColor.hex; ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7; ctx.stroke();
   ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText(`本体の色: ${shcColor.name}`, labelX + 16, ly + 3);
+  ctx.fillText(`表面の色: ${shcColor.name}`, labelX + 16, ly + 3);
+  ly += 22;
+
+  ctx.beginPath(); ctx.arc(labelX + 6, ly, 5, 0, Math.PI * 2);
+  ctx.fillStyle = SHC_BACK_COLOR.hex; ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7; ctx.stroke();
+  ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText(`裏面: ${SHC_BACK_COLOR.name}（固定）`, labelX + 16, ly + 3);
   ly += 22;
 
   ctx.fillStyle = '#333'; ctx.font = '10px sans-serif';
@@ -662,7 +677,8 @@ function showShcConfirmModal(uploadResult) {
     <p><strong>価格:</strong> ¥${price.toLocaleString()}（税込）</p>
     <p style="margin-top:12px;"><strong>仕様:</strong></p>
     <div style="font-size:12px;line-height:1.6;color:#888;margin-top:4px;">
-      本体の色: ${shcColor.name}<br>
+      表面の色: ${shcColor.name}<br>
+      裏面: ${SHC_BACK_COLOR.name}（固定）<br>
       装着予定の楽器: ${shcHandedness === 'left' ? '左利き用' : '右利き用'}<br>
       サウンドホール適応サイズ: ${shcDiameter}mm
     </div>
@@ -697,7 +713,8 @@ async function shcProceedToCart() {
 
     const props = {
       'Order ID': shcLastUploadedImage.orderId,
-      '本体の色': shcColor.name,
+      '表面の色': shcColor.name,
+      '裏面': `${SHC_BACK_COLOR.name}（固定）`,
       '装着予定の楽器': shcHandedness === 'left' ? '左利き用' : '右利き用',
       'サウンドホール適応サイズ': `${shcDiameter}mm`,
       'Image URL': shcLastUploadedImage.imageUrl,

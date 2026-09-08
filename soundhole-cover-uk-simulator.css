@@ -12,12 +12,15 @@
   width: 100%; max-width: 520px; display: flex; flex-direction: column; margin: 0 auto;
 }
 
+/* このSVGはクローズアップ＋本体装着イメージが縦に連結された縦長画像（比率約1:2.6）のため、
+   他ラインのような横並び2カラムにすると、丈の短いctrl-colがSVGの高さに引き伸ばされて
+   下部に大きな余白ができてしまう。そのため縦積みレイアウトにする。 */
 .shc-simulator .top-area {
-  display: flex; flex-direction: row; padding: 10px 10px 0; gap: 10px; align-items: stretch;
+  display: flex; flex-direction: column; padding: 10px 10px 0; gap: 10px;
 }
-.shc-simulator .ctrl-col { flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.shc-simulator .ctrl-col { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .shc-simulator .svg-col {
-  display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 180px; align-self: flex-start;
+  display: flex; flex-direction: column; align-items: center; width: 100%;
 }
 
 .shc-simulator .shc-handedness-buttons { display: flex; gap: 6px; width: 100%; margin-bottom: 8px; }
@@ -35,6 +38,7 @@
 .shc-simulator .summary { font-size: 11px; color: #666; line-height: 2; }
 
 .shc-simulator .palette { display: flex; flex-wrap: wrap; gap: 5px; }
+.shc-simulator .shc-box-note { font-size: 10px; color: #999; margin-top: 6px; }
 .shc-simulator .shc-swatch {
   width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
   border: 1.5px solid rgba(0,0,0,.12); transition: transform .1s;
