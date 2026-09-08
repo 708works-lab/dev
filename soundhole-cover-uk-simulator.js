@@ -356,12 +356,18 @@ function shcRedrawKokuin() {
   const font = shcCurrentFont();
   const text = shcKokuinText;
   const n = text.length;
-  const step = n > 1 ? (arc.endAngle - arc.startAngle) / 11 : 0; // プレースホルダーと同じ間隔(12文字分/11ギャップ)を維持
+  // 左右のkokuin/kokuin1は鏡写しの円弧のため、両方とも同じ「startAngle→endAngle」の向きで
+  // 文字を並べると、片方は正しく読めてももう片方は逆順（鏡文字の並び）になってしまう。
+  // 位置（円弧の範囲）はそのままに、文字を置き始める端だけ左右で入れ替えて読む向きを揃える。
+  const reverseOrder = shcHandedness === 'left';
+  const effStartAngle = reverseOrder ? arc.endAngle : arc.startAngle;
+  const effEndAngle = reverseOrder ? arc.startAngle : arc.endAngle;
+  const step = n > 1 ? (effEndAngle - effStartAngle) / 11 : 0; // プレースホルダーと同じ間隔(12文字分/11ギャップ)を維持
   const baseHex = shcColor.hex;
   const fillColor = shcContrastColor(baseHex);
 
   for (let i = 0; i < n; i++) {
-    const angleDeg = arc.startAngle + i * step;
+    const angleDeg = effStartAngle + i * step;
     const angleRad = (angleDeg * Math.PI) / 180;
     const x = arc.cx + arc.r * Math.cos(angleRad);
     const y = arc.cy + arc.r * Math.sin(angleRad);
