@@ -262,6 +262,63 @@ function backstageCameraReset() {
 // 画像保存・アップロード
 // ============================================================================
 
+// ---- 名入れ刻印フォント埋め込み ----
+// SVGをdata URIのImageとして再描画すると、ページ側で読み込んだWebフォント（Googleフォント／
+// カスタムフォント）は継承されず既定フォントにフォールバックする。保存画像・注文用画像で
+// 刻印文字のフォントが選択と異なって見える不具合の原因のため、選択中フォントを@font-faceとして
+// SVG自身に埋め込んでから書き出す。
+const KOKUIN_FONT_SOURCES = {
+  'Cabin Sketch': { google: true, param: 'Cabin+Sketch:wght@700' },
+  'Special Elite': { google: true, param: 'Special+Elite' },
+  'AG Stencil': { google: false, url: 'https://708works-lab.github.io/dev/fonts/AG-Stencil.ttf' },
+  'Lobster': { google: true, param: 'Lobster' },
+  'Playball': { google: true, param: 'Playball' },
+  'Great Vibes': { google: true, param: 'Great+Vibes' },
+  'Bebas Neue': { google: true, param: 'Bebas+Neue' },
+  'UnifrakturMaguntia': { google: true, param: 'UnifrakturMaguntia' }
+};
+const kokuinFontDataUriCache = {};
+function kokuinBufferToBase64(buf) {
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+async function kokuinFontDataUri(family) {
+  if (kokuinFontDataUriCache[family]) return kokuinFontDataUriCache[family];
+  const src = KOKUIN_FONT_SOURCES[family];
+  if (!src) return null;
+  const promise = (async () => {
+    try {
+      let fontUrl, mime;
+      if (src.google) {
+        const cssText = await (await fetch(`https://fonts.googleapis.com/css2?family=${src.param}&display=swap`)).text();
+        const m = cssText.match(/src:\s*url\(([^)]+)\)\s*format\('(woff2?|truetype)'\)/);
+        if (!m) return null;
+        fontUrl = m[1];
+        mime = m[2] === 'truetype' ? 'font/ttf' : 'font/woff2';
+      } else {
+        fontUrl = src.url;
+        mime = 'font/ttf';
+      }
+      const buf = await (await fetch(fontUrl)).arrayBuffer();
+      return `data:${mime};base64,${kokuinBufferToBase64(buf)}`;
+    } catch (e) {
+      return null;
+    }
+  })();
+  kokuinFontDataUriCache[family] = promise;
+  return promise;
+}
+async function embedKokuinFontIntoSvg(svgRoot, family, weight) {
+  const dataUri = await kokuinFontDataUri(family);
+  if (!dataUri) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const style = document.createElementNS(ns, 'style');
+  style.textContent = `@font-face{font-family:'${family}';font-weight:${weight || 400};src:url(${dataUri});}`;
+  svgRoot.insertBefore(style, svgRoot.firstChild);
+}
+
 async function backstageCameraSaveImage() {
   const svg = document.querySelector('#backstage-camera-svg-wrap svg');
   if (!svg) { showBackstageCameraToast('SVGが見つかりません'); return; }
@@ -337,6 +394,9 @@ async function buildBackstageCameraSaveCanvas() {
     cloned.setAttribute('width', svgSaveW);
     cloned.setAttribute('height', svgSaveH);
     cloned.style.margin = '0';
+    if (kokuinEnabled && kokuin?.fontFamily) {
+      await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
+    }
     const svgStr  = new XMLSerializer().serializeToString(cloned);
     const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
     await new Promise(resolve => {
