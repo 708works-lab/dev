@@ -1124,7 +1124,23 @@ async function buildSaveCanvas() {
 
   const kokuin = window.FOLKLORE_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
-  const kokuinH = kokuinEnabled ? 78 : 0;
+  // 名入れ刻印プレビュー（folklore-kokuin-svg-wrap内のShadow DOM）はメイン商品画像とは別のSVG・
+  // 別の座標系を持つ拡大クローズアップ表示のため、保存画像にはこれまで刻印文字が一切
+  // 現れていなかった。拡大プレビューSVGをそのまま複製して保存画像にも合成する。
+  const kokuinBoxContentW = cw - 24 * 2 - 28;
+  let kokuinPreviewSvg = null, kokuinPreviewW = kokuinBoxContentW, kokuinPreviewImgH = 0;
+  if (kokuinEnabled) {
+    kokuinPreviewSvg = document.getElementById('folklore-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
+    const vb = kokuinPreviewSvg?.getAttribute('viewBox')?.split(' ').map(Number);
+    const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
+    kokuinPreviewImgH = Math.round(kokuinBoxContentW * aspect);
+    const MAX_PREVIEW_H = 190;
+    if (kokuinPreviewImgH > MAX_PREVIEW_H) {
+      kokuinPreviewImgH = MAX_PREVIEW_H;
+      kokuinPreviewW = Math.round(MAX_PREVIEW_H / aspect);
+    }
+  }
+  const kokuinH = kokuinEnabled ? (26 + kokuinPreviewImgH + 16) : 0;
 
   const headerH = 50;
   const topLabelH = 25;
@@ -1237,11 +1253,29 @@ async function buildSaveCanvas() {
     ctx.textAlign = 'left';
     ctx.fillText('名入れ刻印', boxX + 14, boxY + 18);
 
-    await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
-    ctx.textAlign = 'left';
-    ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
+    if (kokuinPreviewSvg) {
+      const previewClone = kokuinPreviewSvg.cloneNode(true);
+      if (kokuin?.fontFamily) {
+        await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+      }
+      previewClone.setAttribute('width', kokuinPreviewW);
+      previewClone.setAttribute('height', kokuinPreviewImgH);
+      const previewSvgStr = new XMLSerializer().serializeToString(previewClone);
+      const previewDataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(previewSvgStr)));
+      const previewX = boxX + 14 + (kokuinBoxContentW - kokuinPreviewW) / 2;
+      await new Promise(resolve => {
+        const img = new Image();
+        img.onload  = () => { ctx.drawImage(img, previewX, boxY + 26, kokuinPreviewW, kokuinPreviewImgH); resolve(); };
+        img.onerror = resolve;
+        img.src = previewDataUri;
+      });
+    } else {
+      await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+      ctx.textAlign = 'left';
+      ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
+    }
   }
 
   // フッター
