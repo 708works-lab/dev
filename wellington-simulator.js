@@ -697,7 +697,13 @@ async function kokuinFontDataUri(family) {
       let fontUrl, mime;
       if (src.google) {
         const cssText = await (await fetch(`https://fonts.googleapis.com/css2?family=${src.param}&display=swap`)).text();
-        const m = cssText.match(/src:\s*url\(([^)]+)\)\s*format\('(woff2?|truetype)'\)/);
+        // GoogleフォントのCSSはUnicodeサブセットごとに複数の@font-faceブロックを含む。
+        // 先頭ブロックはcyrillic-ext等の場合が多く、それを使うと半角英数字のグリフを
+        // 持たないフォントファイルを埋め込んでしまい結局既定フォントにフォールバックする
+        // ため、必ず基本ラテン文字（U+0000-00FF）を含むブロックを選んで使用する。
+        const fontBlocks = cssText.split('}').filter(b => b.includes('@font-face'));
+        const latinBlock = fontBlocks.find(b => /unicode-range:[^;]*U\+0000-00FF/.test(b)) || fontBlocks[fontBlocks.length - 1] || cssText;
+        const m = latinBlock.match(/src:\s*url\(([^)]+)\)\s*format\('(woff2?|truetype)'\)/);
         if (!m) return null;
         fontUrl = m[1];
         mime = m[2] === 'truetype' ? 'font/ttf' : 'font/woff2';
