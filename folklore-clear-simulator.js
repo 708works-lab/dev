@@ -603,6 +603,69 @@ function hideLoading(){
 // 画像保存
 // ============================================================================
 
+// ---- 名入れ刻印フォント埋め込み ----
+// SVGをdata URIのImageとして再描画すると、ページ側で読み込んだWebフォント（Googleフォント／
+// カスタムフォント）は継承されず既定フォントにフォールバックする。保存画像・注文用画像で
+// 刻印文字のフォントが選択と異なって見える不具合の原因のため、選択中フォントを@font-faceとして
+// SVG自身に埋め込んでから書き出す。
+const KOKUIN_FONT_SOURCES = {
+  'Cabin Sketch': { google: true, param: 'Cabin+Sketch:wght@700' },
+  'Special Elite': { google: true, param: 'Special+Elite' },
+  'AG Stencil': { google: false, url: 'https://708works-lab.github.io/dev/fonts/AG-Stencil.ttf' },
+  'Lobster': { google: true, param: 'Lobster' },
+  'Playball': { google: true, param: 'Playball' },
+  'Great Vibes': { google: true, param: 'Great+Vibes' },
+  'Bebas Neue': { google: true, param: 'Bebas+Neue' },
+  'UnifrakturMaguntia': { google: true, param: 'UnifrakturMaguntia' }
+};
+const kokuinFontDataUriCache = {};
+function kokuinBufferToBase64(buf) {
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+async function kokuinFontDataUri(family) {
+  if (kokuinFontDataUriCache[family]) return kokuinFontDataUriCache[family];
+  const src = KOKUIN_FONT_SOURCES[family];
+  if (!src) return null;
+  const promise = (async () => {
+    try {
+      let fontUrl, mime;
+      if (src.google) {
+        const cssText = await (await fetch(`https://fonts.googleapis.com/css2?family=${src.param}&display=swap`)).text();
+        // GoogleフォントのCSSはUnicodeサブセットごとに複数の@font-faceブロックを含む。
+        // 先頭ブロックはcyrillic-ext等の場合が多く、それを使うと半角英数字のグリフを
+        // 持たないフォントファイルを埋め込んでしまい結局既定フォントにフォールバックする
+        // ため、必ず基本ラテン文字（U+0000-00FF）を含むブロックを選んで使用する。
+        const fontBlocks = cssText.split('}').filter(b => b.includes('@font-face'));
+        const latinBlock = fontBlocks.find(b => /unicode-range:[^;]*U\+0000-00FF/.test(b)) || fontBlocks[fontBlocks.length - 1] || cssText;
+        const m = latinBlock.match(/src:\s*url\(([^)]+)\)\s*format\('(woff2?|truetype)'\)/);
+        if (!m) return null;
+        fontUrl = m[1];
+        mime = m[2] === 'truetype' ? 'font/ttf' : 'font/woff2';
+      } else {
+        fontUrl = src.url;
+        mime = 'font/ttf';
+      }
+      const buf = await (await fetch(fontUrl)).arrayBuffer();
+      return `data:${mime};base64,${kokuinBufferToBase64(buf)}`;
+    } catch (e) {
+      return null;
+    }
+  })();
+  kokuinFontDataUriCache[family] = promise;
+  return promise;
+}
+async function embedKokuinFontIntoSvg(svgRoot, family, weight) {
+  const dataUri = await kokuinFontDataUri(family);
+  if (!dataUri) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const style = document.createElementNS(ns, 'style');
+  style.textContent = `@font-face{font-family:'${family}';font-weight:${weight || 400};src:url(${dataUri});}`;
+  svgRoot.insertBefore(style, svgRoot.firstChild);
+}
+
 async function fcBuildSaveCanvas(){
   const cv=document.createElement('canvas');
   const cw=600;
@@ -618,7 +681,23 @@ async function fcBuildSaveCanvas(){
 
   const kokuin=window.FOLKLORE_KOKUIN_STATE;
   const kokuinEnabled=!!(kokuin?.enabled && kokuin.valid && kokuin.text);
-  const kokuinH=kokuinEnabled?78:0;
+  // 名入れ刻印プレビュー（folklore-kokuin-svg-wrap内のShadow DOM）はメイン商品画像とは別のSVG・
+  // 別の座標系を持つ拡大クローズアップ表示のため、保存画像にはこれまで刻印文字が一切
+  // 現れていなかった。拡大プレビューSVGをそのまま複製して保存画像にも合成する。
+  const kokuinBoxContentW = cw - 24 * 2 - 28;
+  let kokuinPreviewSvg = null, kokuinPreviewW = kokuinBoxContentW, kokuinPreviewImgH = 0;
+  if (kokuinEnabled) {
+    kokuinPreviewSvg = document.getElementById('folklore-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
+    const vb = kokuinPreviewSvg?.getAttribute('viewBox')?.split(' ').map(Number);
+    const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
+    kokuinPreviewImgH = Math.round(kokuinBoxContentW * aspect);
+    const MAX_PREVIEW_H = 190;
+    if (kokuinPreviewImgH > MAX_PREVIEW_H) {
+      kokuinPreviewImgH = MAX_PREVIEW_H;
+      kokuinPreviewW = Math.round(MAX_PREVIEW_H / aspect);
+    }
+  }
+  const kokuinH = kokuinEnabled ? (26 + kokuinPreviewImgH + 16) : 0;
 
   const headerH=50, topLabelH=25, bottomLabelH=25, footerH=28;
   const svgX=Math.round(cw/2-svgSaveW/2);
@@ -692,11 +771,29 @@ async function fcBuildSaveCanvas(){
     ctx.fillStyle='#999'; ctx.font='10px sans-serif'; ctx.textAlign='left';
     ctx.fillText('名入れ刻印', boxX+14, boxY+18);
 
-    await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(()=>{});
-    ctx.fillStyle='#1a1a1a';
-    ctx.font=`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
-    ctx.textAlign='left';
-    ctx.fillText(kokuin.text, boxX+14, boxY+boxH-16);
+    if (kokuinPreviewSvg) {
+      const previewClone = kokuinPreviewSvg.cloneNode(true);
+      if (kokuin?.fontFamily) {
+        await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+      }
+      previewClone.setAttribute('width', kokuinPreviewW);
+      previewClone.setAttribute('height', kokuinPreviewImgH);
+      const previewSvgStr = new XMLSerializer().serializeToString(previewClone);
+      const previewDataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(previewSvgStr)));
+      const previewX = boxX + 14 + (kokuinBoxContentW - kokuinPreviewW) / 2;
+      await new Promise(resolve => {
+        const img = new Image();
+        img.onload  = () => { ctx.drawImage(img, previewX, boxY + 26, kokuinPreviewW, kokuinPreviewImgH); resolve(); };
+        img.onerror = resolve;
+        img.src = previewDataUri;
+      });
+    } else {
+      await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(()=>{});
+      ctx.fillStyle='#1a1a1a';
+      ctx.font=`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+      ctx.textAlign='left';
+      ctx.fillText(kokuin.text, boxX+14, boxY+boxH-16);
+    }
   }
 
   ctx.fillStyle='rgba(0,0,0,.1)'; ctx.fillRect(0,ch-footerH,cw,footerH);
