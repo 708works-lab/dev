@@ -349,7 +349,7 @@
 .wellington-simulator .btn-reset { flex: 1; padding: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 13px; color: #666; cursor: pointer; }
 .wellington-simulator .btn-undo { flex: 1; padding: 14px; border: 1px solid #ddd; border-radius: 10px; background: #fff; font-size: 13px; color: #666; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
 .wellington-simulator .btn-undo:disabled { opacity: .35; cursor: default; }
-.wellington-simulator .btn-order { flex: 2.5; padding: 14px; border: none; border-radius: 10px; background: #111; color: #fff; font-size: 13px; cursor: pointer; font-weight: 500; letter-spacing: .04em; }
+.wellington-simulator .btn-order { flex: 2.5; padding: 14px; border: none; border-radius: 10px; background: #c8a04a; color: #1a1a1a; font-size: 13px; cursor: pointer; font-weight: 500; letter-spacing: .04em; }
 .wellington-simulator .btn-order:active { opacity: .7; }
 .wellington-simulator .btn-order:disabled { opacity: .5; cursor: not-allowed; }
 .wellington-simulator .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; }

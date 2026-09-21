@@ -150,7 +150,7 @@
 }
 .backstage-camera-simulator .btn-undo:disabled { opacity: .4; cursor: default; }
 .backstage-camera-simulator .btn-order {
-  flex: 1; padding: 10px 10px; background: #111; color: #fff;
+  flex: 1; padding: 10px 10px; background: #c8a04a; color: #1a1a1a;
   border: none; border-radius: 7px; font-size: 11px; font-weight: 600;
   cursor: pointer; text-align: center;
 }
