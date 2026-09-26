@@ -30,9 +30,15 @@
   //   #kokuin  : 装着時は革が巻き込まれる関係で天地が逆さまになる（実写サンプルの
   //              Naoya刻印も同様に逆さまに写っている）
   //   #kokuin1 : 商品単体イメージでは通常向き（右肩上がりの対角線）
+  // maxWidthは「kokuin」プレースホルダー自体の幅ではなく、革パーツ（#leather /
+  // #leather1 の該当パス）の輪郭を実際にサンプリングして、アンカー点からベースライン
+  // 方向へ左右にどれだけ余裕があるかを実測した値（安全マージンとして実測値の80%）。
+  // こうすることで「kokuinの枠は超えてよいが、革レイヤーからははみ出さない」という
+  // 仕様を満たす。（leather: 実測134.7 → 中心対称で約132 → ×0.8 ≈ 105 /
+  // leather1: 実測355.5 → 中心対称で約346 → ×0.8 ≈ 275）
   const TARGETS = [
-    { groupId: 'kokuin',  anchor: { x: 287.06, y: 462.77 }, angle: 191.9, baseFontSize: 8,  maxWidth: 26 },
-    { groupId: 'kokuin1', anchor: { x: 274.39, y: 136.15 }, angle: 42.6,  baseFontSize: 18, maxWidth: 54 }
+    { groupId: 'kokuin',  anchor: { x: 287.06, y: 462.77 }, angle: 191.9, baseFontSize: 10, maxWidth: 105 },
+    { groupId: 'kokuin1', anchor: { x: 274.39, y: 136.15 }, angle: 42.6,  baseFontSize: 22, maxWidth: 275 }
   ];
 
   const KOKUIN_PRICE_ADD = 1100;
