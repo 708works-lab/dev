@@ -1,0 +1,119 @@
+
+<!-- Capo Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/capo-simulator.css">
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/capo-kokuin-addon.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
+
+<div class="capo-simulator">
+  <div class="app">
+
+    <!-- 左：コントロール（パレット・向き・サマリー・刻印） -->
+    <div class="ctrl-left">
+      <div class="box-label">革の色を選択</div>
+      <div class="pal-box">
+        <div class="palette" id="capo-leather-palette"></div>
+      </div>
+
+      <div class="box-label" style="margin-top:8px;">バネホックの色を選択</div>
+      <div class="pal-box">
+        <div class="palette" id="capo-hardware-palette"></div>
+      </div>
+
+      <div class="kokuin-toggle-area" style="margin-top:8px;">
+        <label class="kokuin-toggle">
+          <input type="checkbox" id="capo-reverse-toggle">
+          <span>バネホックの向きを反転させる</span>
+        </label>
+      </div>
+
+      <div class="sum-box">
+        <div class="box-label">配色サマリー</div>
+        <div id="capo-summary"></div>
+      </div>
+
+      <!-- 名入れ刻印オプション（有料アップチャージ、革に刻印） -->
+      <div class="kokuin-toggle-area">
+        <label class="kokuin-toggle">
+          <input type="checkbox" id="capo-kokuin-toggle">
+          <span>革に名入れ刻印を追加する <span class="kokuin-price">（+¥1,100 税込）</span></span>
+        </label>
+      </div>
+
+      <div class="kokuin-section" id="capo-kokuin-section" hidden>
+        <div class="kokuin-inner">
+          <div class="kokuin-field-label">刻印する文字（半角英数字）</div>
+          <input type="text" id="capo-kokuin-text" maxlength="10" placeholder="例：ABC">
+          <div class="kokuin-char-count" id="capo-kokuin-char-count">0 / 10</div>
+          <div class="kokuin-warn" id="capo-kokuin-warn"></div>
+
+          <div class="kokuin-field-label">フォントを選択</div>
+          <select id="capo-kokuin-font-select"></select>
+          <div class="kokuin-font-swatch" id="capo-kokuin-font-swatch"></div>
+
+          <div class="kokuin-notice">
+            <strong>ご注意</strong><br>
+            右のカラーイメージ内に刻印イメージを直接反映しています。実際の刻印は、刻印を施す革パーツのサイズに合わせて弊社側で文字サイズや配置を調整する場合があります。革パーツが小さいため、長い文字列は大幅に縮小されます。あらかじめご了承ください。<br><br>
+            2個1セットのうち、708worksロゴ入りバネホックを使用している側のパーツにのみ名入れ刻印を追加できます。もう一方のパーツには、バネホックの刻印・名入れ刻印とも一切入りません。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：カラーイメージプレビュー（商品イメージ＋使用イメージ） -->
+    <div class="preview-col">
+      <div class="dir-tag-v">カラーイメージ<small>商品イメージ（上）／使用イメージ（下）</small></div>
+      <div id="capo-svg-wrap" class="strap-wrap"></div>
+    </div>
+
+  </div>
+
+  <!-- 価格表示 -->
+  <div class="price-bar">
+    <span class="price-bar-label">価格</span>
+    <span class="price-bar-value" id="capo-price-display"></span>
+  </div>
+
+  <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
+
+  <!-- 下部ボタンバー -->
+  <div class="bottom-bar">
+    <button class="btn-reset" onclick="capoReset()">リセット</button>
+    <button class="btn-undo" id="capo-btn-undo" onclick="capoUndo()" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+      </svg>戻る
+    </button>
+    <button class="btn-order" onclick="capoGoOrder()">
+      <span id="capo-cart-label">画像を保存してカートに入れる →</span>
+    </button>
+  </div>
+
+  <!-- 注文確認モーダル -->
+  <div class="modal" id="capo-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeCapoModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="capo-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="capo-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeCapoModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="capoProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-overlay" id="capo-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="capo-toast" class="toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/capo-simulator.js"></script>
+<script src="https://708works-lab.github.io/dev/capo-kokuin-addon.js"></script>
