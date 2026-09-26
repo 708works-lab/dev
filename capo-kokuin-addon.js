@@ -21,11 +21,18 @@
   const ALLOWED_PATTERN = /^[A-Za-z0-9\-_.,:;$!\s]*$/;
   const ALLOWED_HINT = '半角英数字と一部の記号（- _ . , : ; $ !）のみご利用いただけます。絵文字・機種依存文字・全角文字はご利用いただけません。';
 
-  // capo_color_order.svg 内、#kokuin（装着イメージ・小さい）と #kokuin1（商品イメージ・大きい）
-  // それぞれの実測bbox中心を基準点として使う（Nametag/Backstageでの教訓を踏襲）。
+  // capo_color_order.svg 内、#kokuin（装着イメージ・小さい）と #kokuin1（商品イメージ・
+  // 大きい）には、革の上に実際に刻印する角度・向きの見本として「kokuin」という文字が
+  // アウトライン化された状態で仕込まれている（サンプル文字そのものは表示せず削除する
+  // が、位置・角度の基準としてそのまま利用する）。角度は各文字パスの中心座標を実測し、
+  // 最小二乗法でベースライン方向を求めた値（documentのpath順が先頭→末尾で意味の並び
+  // 順と一致しているため、その向きにdeg換算している）。
+  //   #kokuin  : 装着時は革が巻き込まれる関係で天地が逆さまになる（実写サンプルの
+  //              Naoya刻印も同様に逆さまに写っている）
+  //   #kokuin1 : 商品単体イメージでは通常向き（右肩上がりの対角線）
   const TARGETS = [
-    { groupId: 'kokuin',  anchor: { x: 287.80, y: 463.67 }, baseFontSize: 9,  maxWidth: 30 },
-    { groupId: 'kokuin1', anchor: { x: 272.48, y: 134.10 }, baseFontSize: 20, maxWidth: 52 }
+    { groupId: 'kokuin',  anchor: { x: 287.06, y: 462.77 }, angle: 191.9, baseFontSize: 8,  maxWidth: 26 },
+    { groupId: 'kokuin1', anchor: { x: 274.39, y: 136.15 }, angle: 42.6,  baseFontSize: 18, maxWidth: 54 }
   ];
 
   const KOKUIN_PRICE_ADD = 1100;
@@ -148,7 +155,7 @@
     const baseHex = (typeof capoColors !== 'undefined') ? capoColors.leather : null;
     const fillColor = (baseHex && typeof engravingColor === 'function') ? engravingColor(baseHex) : '#2a1710';
 
-    TARGETS.forEach(({ groupId, anchor, baseFontSize, maxWidth }) => {
+    TARGETS.forEach(({ groupId, anchor, angle, baseFontSize, maxWidth }) => {
       const group = svg.querySelector('#' + groupId);
       if (!group) return;
       group.innerHTML = '';
@@ -160,6 +167,7 @@
       textEl.setAttribute('y', anchor.y);
       textEl.setAttribute('text-anchor', 'middle');
       textEl.setAttribute('dominant-baseline', 'central');
+      if (angle) textEl.setAttribute('transform', `rotate(${angle} ${anchor.x} ${anchor.y})`);
       textEl.setAttribute('font-family', font.family);
       textEl.setAttribute('font-weight', font.weight);
       textEl.setAttribute('font-size', baseFontSize);

@@ -33,10 +33,13 @@ const CAPO_LEATHER_COLORS = [
   {id:'black',   name:'Black',     hex:'#1a1a1a'},
 ];
 
-// バネホック（スナップ）カラー。向き（通常／反転）は色とは別軸の状態として持つ
-const CAPO_HARDWARE_COLORS = [
-  {id:'silver', name:'Silver', hex:'#c7c9cd'},
-  {id:'gold',   name:'Gold',   hex:'#e5b415'},
+// バネホック（スナップ）の色×向き。guitarpick-case01と同じ4種展開
+// （色名のみ＝通常、「・反転」付き＝向きを反転）
+const CAPO_HARDWARE_OPTIONS = [
+  {id:'silver',   label:'Silver',      hex:'#c7c9cd', reversed:false},
+  {id:'silver-r', label:'Silver・反転', hex:'#c7c9cd', reversed:true},
+  {id:'gold',     label:'Gold',        hex:'#e5b415', reversed:false},
+  {id:'gold-r',   label:'Gold・反転',   hex:'#e5b415', reversed:true},
 ];
 
 // SVG内のCSSクラス ⇔ ゾーンID の対応（capo_color_order.svg 共通）
@@ -72,18 +75,6 @@ function initCapoSimulator() {
   updateCapoPriceDisplay();
   updateCapoCartButtonState();
   loadCapoSVG();
-
-  const reverseToggle = document.getElementById('capo-reverse-toggle');
-  if (reverseToggle) {
-    reverseToggle.checked = capoReversed;
-    reverseToggle.addEventListener('change', () => {
-      saveCapoHistory();
-      capoReversed = reverseToggle.checked;
-      capoImageSaved = false;
-      updateCapoSummary();
-      applyCapoState();
-    });
-  }
 }
 
 if (document.readyState === 'loading') {
@@ -166,31 +157,72 @@ function applyCapoState() {
 // ============================================================================
 
 function buildCapoPalettes() {
-  buildCapoPalette('leather', 'capo-leather-palette', CAPO_LEATHER_COLORS);
-  buildCapoPalette('hardware', 'capo-hardware-palette', CAPO_HARDWARE_COLORS);
+  buildCapoLeatherPalette();
+  buildCapoHardwarePalette();
 }
 
-function buildCapoPalette(zone, elId, colors) {
-  const palette = document.getElementById(elId);
+function buildCapoLeatherPalette() {
+  const palette = document.getElementById('capo-leather-palette');
   if (!palette) return;
   palette.innerHTML = '';
-  const current = capoColors[zone];
+  const current = capoColors.leather;
 
-  colors.forEach(c => {
+  CAPO_LEATHER_COLORS.forEach(c => {
     const sw = document.createElement('div');
     sw.className = 'capo-swatch' + (c.hex === current ? ' selected' : '');
     // テーマのbase.cssに `div:empty{display:none}` があるため、
     // 子要素を持たない空divのままだと非表示になってしまう。display指定を明示して回避する。
     sw.style.cssText = `display:block;background:${c.hex};`;
     sw.title = c.name;
-    sw.onclick = () => setCapoColor(zone, c.hex);
+    sw.onclick = () => setCapoLeather(c.hex);
     palette.appendChild(sw);
   });
 }
 
-function setCapoColor(zone, hex) {
+function setCapoLeather(hex) {
   saveCapoHistory();
-  capoColors[zone] = hex;
+  capoColors.leather = hex;
+  capoImageSaved = false;
+  buildCapoPalettes();
+  updateCapoSummary();
+  updateCapoCartButtonState();
+  applyCapoState();
+}
+
+// バネホックは色×向きの4択を1つのチップ群として表示する（guitarpick-case01と同じ
+// 「Silver / Silver・反転 / Gold / Gold・反転」という粒度に合わせるため、色スウォッチ
+// だけでは向きの違いを表現できず、チップ＋ラベルの組み合わせにしている）。
+function buildCapoHardwarePalette() {
+  const palette = document.getElementById('capo-hardware-palette');
+  if (!palette) return;
+  palette.innerHTML = '';
+
+  CAPO_HARDWARE_OPTIONS.forEach(opt => {
+    const selected = opt.hex === capoColors.hardware && opt.reversed === capoReversed;
+    const chip = document.createElement('div');
+    chip.className = 'hw-chip' + (selected ? ' selected' : '');
+    chip.onclick = () => setCapoHardware(opt.id);
+
+    const sw = document.createElement('div');
+    sw.className = 'hw-chip-swatch' + (opt.reversed ? ' reversed' : '');
+    sw.style.cssText = `display:block;background:${opt.hex};`;
+
+    const label = document.createElement('div');
+    label.className = 'hw-chip-label';
+    label.textContent = opt.label;
+
+    chip.appendChild(sw);
+    chip.appendChild(label);
+    palette.appendChild(chip);
+  });
+}
+
+function setCapoHardware(optionId) {
+  const opt = CAPO_HARDWARE_OPTIONS.find(o => o.id === optionId);
+  if (!opt) return;
+  saveCapoHistory();
+  capoColors.hardware = opt.hex;
+  capoReversed = opt.reversed;
   capoImageSaved = false;
   buildCapoPalettes();
   updateCapoSummary();
@@ -214,8 +246,8 @@ function updateCapoSummary() {
 }
 
 function hardwareLabel() {
-  const name = colorName(capoColors.hardware, 'hardware');
-  return capoReversed ? `${name}・反転` : name;
+  const opt = CAPO_HARDWARE_OPTIONS.find(o => o.hex === capoColors.hardware && o.reversed === capoReversed);
+  return opt ? opt.label : capoColors.hardware;
 }
 
 function updateCapoPriceDisplay() {
@@ -225,12 +257,9 @@ function updateCapoPriceDisplay() {
   el.textContent = `¥${(CAPO_PRICE + kokuinAdd).toLocaleString()}（税込）`;
 }
 
-function paletteForZone(zone) {
-  return zone === 'hardware' ? CAPO_HARDWARE_COLORS : CAPO_LEATHER_COLORS;
-}
-
 function colorName(hex, zone) {
-  return paletteForZone(zone).find(c => c.hex === hex)?.name || hex;
+  if (zone === 'hardware') return hardwareLabel();
+  return CAPO_LEATHER_COLORS.find(c => c.hex === hex)?.name || hex;
 }
 
 // ============================================================================
@@ -268,8 +297,6 @@ function capoUndo() {
   buildCapoPalettes();
   updateCapoSummary();
   updateCapoCartButtonState();
-  const reverseToggle = document.getElementById('capo-reverse-toggle');
-  if (reverseToggle) reverseToggle.checked = capoReversed;
   applyCapoState();
   const btn = document.getElementById('capo-btn-undo');
   if (btn) btn.disabled = capoHistory.length === 0;
@@ -283,8 +310,6 @@ function capoReset() {
   buildCapoPalettes();
   updateCapoSummary();
   updateCapoCartButtonState();
-  const reverseToggle = document.getElementById('capo-reverse-toggle');
-  if (reverseToggle) reverseToggle.checked = false;
   applyCapoState();
 }
 
