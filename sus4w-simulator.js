@@ -45,7 +45,7 @@ const SUS4W_HARDWARE_FIXED = { label: '金具色', name: 'Silver（現状はSilv
 // leather2=革2（バッグ開口部のサスペンダークリップに直結する連結ループ側）
 const SUS4W_ZONE_CLASS = { leather1: 'st2', leather2: 'st3' };
 const SUS4W_ZONES = ['leather1', 'leather2'];
-const SUS4W_ZONE_LABEL = { leather1: '革1（本体）', leather2: '革2（バッグ接続側）' };
+const SUS4W_ZONE_LABEL = { leather1: '本体', leather2: 'バッグ接続部分' };
 
 // 金具はst5固定（このSVGではproduct_image/product_image1とも単一クラスで完結）
 const SUS4W_HARDWARE_CLASSES = ['st5'];
@@ -421,7 +421,7 @@ function showSus4wConfirmModal(result) {
 
   const kokuin = window.SUS4W_KOKUIN_STATE;
   const kokuinRow = kokuin?.enabled
-    ? `<div class="modal-color-row"><span class="modal-zone-label">名入れ刻印（革1）</span><span>「${kokuin.text}」（${kokuin.fontLabel}）</span></div>`
+    ? `<div class="modal-color-row"><span class="modal-zone-label">名入れ刻印（本体）</span><span>「${kokuin.text}」（${kokuin.fontLabel}）</span></div>`
     : '';
 
   const info = document.getElementById('sus4w-modal-info');
@@ -475,7 +475,7 @@ async function sus4wProceedToCart() {
     'Image URL': sus4wLastUploadedImage.imageUrl
   };
   if (kokuinEnabled) {
-    properties['刻印文字（革1）'] = kokuin.text;
+    properties['刻印文字（本体）'] = kokuin.text;
     properties['刻印フォント'] = kokuin.fontLabel;
   }
   Object.entries(properties)
