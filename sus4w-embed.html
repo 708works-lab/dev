@@ -1,0 +1,118 @@
+
+<!-- SUS4 Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/sus4w-simulator.css">
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/sus4w-kokuin-addon.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
+
+<div class="sus4w-simulator">
+  <div class="app">
+
+    <!-- 左：コントロール（パレット・サマリー・刻印） -->
+    <div class="ctrl-left">
+      <div class="box-label">革1の色を選択（本体）</div>
+      <div class="pal-box">
+        <div class="palette" id="sus4w-leather1-palette"></div>
+      </div>
+
+      <div class="box-label" style="margin-top:8px;">革2の色を選択（バッグ接続側）</div>
+      <div class="pal-box">
+        <div class="palette" id="sus4w-leather2-palette"></div>
+      </div>
+
+      <div class="box-label" style="margin-top:8px;">金具色</div>
+      <div class="fixed-note">
+        <span class="fixed-dot" style="background:#c7c9cd;"></span>
+        <span>現状はSilverのみ</span>
+      </div>
+
+      <div class="sum-box">
+        <div class="box-label">配色サマリー</div>
+        <div id="sus4w-summary"></div>
+      </div>
+
+      <!-- 名入れ刻印オプション（有料アップチャージ、革1に刻印） -->
+      <div class="kokuin-toggle-area">
+        <label class="kokuin-toggle">
+          <input type="checkbox" id="sus4w-kokuin-toggle">
+          <span>革1に名入れ刻印を追加する <span class="kokuin-price">（+¥1,100 税込）</span></span>
+        </label>
+      </div>
+
+      <div class="kokuin-section" id="sus4w-kokuin-section" hidden>
+        <div class="kokuin-inner">
+          <div class="kokuin-field-label">刻印する文字（半角英数字）</div>
+          <input type="text" id="sus4w-kokuin-text" maxlength="15" placeholder="例：ABC">
+          <div class="kokuin-char-count" id="sus4w-kokuin-char-count">0 / 15</div>
+          <div class="kokuin-warn" id="sus4w-kokuin-warn"></div>
+
+          <div class="kokuin-field-label">フォントを選択</div>
+          <select id="sus4w-kokuin-font-select"></select>
+          <div class="kokuin-font-swatch" id="sus4w-kokuin-font-swatch"></div>
+
+          <div class="kokuin-notice">
+            <strong>ご注意</strong><br>
+            右のカラーイメージ内に刻印イメージを直接反映しています。実際の刻印は、刻印を施す革パーツのサイズに合わせて弊社側で文字サイズや配置を調整する場合があります。革パーツが小さいため、長い文字列は大幅に縮小されます。あらかじめご了承ください。<br><br>
+            本体の一方の端に708worksロゴが入っており、名入れ刻印はもう一方の端にのみ追加できます。ロゴ・刻印が同じ端に入ることはありません。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右：カラーイメージプレビュー（商品イメージ＋使用イメージ） -->
+    <div class="preview-col">
+      <div class="dir-tag-v">カラーイメージ<small>商品イメージ（上）／使用イメージ（下）</small></div>
+      <div id="sus4w-svg-wrap" class="strap-wrap"></div>
+    </div>
+
+  </div>
+
+  <!-- 価格表示 -->
+  <div class="price-bar">
+    <span class="price-bar-label">価格</span>
+    <span class="price-bar-value" id="sus4w-price-display"></span>
+  </div>
+
+  <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
+
+  <!-- 下部ボタンバー -->
+  <div class="bottom-bar">
+    <button class="btn-reset" onclick="sus4Reset()">リセット</button>
+    <button class="btn-undo" id="sus4w-btn-undo" onclick="sus4Undo()" disabled>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+      </svg>戻る
+    </button>
+    <button class="btn-order" onclick="sus4GoOrder()">
+      <span id="sus4w-cart-label">画像を保存してカートに入れる →</span>
+    </button>
+  </div>
+
+  <!-- 注文確認モーダル -->
+  <div class="modal" id="sus4w-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeSus4wModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="sus4w-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="sus4w-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeSus4wModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="sus4ProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading-overlay" id="sus4w-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="sus4w-toast" class="toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/sus4w-simulator.js"></script>
+<script src="https://708works-lab.github.io/dev/sus4w-kokuin-addon.js"></script>
