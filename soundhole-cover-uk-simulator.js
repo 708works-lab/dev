@@ -572,91 +572,40 @@ function shcWrapCanvasText(ctx, text, maxWidth) {
 }
 
 async function shcBuildSaveCanvas() {
-  const cv = document.createElement('canvas');
-  const cw = 680;
+  const chips = [
+    { hex: shcColor.hex, label: `表面の色：${shcColor.name}` },
+    { hex: SHC_BACK_COLOR.hex, label: `裏面：${SHC_BACK_COLOR.name}（固定）` },
+    { hex: null, label: `装着予定の楽器：${shcHandedness === 'left' ? '左利き用' : '右利き用'}` },
+    { hex: null, label: `サウンドホール適応サイズ：${shcDiameter}mm` },
+  ];
 
-  const liveSvg = document.getElementById('shc-svg');
-  const vbW = 319.75, vbH = 832.24;
-  const svgSaveW = 260;
-  const svgSaveH = Math.round(vbH * (svgSaveW / vbW));
-
-  const headerH = 50, topLabelH = 10, bottomLabelH = 10, footerH = 28;
-  const svgX = Math.round(cw / 2 - svgSaveW / 2);
-  const svgY0 = headerH + topLabelH;
-  const ch = svgY0 + svgSaveH + bottomLabelH + footerH + 10;
-
-  cv.width = cw; cv.height = ch;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#f0ede8'; ctx.fillRect(0, 0, cw, ch);
-
-  ctx.fillStyle = '#111'; ctx.fillRect(0, 0, cw, headerH);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('SOUNDHOLE COVER UKULELE', cw / 2, 28);
-  ctx.fillStyle = '#666'; ctx.font = '11px sans-serif';
-  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 42);
-
-  if (liveSvg) {
-    const cloned = liveSvg.cloneNode(true);
-    cloned.setAttribute('width', svgSaveW);
-    cloned.setAttribute('height', svgSaveH);
-    cloned.style.margin = '0';
-    const svgStr = new XMLSerializer().serializeToString(cloned);
-    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-    await new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => { ctx.drawImage(img, svgX, svgY0, svgSaveW, svgSaveH); resolve(); };
-      img.onerror = resolve;
-      img.src = dataUri;
-    });
-  }
-
-  const labelX = svgX + svgSaveW + 18;
-  const labelMaxWidth = cw - labelX - 16;
-  let ly = svgY0 + 16;
-
-  const drawWrappedLine = (text, indent = 0) => {
-    ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
-    const lines = shcWrapCanvasText(ctx, text, labelMaxWidth - indent);
-    lines.forEach((line) => {
-      ctx.fillText(line, labelX + indent, ly + 3);
-      ly += 16;
-    });
-    ly += 6;
-  };
-
-  ctx.beginPath(); ctx.arc(labelX + 6, ly, 5, 0, Math.PI * 2);
-  ctx.fillStyle = shcColor.hex; ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7; ctx.stroke();
-  drawWrappedLine(`表面の色: ${shcColor.name}`, 16);
-
-  ctx.beginPath(); ctx.arc(labelX + 6, ly, 5, 0, Math.PI * 2);
-  ctx.fillStyle = SHC_BACK_COLOR.hex; ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7; ctx.stroke();
-  drawWrappedLine(`裏面: ${SHC_BACK_COLOR.name}（固定）`, 16);
-
-  drawWrappedLine(`装着予定の楽器: ${shcHandedness === 'left' ? '左利き用' : '右利き用'}`);
-  drawWrappedLine(`サウンドホール適応サイズ: ${shcDiameter}mm`);
-
+  let extra;
   if (shcKokuinEnabled && shcKokuinText) {
-    ctx.fillStyle = '#999'; ctx.font = '10px sans-serif';
-    ctx.fillText('名入れ刻印', labelX, ly + 4);
-    ly += 18;
-    const font = shcCurrentFont();
-    await document.fonts.load(`${font.weight} 16px "${font.family}"`).catch(() => {});
-    ctx.fillStyle = '#1a1a1a'; ctx.font = `${font.weight} 15px "${font.family}"`;
-    const kokuinLines = shcWrapCanvasText(ctx, shcKokuinText, labelMaxWidth);
-    kokuinLines.forEach((line) => {
-      ctx.fillText(line, labelX, ly + 3);
-      ly += 20;
-    });
+    extra = {
+      height: 70,
+      draw: async (ctx, box) => {
+        ctx.fillStyle = '#999';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('名入れ刻印', box.x, box.y + 14);
+        const font = shcCurrentFont();
+        await document.fonts.load(`${font.weight} 26px "${font.family}"`).catch(() => {});
+        ctx.fillStyle = '#1a1a1a';
+        ctx.font = `${font.weight} 26px "${font.family}"`;
+        ctx.fillText(shcKokuinText, box.x, box.y + 46);
+      },
+    };
   }
 
-  ctx.fillStyle = 'rgba(0,0,0,.1)'; ctx.fillRect(0, ch - footerH, cw, footerH);
-  ctx.fillStyle = '#888'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('708works.jp', cw / 2, ch - 10);
-
-  return cv;
+  return build708SaveCanvas({
+    title: 'SOUNDHOLE COVER UKULELE',
+    svgSelector: '#shc-svg',
+    svgW: 319.75, svgH: 832.24,
+    chips,
+    extra,
+  });
 }
+
 
 async function shcSaveImage() {
   showShcLoading('画像を生成中...');

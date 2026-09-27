@@ -1108,185 +1108,89 @@ async function embedKokuinFontIntoSvg(svgRoot, family, weight) {
 }
 
 async function buildSaveCanvas() {
-  const cv = document.createElement('canvas');
-  const cw = 600;
+  const order = getDisplayOrder(N);
+  const chips = order.map((pn, i) => {
+    const color = partColors[i];
+    const frontNum = N - i;
+    const cname = COLORS.find(c => c.hex === color)?.name || '';
+    return { hex: color, label: `P${String(frontNum).padStart(2, '0')}：${cname}` };
+  });
 
-  // SVG描画サイズ（プレビューより少し大きく）
-  const svgSaveW = 60;
-  const scale = svgSaveW / SVG_VW;
+  const kokuin = window.FOLKLORE_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+
+  let extra;
+  if (kokuinEnabled) {
+    extra = {
+      height: 160,
+      draw: async (ctx, box) => {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.moveTo(box.x + 8, box.y);
+        ctx.arcTo(box.x + box.width, box.y, box.x + box.width, box.y + box.height, 8);
+        ctx.arcTo(box.x + box.width, box.y + box.height, box.x, box.y + box.height, 8);
+        ctx.arcTo(box.x, box.y + box.height, box.x, box.y, 8);
+        ctx.arcTo(box.x, box.y, box.x + box.width, box.y, 8);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#999';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('名入れ刻印', box.x + 14, box.y + 20);
+
+        const kokuinPreviewSvg = document.getElementById('folklore-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
+        const contentW = box.width - 28;
+        if (kokuinPreviewSvg) {
+          const previewClone = kokuinPreviewSvg.cloneNode(true);
+          if (kokuin?.fontFamily) await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+          const vb = kokuinPreviewSvg.getAttribute('viewBox')?.split(' ').map(Number);
+          const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
+          let previewW = contentW, previewH = Math.round(contentW * aspect);
+          const maxH = box.height - 34;
+          if (previewH > maxH) { previewH = maxH; previewW = Math.round(maxH / aspect); }
+          previewClone.setAttribute('width', previewW);
+          previewClone.setAttribute('height', previewH);
+          const svgStr = new XMLSerializer().serializeToString(previewClone);
+          const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+          const previewX = box.x + 14 + (contentW - previewW) / 2;
+          await new Promise(resolve => {
+            const img = new Image();
+            img.onload  = () => { ctx.drawImage(img, previewX, box.y + 28, previewW, previewH); resolve(); };
+            img.onerror = resolve;
+            img.src = dataUri;
+          });
+        } else {
+          await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+          ctx.fillStyle = '#1a1a1a';
+          ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+          ctx.textAlign = 'left';
+          ctx.fillText(kokuin.text, box.x + 14, box.y + box.height - 20);
+        }
+      },
+    };
+  }
 
   // buildStrapSVGと同じviewBox高さ計算
   const shiftFixed = (N - 20) * PIECE_PITCH;
   const vbTop = SVG_VTOP - 5;
   const vbBottom = SVG_VTOP + 19 * PIECE_PITCH + shiftFixed + 90;
   const vbH = vbBottom - vbTop;
-  const svgSaveH = Math.round(vbH * scale);
 
-  const kokuin = window.FOLKLORE_KOKUIN_STATE;
-  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
-  // 名入れ刻印プレビュー（folklore-kokuin-svg-wrap内のShadow DOM）はメイン商品画像とは別のSVG・
-  // 別の座標系を持つ拡大クローズアップ表示のため、保存画像にはこれまで刻印文字が一切
-  // 現れていなかった。拡大プレビューSVGをそのまま複製して保存画像にも合成する。
-  const kokuinBoxContentW = cw - 24 * 2 - 28;
-  let kokuinPreviewSvg = null, kokuinPreviewW = kokuinBoxContentW, kokuinPreviewImgH = 0;
-  if (kokuinEnabled) {
-    kokuinPreviewSvg = document.getElementById('folklore-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
-    const vb = kokuinPreviewSvg?.getAttribute('viewBox')?.split(' ').map(Number);
-    const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
-    kokuinPreviewImgH = Math.round(kokuinBoxContentW * aspect);
-    const MAX_PREVIEW_H = 190;
-    if (kokuinPreviewImgH > MAX_PREVIEW_H) {
-      kokuinPreviewImgH = MAX_PREVIEW_H;
-      kokuinPreviewW = Math.round(MAX_PREVIEW_H / aspect);
-    }
-  }
-  const kokuinH = kokuinEnabled ? (26 + kokuinPreviewImgH + 16) : 0;
-
-  const headerH = 50;
-  const topLabelH = 25;
-  const bottomLabelH = 25;
-  const footerH = 28;
-  // ウロコ画像をキャンバス中央に、ラベルは右側に配置
-  const svgX = Math.round(cw / 2 - svgSaveW / 2); // SVG中心 = cw/2
-  const svgY0 = headerH + topLabelH;
-  const ch = svgY0 + svgSaveH + bottomLabelH + kokuinH + footerH + 10;
-
-  cv.width = cw;
-  cv.height = ch;
-
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#f0ede8';
-  ctx.fillRect(0, 0, cw, ch);
-
-  // ヘッダー
-  ctx.fillStyle = '#111';
-  ctx.fillRect(0, 0, cw, headerH);
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 20px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('FOLKLORE', cw / 2, 28);
-  ctx.fillStyle = '#666';
-  ctx.font = '11px sans-serif';
-  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 42);
-
-  // 上部ラベル
-  ctx.fillStyle = '#444';
-  ctx.font = 'bold 9px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('▲ 後ろ（エンドピン側）', cw / 2, svgY0 - 6);
-
-  // SVGをシリアライズしてCanvasに描画
-  const svgEl = document.getElementById('folklore-strap-svg');
-  if (svgEl) {
-    const cloned = svgEl.cloneNode(true);
-    cloned.setAttribute('width', svgSaveW);
-    cloned.setAttribute('height', svgSaveH);
-    cloned.style.margin = '0';
-    if (kokuinEnabled && kokuin?.fontFamily) {
-      await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
-    }
-    const svgStr = new XMLSerializer().serializeToString(cloned);
-    // iOS Safari互換: data URIを使用
-    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => { ctx.drawImage(img, svgX, svgY0, svgSaveW, svgSaveH); resolve(); };
-      img.onerror = resolve;
-      img.src = dataUri;
-    });
-  }
-
-  // 下部ラベル
-  ctx.fillStyle = '#444';
-  ctx.font = 'bold 9px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('▼ 前（ボディ上部側）', cw / 2, svgY0 + svgSaveH + 14);
-
-  // 各ピースのカラーラベル（SVG右側に配置）
-  const labelX = svgX + svgSaveW + 18;
-  const order = getDisplayOrder(N);
-  order.forEach((pn, i) => {
-    // ピース中心のY座標（viewBox内のpiece位置から計算）
-    const pieceY = svgY0 + (5 + (i + 0.5) * PIECE_PITCH) * scale;
-    const color = partColors[i];
-    const frontNum = N - i;
-    const cname = COLORS.find(c => c.hex === color)?.name || '';
-
-    // カラースウォッチ
-    ctx.beginPath();
-    ctx.arc(labelX + 6, pieceY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-    ctx.lineWidth = 0.7;
-    ctx.stroke();
-
-    // P番号
-    ctx.fillStyle = '#aaa';
-    ctx.font = '8px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`P${String(frontNum).padStart(2, '0')}`, labelX + 16, pieceY - 2);
-
-    // カラー名
-    ctx.fillStyle = '#333';
-    ctx.font = '10px sans-serif';
-    ctx.fillText(cname, labelX + 16, pieceY + 10);
-  });
-
-  // 名入れ刻印プレビュー（実際に選んだフォントで描画。あとから見返せるよう保存画像に含める）
-  if (kokuinEnabled) {
-    const boxMargin = 24;
-    const boxX = boxMargin, boxY = svgY0 + svgSaveH + bottomLabelH + 6;
-    const boxW = cw - boxMargin * 2, boxH = kokuinH - 12;
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.moveTo(boxX + 8, boxY);
-    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 8);
-    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, 8);
-    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, 8);
-    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, 8);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.fillStyle = '#999';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('名入れ刻印', boxX + 14, boxY + 18);
-
-    if (kokuinPreviewSvg) {
-      const previewClone = kokuinPreviewSvg.cloneNode(true);
-      if (kokuin?.fontFamily) {
-        await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+  return build708SaveCanvas({
+    title: 'FOLKLORE',
+    svgSelector: '#folklore-strap-svg',
+    svgW: SVG_VW, svgH: vbH,
+    chips,
+    extra,
+    topCaption: '▲ 後ろ（エンドピン側）',
+    bottomCaption: '▼ 前（ボディ上部側）',
+    prepareSvg: async (cloned) => {
+      if (kokuinEnabled && kokuin?.fontFamily) {
+        await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
       }
-      previewClone.setAttribute('width', kokuinPreviewW);
-      previewClone.setAttribute('height', kokuinPreviewImgH);
-      const previewSvgStr = new XMLSerializer().serializeToString(previewClone);
-      const previewDataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(previewSvgStr)));
-      const previewX = boxX + 14 + (kokuinBoxContentW - kokuinPreviewW) / 2;
-      await new Promise(resolve => {
-        const img = new Image();
-        img.onload  = () => { ctx.drawImage(img, previewX, boxY + 26, kokuinPreviewW, kokuinPreviewImgH); resolve(); };
-        img.onerror = resolve;
-        img.src = previewDataUri;
-      });
-    } else {
-      await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
-      ctx.fillStyle = '#1a1a1a';
-      ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
-      ctx.textAlign = 'left';
-      ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
-    }
-  }
-
-  // フッター
-  ctx.fillStyle = 'rgba(0,0,0,.1)';
-  ctx.fillRect(0, ch - footerH, cw, footerH);
-  ctx.fillStyle = '#888';
-  ctx.font = '9px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('708works.jp', cw / 2, ch - 10);
-
-  return cv;
+    },
+  });
 }
 
 // ============================================================================

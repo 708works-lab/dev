@@ -1,0 +1,122 @@
+<!-- Wellington Clear ver. Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/wellington-simulator.css">
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/wellington-kokuin-addon.css">
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/wellington-clear-simulator.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
+
+<div class="wellington-simulator">
+  <div class="app">
+    <div class="top-area">
+      <div class="ctrl-col">
+        <div class="count-row">
+          <button class="cnt-btn" onclick="wcChangeCount(-1)">−</button>
+          <div style="flex:1;">
+            <div class="cnt-num" id="wc-cnt-disp">20個</div>
+            <div class="cnt-sub" id="wc-cnt-sub">標準（全長 約97cm）</div>
+          </div>
+          <button class="cnt-btn" onclick="wcChangeCount(+1)">＋</button>
+        </div>
+
+        <div class="pal-box">
+          <div class="box-label">パーツを選択</div>
+          <div class="wc-zones" id="wc-zones"></div>
+        </div>
+
+        <div class="pal-box">
+          <div class="box-label" id="wc-palette-label">カラー</div>
+          <div class="palette" id="wc-palette"></div>
+        </div>
+
+        <div class="sum-box">
+          <div class="box-label">カラーサマリー</div>
+          <div class="summary" id="wc-summary"></div>
+        </div>
+      </div>
+      <div class="strap-col" id="wc-strap-col">
+        <div class="dir-tag">後ろ<small>末端側</small></div>
+        <div class="strap-scroll" id="wc-strap-scroll"></div>
+        <div class="dir-tag">前<small>先端側</small></div>
+      </div>
+    </div>
+
+    <!-- 名入れ刻印オプション（有料アップチャージ） -->
+    <div class="kokuin-toggle-area">
+      <label class="kokuin-toggle">
+        <input type="checkbox" id="wl-kokuin-toggle">
+        <span>名入れ刻印を追加する <span class="kokuin-price">（+¥1,100 税込）</span></span>
+      </label>
+    </div>
+
+    <div class="kokuin-section" id="wl-kokuin-section" hidden>
+      <div class="kokuin-inner">
+        <div class="kokuin-preview-box">
+          <div class="kokuin-pv-caption">刻印イメージ</div>
+          <div class="kokuin-svg-wrap" id="wl-kokuin-svg-wrap"></div>
+          <div class="kokuin-font-swatch" id="wl-kokuin-font-swatch"></div>
+        </div>
+
+        <div class="kokuin-field-label">刻印する文字（半角英数字）</div>
+        <input type="text" id="wl-kokuin-text" maxlength="20" placeholder="例：Sample">
+        <div class="kokuin-char-count" id="wl-kokuin-char-count">0 / 15</div>
+        <div class="kokuin-warn" id="wl-kokuin-warn"></div>
+
+        <div class="kokuin-field-label">フォントを選択</div>
+        <select id="wl-kokuin-font-select"></select>
+
+        <div class="kokuin-notice">
+          <strong>ご注意</strong><br>
+          こちらはあくまで仕上がりイメージの確認用です。実際の刻印は、バランスを見て文字サイズや余白を弊社側で調整する場合があります。文字数や書体によっては、見栄えを考慮して2段配置に変更することもあります。あらかじめご了承ください。<br><br>
+          本製品はPVC部分に刻印を施すことができないため、通常は先端の本革パーツの表面に708worksロゴが型押しされますが、名入れ刻印をご希望の場合は表面が名入れ刻印となり、708worksロゴは同じパーツの裏面に型押しされます。
+        </div>
+      </div>
+    </div>
+
+    <div class="price-bar" id="wc-price-bar">
+      <span class="price-bar-label">価格</span>
+      <span class="price-bar-value" id="wc-price-display"></span>
+    </div>
+
+    <div id="wc-order-area">
+      <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
+
+      <div class="bottom-bar">
+        <button class="btn-reset" onclick="wcResetAll()">リセット</button>
+        <button class="btn-undo" id="wc-btn-undo" onclick="wcUndo()" disabled>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+          </svg>戻る
+        </button>
+        <button class="btn-order" id="wc-btn-order" onclick="wcGoOrder()">
+          画像を保存してカートに入れる →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="wc-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeWcModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="wc-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="wc-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeWcModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="wcProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="wc-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text" id="wc-loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="wc-toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/save-canvas-common.js"></script>
+<script src="https://708works-lab.github.io/dev/wellington-clear-simulator.js"></script>

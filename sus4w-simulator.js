@@ -342,131 +342,28 @@ async function sus4wSaveImage() {
 }
 
 async function buildSus4wSaveCanvas() {
-  const SVG_VW = 353.62, SVG_VH = 1180.85;
-  const svgSaveW = 260;
-  const scale = svgSaveW / SVG_VW;
-  const svgSaveH = Math.round(SVG_VH * scale);
-
-  const measureCtx = document.createElement('canvas').getContext('2d');
-  let labelColW = 60;
-  [...SUS4W_ZONES, 'hardware'].forEach(zone => {
-    const label = zone === 'hardware' ? SUS4W_HARDWARE_FIXED.name : colorName(sus4wColors[zone]);
-    const smallLabel = zone === 'hardware' ? SUS4W_HARDWARE_FIXED.label : SUS4W_ZONE_LABEL[zone];
-    measureCtx.font = '13px sans-serif';
-    const nameW = measureCtx.measureText(label).width;
-    measureCtx.font = '10px sans-serif';
-    const smallW = measureCtx.measureText(smallLabel).width;
-    labelColW = Math.max(labelColW, 20 + Math.max(nameW, smallW));
-  });
-
-  const margin = 46;
-  const gap    = 24;
-  const cw = margin * 2 + svgSaveW + gap + labelColW;
-
   const kokuin = window.SUS4W_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
-  const kokuinH = kokuinEnabled ? 78 : 0;
 
-  const headerH = 64;
-  const svgY0 = headerH + 16;
-  const footerH = 34;
-  const rowsCount = SUS4W_ZONES.length + 1;
-  const ch = svgY0 + svgSaveH + kokuinH + footerH + 16;
-
-  const cv = document.createElement('canvas');
-  cv.width = cw; cv.height = ch;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#f0ede8';
-  ctx.fillRect(0, 0, cw, ch);
-
-  ctx.fillStyle = '#111';
-  ctx.fillRect(0, 0, cw, headerH);
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 22px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('SUS4 with Wellington', cw / 2, 38);
-  ctx.fillStyle = '#666';
-  ctx.font = '13px sans-serif';
-  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 56);
-
-  const svgEl = document.querySelector('#sus4w-svg-wrap svg');
-  if (svgEl) {
-    const cloned = svgEl.cloneNode(true);
-    cloned.setAttribute('width', svgSaveW);
-    cloned.setAttribute('height', svgSaveH);
-    cloned.style.margin = '0';
-    if (kokuinEnabled && kokuin?.fontFamily) {
-      await embedSus4wKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
-    }
-    const svgStr  = new XMLSerializer().serializeToString(cloned);
-    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload  = () => { ctx.drawImage(img, margin, svgY0, svgSaveW, svgSaveH); resolve(); };
-      img.onerror = resolve;
-      img.src = dataUri;
-    });
-  }
-
-  const labelX = margin + svgSaveW + gap;
-  const rowGap = svgSaveH / (rowsCount + 1);
-  [...SUS4W_ZONES, 'hardware'].forEach((zone, i) => {
-    const hex = zone === 'hardware' ? SUS4W_HARDWARE_FIXED.hex : sus4wColors[zone];
-    const label = zone === 'hardware' ? SUS4W_HARDWARE_FIXED.name : colorName(sus4wColors[zone]);
-    const smallLabel = zone === 'hardware' ? SUS4W_HARDWARE_FIXED.label : SUS4W_ZONE_LABEL[zone];
-    const y = svgY0 + rowGap * (i + 1);
-
-    ctx.beginPath();
-    ctx.arc(labelX + 7, y, 6, 0, Math.PI * 2);
-    ctx.fillStyle = hex;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.fillStyle = '#999';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(smallLabel, labelX + 20, y - 3);
-
-    ctx.fillStyle = '#333';
-    ctx.font = '13px sans-serif';
-    ctx.fillText(label, labelX + 20, y + 14);
-  });
-
+  const chips = [...SUS4W_ZONES, 'hardware'].map(zone => ({
+    hex: zone === 'hardware' ? SUS4W_HARDWARE_FIXED.hex : sus4wColors[zone],
+    label: zone === 'hardware' ? SUS4W_HARDWARE_FIXED.name : colorName(sus4wColors[zone]),
+  }));
   if (kokuinEnabled) {
-    const boxX = margin, boxY = svgY0 + svgSaveH + 6;
-    const boxW = cw - margin * 2, boxH = kokuinH - 12;
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.moveTo(boxX + 8, boxY);
-    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 8);
-    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, 8);
-    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, 8);
-    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, 8);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.fillStyle = '#999';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('名入れ刻印（革1）', boxX + 14, boxY + 18);
-
-    await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
-    ctx.textAlign = 'left';
-    ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
+    chips.push({ hex: engravingColor(sus4wColors.leather1), label: `刻印「${kokuin.text}」` });
   }
 
-  ctx.fillStyle = 'rgba(0,0,0,.1)';
-  ctx.fillRect(0, ch - footerH, cw, footerH);
-  ctx.fillStyle = '#888';
-  ctx.font = '11px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('708works.jp', cw / 2, ch - 12);
-
-  return cv;
+  return build708SaveCanvas({
+    title: 'SUS4 with Wellington',
+    svgSelector: '#sus4w-svg-wrap svg',
+    svgW: 353.62, svgH: 1180.85,
+    chips,
+    prepareSvg: async (cloned) => {
+      if (kokuinEnabled && kokuin?.fontFamily) {
+        await embedSus4wKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
+      }
+    },
+  });
 }
 
 // ============================================================================

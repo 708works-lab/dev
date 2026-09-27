@@ -653,197 +653,89 @@ async function embedKokuinFontIntoSvg(svgRoot, family, weight) {
   svgRoot.insertBefore(style, svgRoot.firstChild);
 }
 
-// 保存・注文アップロード用のキャンバスを生成する。
-// ヘッダー・上下の向きラベル・各パーツのカラー名ラベルを合成し、
-// folkloreのカラーシミュレーターと同じ見せ方にする。
+// 保存・注文アップロード用のキャンバスを生成する（共通ヘルパー build708SaveCanvas に委譲）。
 async function buildDuetSaveCanvas() {
-  const SVG_VW = 191.5, SVG_VH = 1406.71;
-  const svgSaveW = 140;                     // 解像度アップ（旧80）
-  const scale = svgSaveW / SVG_VW;
-  const svgSaveH = Math.round(SVG_VH * scale);
-
-  const zoneLabels = [
-    { y: 69,   zone:'rear',   label:'後端'   },
-    { y: 615,  zone:'belt',   label:'ベルト' },
-    { y: 1175, zone:'front4', label:'先端④' },
-    { y: 1230, zone:'front3', label:'先端③' },
-    { y: 1290, zone:'front2', label:'先端②' },
-    { y: 1360, zone:'front1', label:'先端①' },
+  const zoneDefs = [
+    { zone: 'rear',   label: '後端' },
+    { zone: 'belt',   label: 'ベルト' },
+    { zone: 'front4', label: '先端④' },
+    { zone: 'front3', label: '先端③' },
+    { zone: 'front2', label: '先端②' },
+    { zone: 'front1', label: '先端①' },
   ];
-
-  // ラベル列は色名によって幅が変わるため、実際に描画するテキストを
-  // 計測してから余白を決める（固定幅だと短い色名のときに右の
-  // 余白だけ大きく空いて見えてしまうため）
-  const measureCtx = document.createElement('canvas').getContext('2d');
-  let labelColW = 50;
-  zoneLabels.forEach(z => {
-    const hex = duetColors[z.zone];
-    measureCtx.font = '14px sans-serif';
-    const nameW = measureCtx.measureText(colorName(hex, z.zone)).width;
-    measureCtx.font = '11px sans-serif';
-    const smallW = measureCtx.measureText(z.label).width;
-    labelColW = Math.max(labelColW, 20 + Math.max(nameW, smallW));
-  });
-
-  // 画像とラベル列をまとめて中央寄せするため、左右マージンを固定して
-  // キャンバス幅をそこから逆算する（画像だけを中央寄せすると右側の
-  // 余白がラベル分だけ狭く見えてしまうため）
-  const margin = 46;
-  const gap    = 24;
-  const cw = margin * 2 + svgSaveW + gap + labelColW;
+  const chips = zoneDefs.map(z => ({ hex: duetColors[z.zone], label: `${z.label}：${colorName(duetColors[z.zone], z.zone)}` }));
 
   const kokuin = window.DUET_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
-  // 名入れ刻印プレビュー（duet-kokuin-svg-wrap内のShadow DOM）はメイン商品画像とは別のSVG・
-  // 別の座標系を持つ拡大クローズアップ表示のため、保存画像にはこれまで刻印文字が一切
-  // 現れていなかった。拡大プレビューSVGをそのまま複製して保存画像にも合成する。
-  const kokuinBoxContentW = margin * 2 + svgSaveW + gap + labelColW - margin * 2 - 28;
-  let kokuinPreviewSvg = null, kokuinPreviewW = kokuinBoxContentW, kokuinPreviewImgH = 0;
+
+  let extra;
   if (kokuinEnabled) {
-    kokuinPreviewSvg = document.getElementById('duet-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
-    const vb = kokuinPreviewSvg?.getAttribute('viewBox')?.split(' ').map(Number);
-    const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
-    kokuinPreviewImgH = Math.round(kokuinBoxContentW * aspect);
-    const MAX_PREVIEW_H = 190;
-    if (kokuinPreviewImgH > MAX_PREVIEW_H) {
-      kokuinPreviewImgH = MAX_PREVIEW_H;
-      kokuinPreviewW = Math.round(MAX_PREVIEW_H / aspect);
-    }
-  }
-  const kokuinH = kokuinEnabled ? (26 + kokuinPreviewImgH + 16) : 0;
+    extra = {
+      height: 160,
+      draw: async (ctx, box) => {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.moveTo(box.x + 8, box.y);
+        ctx.arcTo(box.x + box.width, box.y, box.x + box.width, box.y + box.height, 8);
+        ctx.arcTo(box.x + box.width, box.y + box.height, box.x, box.y + box.height, 8);
+        ctx.arcTo(box.x, box.y + box.height, box.x, box.y, 8);
+        ctx.arcTo(box.x, box.y, box.x + box.width, box.y, 8);
+        ctx.closePath();
+        ctx.fill();
 
-  const headerH = 64, topLabelH = 30, bottomLabelH = 30, footerH = 34;
-  const svgX  = margin;
-  const svgY0 = headerH + topLabelH;
-  const ch    = svgY0 + svgSaveH + bottomLabelH + kokuinH + footerH + 10;
+        ctx.fillStyle = '#999';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('名入れ刻印', box.x + 14, box.y + 20);
 
-  const cv = document.createElement('canvas');
-  cv.width = cw; cv.height = ch;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#f0ede8';
-  ctx.fillRect(0, 0, cw, ch);
-
-  // ヘッダー
-  ctx.fillStyle = '#111';
-  ctx.fillRect(0, 0, cw, headerH);
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 26px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('DUET', cw / 2, 38);
-  ctx.fillStyle = '#666';
-  ctx.font = '13px sans-serif';
-  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 56);
-
-  // 上部ラベル
-  ctx.fillStyle = '#444';
-  ctx.font = 'bold 12px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('▲ 後端（エンドピン側）', cw / 2, svgY0 - 8);
-
-  // SVGをシリアライズしてCanvasに描画（iOS Safari互換のためdata URIを使用）
-  const svgEl = document.querySelector('#duet-strap-wrap svg');
-  if (svgEl) {
-    const cloned = svgEl.cloneNode(true);
-    cloned.setAttribute('width', svgSaveW);
-    cloned.setAttribute('height', svgSaveH);
-    cloned.style.margin = '0';
-    if (kokuinEnabled && kokuin?.fontFamily) {
-      await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
-    }
-    const svgStr  = new XMLSerializer().serializeToString(cloned);
-    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload  = () => { ctx.drawImage(img, svgX, svgY0, svgSaveW, svgSaveH); resolve(); };
-      img.onerror = resolve;
-      img.src = dataUri;
-    });
+        const kokuinPreviewSvg = document.getElementById('duet-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
+        const contentW = box.width - 28;
+        if (kokuinPreviewSvg) {
+          const previewClone = kokuinPreviewSvg.cloneNode(true);
+          if (kokuin?.fontFamily) await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+          const vb = kokuinPreviewSvg.getAttribute('viewBox')?.split(' ').map(Number);
+          const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
+          let previewW = contentW, previewH = Math.round(contentW * aspect);
+          const maxH = box.height - 34;
+          if (previewH > maxH) { previewH = maxH; previewW = Math.round(maxH / aspect); }
+          previewClone.setAttribute('width', previewW);
+          previewClone.setAttribute('height', previewH);
+          const svgStr = new XMLSerializer().serializeToString(previewClone);
+          const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+          const previewX = box.x + 14 + (contentW - previewW) / 2;
+          await new Promise(resolve => {
+            const img = new Image();
+            img.onload  = () => { ctx.drawImage(img, previewX, box.y + 28, previewW, previewH); resolve(); };
+            img.onerror = resolve;
+            img.src = dataUri;
+          });
+        } else {
+          await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+          ctx.fillStyle = '#1a1a1a';
+          ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+          ctx.textAlign = 'left';
+          ctx.fillText(kokuin.text, box.x + 14, box.y + box.height - 20);
+        }
+      },
+    };
   }
 
-  // 下部ラベル
-  ctx.fillStyle = '#444';
-  ctx.font = 'bold 12px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('▼ 先端（ストラップピン側）', cw / 2, svgY0 + svgSaveH + 20);
-
-  // 各パーツのカラーラベル（SVG右側に配置。Y座標はSVG内の各パーツのおおよその中心）
-  const labelX = svgX + svgSaveW + gap;
-  zoneLabels.forEach(z => {
-    const hex    = duetColors[z.zone];
-    const pieceY = svgY0 + z.y * scale;
-
-    ctx.beginPath();
-    ctx.arc(labelX + 7, pieceY, 6, 0, Math.PI * 2);
-    ctx.fillStyle = hex;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.fillStyle = '#999';
-    ctx.font = '11px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(z.label, labelX + 20, pieceY - 3);
-
-    ctx.fillStyle = '#333';
-    ctx.font = '14px sans-serif';
-    ctx.fillText(colorName(hex, z.zone), labelX + 20, pieceY + 14);
-  });
-
-  // 名入れ刻印プレビュー（実際に選んだフォントで描画。あとから見返せるよう保存画像に含める）
-  if (kokuinEnabled) {
-    const boxX = margin, boxY = svgY0 + svgSaveH + bottomLabelH + 6;
-    const boxW = cw - margin * 2, boxH = kokuinH - 12;
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.moveTo(boxX + 8, boxY);
-    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 8);
-    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, 8);
-    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, 8);
-    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, 8);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.fillStyle = '#999';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('名入れ刻印', boxX + 14, boxY + 18);
-
-    if (kokuinPreviewSvg) {
-      const previewClone = kokuinPreviewSvg.cloneNode(true);
-      if (kokuin?.fontFamily) {
-        await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+  return build708SaveCanvas({
+    title: 'DUET',
+    svgSelector: '#duet-strap-wrap svg',
+    svgW: 191.5, svgH: 1406.71,
+    chips,
+    extra,
+    topCaption: '▲ 後端（エンドピン側）',
+    bottomCaption: '▼ 先端（ストラップピン側）',
+    prepareSvg: async (cloned) => {
+      if (kokuinEnabled && kokuin?.fontFamily) {
+        await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
       }
-      previewClone.setAttribute('width', kokuinPreviewW);
-      previewClone.setAttribute('height', kokuinPreviewImgH);
-      const previewSvgStr = new XMLSerializer().serializeToString(previewClone);
-      const previewDataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(previewSvgStr)));
-      const previewX = boxX + 14 + (kokuinBoxContentW - kokuinPreviewW) / 2;
-      await new Promise(resolve => {
-        const img = new Image();
-        img.onload  = () => { ctx.drawImage(img, previewX, boxY + 26, kokuinPreviewW, kokuinPreviewImgH); resolve(); };
-        img.onerror = resolve;
-        img.src = previewDataUri;
-      });
-    } else {
-      await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
-      ctx.fillStyle = '#1a1a1a';
-      ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
-      ctx.textAlign = 'left';
-      ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
-    }
-  }
-
-  // フッター
-  ctx.fillStyle = 'rgba(0,0,0,.1)';
-  ctx.fillRect(0, ch - footerH, cw, footerH);
-  ctx.fillStyle = '#888';
-  ctx.font = '11px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('708works.jp', cw / 2, ch - 12);
-
-  return cv;
+    },
+  });
 }
+
 
 // ============================================================================
 // カート注文

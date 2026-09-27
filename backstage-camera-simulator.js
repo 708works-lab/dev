@@ -344,136 +344,32 @@ async function backstageCameraSaveImage() {
   showBackstageCameraToast('画像を保存しました ✓　カートに進めます');
 }
 
-// 保存・注文アップロード用のキャンバスを生成する。
-// ヘッダー・配色サマリーを合成し、他シリーズのカラーシミュレーターと同じ見せ方にする。
+// 保存・注文アップロード用のキャンバスを生成する（共通ヘルパー build708SaveCanvas に委譲）。
 async function buildBackstageCameraSaveCanvas() {
-  const SVG_VW = 413.5, SVG_VH = 993.65;
-  const svgSaveW = 300;
-  const scale = svgSaveW / SVG_VW;
-  const svgSaveH = Math.round(SVG_VH * scale);
-
-  const measureCtx = document.createElement('canvas').getContext('2d');
-  let labelColW = 60;
-  BACKSTAGE_CAMERA_ZONES.forEach(zone => {
-    const hex = backstageCameraColors[zone];
-    measureCtx.font = '13px sans-serif';
-    const nameW = measureCtx.measureText(backstageCameraColorName(hex, zone)).width;
-    measureCtx.font = '10px sans-serif';
-    const smallW = measureCtx.measureText(BACKSTAGE_CAMERA_ZONE_LABEL[zone]).width;
-    labelColW = Math.max(labelColW, 20 + Math.max(nameW, smallW));
-  });
-
-  const margin = 46;
-  const gap    = 24;
-  const cw = margin * 2 + svgSaveW + gap + labelColW;
-
   const kokuin = window.BACKSTAGE_CAMERA_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
-  const kokuinH = kokuinEnabled ? 78 : 0;
 
-  const headerH = 64;
-  const svgY0 = headerH + 16;
-  const footerH = 34;
-  const ch = svgY0 + svgSaveH + kokuinH + footerH + 16;
-
-  const cv = document.createElement('canvas');
-  cv.width = cw; cv.height = ch;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#f0ede8';
-  ctx.fillRect(0, 0, cw, ch);
-
-  // ヘッダー
-  ctx.fillStyle = '#111';
-  ctx.fillRect(0, 0, cw, headerH);
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 22px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('BACKSTAGE for CAMERA', cw / 2, 38);
-  ctx.fillStyle = '#666';
-  ctx.font = '13px sans-serif';
-  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 56);
-
-  // SVGをシリアライズしてCanvasに描画（iOS Safari互換のためdata URIを使用）
-  const svgEl = document.querySelector('#backstage-camera-svg-wrap svg');
-  if (svgEl) {
-    const cloned = svgEl.cloneNode(true);
-    cloned.setAttribute('width', svgSaveW);
-    cloned.setAttribute('height', svgSaveH);
-    cloned.style.margin = '0';
-    if (kokuinEnabled && kokuin?.fontFamily) {
-      await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
-    }
-    const svgStr  = new XMLSerializer().serializeToString(cloned);
-    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload  = () => { ctx.drawImage(img, margin, svgY0, svgSaveW, svgSaveH); resolve(); };
-      img.onerror = resolve;
-      img.src = dataUri;
-    });
-  }
-
-  // 右側：配色サマリー（等間隔に配置）
-  const labelX = margin + svgSaveW + gap;
-  const rowGap = svgSaveH / (BACKSTAGE_CAMERA_ZONES.length + 1);
-  BACKSTAGE_CAMERA_ZONES.forEach((zone, i) => {
-    const hex = backstageCameraColors[zone];
-    const y = svgY0 + rowGap * (i + 1);
-
-    ctx.beginPath();
-    ctx.arc(labelX + 7, y, 6, 0, Math.PI * 2);
-    ctx.fillStyle = hex;
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    ctx.fillStyle = '#999';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(BACKSTAGE_CAMERA_ZONE_LABEL[zone], labelX + 20, y - 3);
-
-    ctx.fillStyle = '#333';
-    ctx.font = '13px sans-serif';
-    ctx.fillText(backstageCameraColorName(hex, zone), labelX + 20, y + 14);
-  });
-
-  // 名入れ刻印プレビュー（実際に選んだフォントで描画。あとから見返せるよう保存画像に含める）
+  const chips = BACKSTAGE_CAMERA_ZONES.map(zone => ({
+    hex: backstageCameraColors[zone],
+    label: `${BACKSTAGE_CAMERA_ZONE_LABEL[zone]}：${backstageCameraColorName(backstageCameraColors[zone], zone)}`,
+  }));
   if (kokuinEnabled) {
-    const boxX = margin, boxY = svgY0 + svgSaveH + 6;
-    const boxW = cw - margin * 2, boxH = kokuinH - 12;
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.moveTo(boxX + 8, boxY);
-    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 8);
-    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, 8);
-    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, 8);
-    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, 8);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.fillStyle = '#999';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('名入れ刻印', boxX + 14, boxY + 18);
-
-    await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
-    ctx.textAlign = 'left';
-    ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
+    chips.push({ hex: engravingColor(backstageCameraColors.leather), label: `刻印「${kokuin.text}」` });
   }
 
-  // フッター
-  ctx.fillStyle = 'rgba(0,0,0,.1)';
-  ctx.fillRect(0, ch - footerH, cw, footerH);
-  ctx.fillStyle = '#888';
-  ctx.font = '11px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('708works.jp', cw / 2, ch - 12);
-
-  return cv;
+  return build708SaveCanvas({
+    title: 'BACKSTAGE for CAMERA',
+    svgSelector: '#backstage-camera-svg-wrap svg',
+    svgW: 413.5, svgH: 993.65,
+    chips,
+    prepareSvg: async (cloned) => {
+      if (kokuinEnabled && kokuin?.fontFamily) {
+        await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
+      }
+    },
+  });
 }
+
 
 // ============================================================================
 // カート注文

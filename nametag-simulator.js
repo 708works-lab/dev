@@ -599,103 +599,23 @@ async function embedKokuinFontIntoSvg(svgRoot, family, weight) {
 }
 
 async function buildNametagSaveCanvas() {
-  const SVG_VW = 247.78, SVG_VH = 811.14;
-  const svgSaveW = 220;
-  const scale = svgSaveW / SVG_VW;
-  const svgSaveH = Math.round(SVG_VH * scale);
+  const summaryLines = buildNametagSummaryLines();
+  const chips = summaryLines.map(line => ({ hex: line.dot || null, label: `${line.label}：${line.value}` }));
 
-  const lines = buildNametagSummaryLines();
-  const measureCtx = document.createElement('canvas').getContext('2d');
-  let labelColW = 70;
-  lines.forEach(line => {
-    measureCtx.font = '13px sans-serif';
-    const valueW = measureCtx.measureText(line.value).width;
-    measureCtx.font = '10px sans-serif';
-    const labelW = measureCtx.measureText(line.label).width;
-    labelColW = Math.max(labelColW, 20 + Math.max(valueW, labelW));
+  const hasKokuinTextForSave = !!(nametagKokuinText.area1 || (nametagShape === 'ag' && nametagKokuinText.area2));
+
+  return build708SaveCanvas({
+    title: 'GUITAR NAMETAG',
+    svgSelector: '#nametag-svg-wrap svg',
+    svgW: 247.78, svgH: 811.14,
+    chips,
+    prepareSvg: async (cloned) => {
+      if (hasKokuinTextForSave) {
+        const activeFont = nametagCurrentFont();
+        await embedKokuinFontIntoSvg(cloned, activeFont.family, activeFont.weight);
+      }
+    },
   });
-
-  const margin = 32;
-  const gap = 22;
-  const headerH = 60;
-  const svgY0 = headerH + 14;
-  const footerH = 30;
-  const svgH = svgSaveH;
-  const ch = svgY0 + svgH + footerH + 24;
-  const cw = margin + svgSaveW + gap + labelColW + margin;
-
-  const cv = document.createElement('canvas');
-  cv.width = cw; cv.height = ch;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#f0ede8';
-  ctx.fillRect(0, 0, cw, ch);
-
-  ctx.fillStyle = '#111';
-  ctx.fillRect(0, 0, cw, headerH);
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 18px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('GUITAR NAMETAG', cw / 2, 32);
-  ctx.fillStyle = '#666';
-  ctx.font = '11px sans-serif';
-  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 48);
-
-  const svgEl = document.querySelector('#nametag-svg-wrap svg');
-  if (svgEl) {
-    const cloned = svgEl.cloneNode(true);
-    cloned.setAttribute('width', svgSaveW);
-    cloned.setAttribute('height', svgSaveH);
-    cloned.style.margin = '0';
-    const hasKokuinTextForSave = !!(nametagKokuinText.area1 || (nametagShape === 'ag' && nametagKokuinText.area2));
-    if (hasKokuinTextForSave) {
-      const activeFont = nametagCurrentFont();
-      await embedKokuinFontIntoSvg(cloned, activeFont.family, activeFont.weight);
-    }
-    const svgStr  = new XMLSerializer().serializeToString(cloned);
-    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload  = () => { ctx.drawImage(img, margin, svgY0, svgSaveW, svgSaveH); resolve(); };
-      img.onerror = resolve;
-      img.src = dataUri;
-    });
-  }
-
-  // 右側：選択内容サマリー（等間隔に配置）
-  const labelX = margin + svgSaveW + gap;
-  const rowGap = svgH / (lines.length + 1);
-  lines.forEach((line, i) => {
-    const y = svgY0 + rowGap * (i + 1);
-
-    if (line.dot) {
-      ctx.beginPath();
-      ctx.arc(labelX + 7, y, 6, 0, Math.PI * 2);
-      ctx.fillStyle = line.dot;
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-    const textX = labelX + (line.dot ? 20 : 0);
-
-    ctx.fillStyle = '#999';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(line.label, textX, y - 3);
-
-    ctx.fillStyle = '#333';
-    ctx.font = '13px sans-serif';
-    ctx.fillText(line.value, textX, y + 14);
-  });
-
-  ctx.fillStyle = 'rgba(0,0,0,.1)';
-  ctx.fillRect(0, ch - footerH, cw, footerH);
-  ctx.fillStyle = '#888';
-  ctx.font = '10px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('708works.jp', cw / 2, ch - 10);
-
-  return cv;
 }
 
 // ============================================================================

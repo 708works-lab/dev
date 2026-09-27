@@ -572,140 +572,91 @@ async function embedKokuinFontIntoSvg(svgRoot, family, weight) {
 }
 
 async function buildKolmioSaveCanvas() {
-  const cv = document.createElement('canvas');
-  const cw = 600;
-  const svgSaveW = 56;
-  // ライブのプレビューSVG（buildKolmioStrapSVGでgetBBoxにより実測済みのviewBoxを持つ）から
-  // そのままアスペクト比を引き継ぐ。ここで独自に余白を仮定し直すと、末端パーツの実形状に
-  // よっては上端が切れるおそれがあるため、必ず実測済みのviewBoxを使うこと。
   const liveSvg = document.getElementById('kolmio-strap-svg');
   const liveVb = liveSvg?.getAttribute('viewBox')?.split(' ').map(Number);
   const vbW = liveVb ? liveVb[2] : KOLMIO_SVG_VW;
   const vbH = liveVb ? liveVb[3] : 1700;
-  const scale = svgSaveW / vbW;
-  const svgSaveH = Math.round(vbH * scale);
+
+  const order = kolmioDisplayOrder(kN);
+  const chips = order.map((pieceNum, i) => {
+    const color = kPieceColors[pieceNum];
+    const cname = KOLMIO_COLORS.find(c => c.hex === color)?.name || '';
+    return { hex: color, label: `P${String(kN - i).padStart(2, '0')}：${cname}` };
+  });
+  chips.push({ hex: null, label: `仕様：${kThick ? '厚革仕様（ギター向け、+¥' + KOLMIO_THICK_ADD.toLocaleString() + '）' : '標準厚み'}` });
 
   const kokuin = window.KOLMIO_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
-  // 名入れ刻印プレビュー（kolmio-kokuin-svg-wrap内のShadow DOM）はメイン商品画像とは別のSVG・
-  // 別の座標系を持つ拡大クローズアップ表示のため、保存画像にはこれまで刻印文字が一切
-  // 現れていなかった。拡大プレビューSVGをそのまま複製して保存画像にも合成する。
-  const kokuinBoxContentW = cw - 24 * 2 - 28;
-  let kokuinPreviewSvg = null, kokuinPreviewW = kokuinBoxContentW, kokuinPreviewImgH = 0;
+
+  let extra;
   if (kokuinEnabled) {
-    kokuinPreviewSvg = document.getElementById('kolmio-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
-    const vb = kokuinPreviewSvg?.getAttribute('viewBox')?.split(' ').map(Number);
-    const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
-    kokuinPreviewImgH = Math.round(kokuinBoxContentW * aspect);
-    const MAX_PREVIEW_H = 190;
-    if (kokuinPreviewImgH > MAX_PREVIEW_H) {
-      kokuinPreviewImgH = MAX_PREVIEW_H;
-      kokuinPreviewW = Math.round(MAX_PREVIEW_H / aspect);
-    }
-  }
-  const kokuinH = kokuinEnabled ? (26 + kokuinPreviewImgH + 16) : 0;
+    extra = {
+      height: 160,
+      draw: async (ctx, box) => {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.moveTo(box.x + 8, box.y);
+        ctx.arcTo(box.x + box.width, box.y, box.x + box.width, box.y + box.height, 8);
+        ctx.arcTo(box.x + box.width, box.y + box.height, box.x, box.y + box.height, 8);
+        ctx.arcTo(box.x, box.y + box.height, box.x, box.y, 8);
+        ctx.arcTo(box.x, box.y, box.x + box.width, box.y, 8);
+        ctx.closePath();
+        ctx.fill();
 
-  const headerH = 50, topLabelH = 25, bottomLabelH = 25, specH = 24, footerH = 28;
-  const svgX = Math.round(cw / 2 - svgSaveW / 2);
-  const svgY0 = headerH + topLabelH;
-  const ch = svgY0 + svgSaveH + bottomLabelH + specH + kokuinH + footerH + 10;
+        ctx.fillStyle = '#999';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('名入れ刻印', box.x + 14, box.y + 20);
 
-  cv.width = cw; cv.height = ch;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#f0ede8'; ctx.fillRect(0, 0, cw, ch);
-
-  ctx.fillStyle = '#111'; ctx.fillRect(0, 0, cw, headerH);
-  ctx.fillStyle = '#fff'; ctx.font = 'bold 20px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('KOLMIO', cw / 2, 28);
-  ctx.fillStyle = '#666'; ctx.font = '11px sans-serif';
-  ctx.fillText('COLOR SIMULATOR  |  708works', cw / 2, 42);
-
-  ctx.fillStyle = '#444'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('▲ 後ろ', cw / 2, svgY0 - 6);
-
-  const svgEl = document.getElementById('kolmio-strap-svg');
-  if (svgEl) {
-    const cloned = svgEl.cloneNode(true);
-    cloned.setAttribute('width', svgSaveW);
-    cloned.setAttribute('height', svgSaveH);
-    cloned.style.margin = '0';
-    cloned.querySelectorAll('[style*="stroke"]').forEach(el => { el.style.stroke = '#000'; el.style.strokeWidth = '0.5'; });
-    if (kokuinEnabled && kokuin?.fontFamily) {
-      await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
-    }
-    const svgStr = new XMLSerializer().serializeToString(cloned);
-    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => { ctx.drawImage(img, svgX, svgY0, svgSaveW, svgSaveH); resolve(); };
-      img.onerror = resolve;
-      img.src = dataUri;
-    });
+        const kokuinPreviewSvg = document.getElementById('kolmio-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
+        const contentW = box.width - 28;
+        if (kokuinPreviewSvg) {
+          const previewClone = kokuinPreviewSvg.cloneNode(true);
+          if (kokuin?.fontFamily) await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+          const vb = kokuinPreviewSvg.getAttribute('viewBox')?.split(' ').map(Number);
+          const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
+          let previewW = contentW, previewH = Math.round(contentW * aspect);
+          const maxH = box.height - 34;
+          if (previewH > maxH) { previewH = maxH; previewW = Math.round(maxH / aspect); }
+          previewClone.setAttribute('width', previewW);
+          previewClone.setAttribute('height', previewH);
+          const svgStr = new XMLSerializer().serializeToString(previewClone);
+          const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+          const previewX = box.x + 14 + (contentW - previewW) / 2;
+          await new Promise(resolve => {
+            const img = new Image();
+            img.onload  = () => { ctx.drawImage(img, previewX, box.y + 28, previewW, previewH); resolve(); };
+            img.onerror = resolve;
+            img.src = dataUri;
+          });
+        } else {
+          await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+          ctx.fillStyle = '#1a1a1a';
+          ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+          ctx.textAlign = 'left';
+          ctx.fillText(kokuin.text, box.x + 14, box.y + box.height - 20);
+        }
+      },
+    };
   }
 
-  ctx.fillStyle = '#444'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('▼ 前', cw / 2, svgY0 + svgSaveH + 14);
-
-  const labelX = svgX + svgSaveW + 18;
-  const order = kolmioDisplayOrder(kN);
-  order.forEach((pieceNum, i) => {
-    const pieceY = svgY0 + (5 + (i + 0.5) * ((svgSaveH) / order.length)) ;
-    const color = kPieceColors[pieceNum];
-    const cname = KOLMIO_COLORS.find(c => c.hex === color)?.name || '';
-    ctx.beginPath(); ctx.arc(labelX + 6, pieceY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = color; ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.7; ctx.stroke();
-    ctx.fillStyle = '#aaa'; ctx.font = '8px sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText(`P${String(kN - i).padStart(2, '0')}`, labelX + 16, pieceY - 2);
-    ctx.fillStyle = '#333'; ctx.font = '10px sans-serif';
-    ctx.fillText(cname, labelX + 16, pieceY + 10);
-  });
-
-  const specY = svgY0 + svgSaveH + bottomLabelH + 6;
-  ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText(`仕様：${kThick ? '厚革仕様（ギター向け、+¥' + KOLMIO_THICK_ADD.toLocaleString() + '）' : '標準厚み'}`, 24, specY + 14);
-
-  if (kokuinEnabled) {
-    const boxMargin = 24, boxX = boxMargin, boxY = specY + specH, boxW = cw - boxMargin * 2, boxH = kokuinH - 12;
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.moveTo(boxX + 8, boxY);
-    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 8);
-    ctx.arcTo(boxX + boxW, boxY + boxH, boxX, boxY + boxH, 8);
-    ctx.arcTo(boxX, boxY + boxH, boxX, boxY, 8);
-    ctx.arcTo(boxX, boxY, boxX + boxW, boxY, 8);
-    ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#999'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText('名入れ刻印', boxX + 14, boxY + 18);
-    if (kokuinPreviewSvg) {
-      const previewClone = kokuinPreviewSvg.cloneNode(true);
-      if (kokuin?.fontFamily) {
-        await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+  return build708SaveCanvas({
+    title: 'KOLMIO',
+    svgSelector: '#kolmio-strap-svg',
+    svgW: vbW, svgH: vbH,
+    chips,
+    extra,
+    topCaption: '▲ 後ろ',
+    bottomCaption: '▼ 前',
+    prepareSvg: async (cloned) => {
+      cloned.querySelectorAll('[style*="stroke"]').forEach(el => { el.style.stroke = '#000'; el.style.strokeWidth = '0.5'; });
+      if (kokuinEnabled && kokuin?.fontFamily) {
+        await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
       }
-      previewClone.setAttribute('width', kokuinPreviewW);
-      previewClone.setAttribute('height', kokuinPreviewImgH);
-      const previewSvgStr = new XMLSerializer().serializeToString(previewClone);
-      const previewDataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(previewSvgStr)));
-      const previewX = boxX + 14 + (kokuinBoxContentW - kokuinPreviewW) / 2;
-      await new Promise(resolve => {
-        const img = new Image();
-        img.onload  = () => { ctx.drawImage(img, previewX, boxY + 26, kokuinPreviewW, kokuinPreviewImgH); resolve(); };
-        img.onerror = resolve;
-        img.src = previewDataUri;
-      });
-    } else {
-      await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
-      ctx.fillStyle = '#1a1a1a'; ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
-      ctx.fillText(kokuin.text, boxX + 14, boxY + boxH - 16);
-    }
-  }
-
-  ctx.fillStyle = 'rgba(0,0,0,.1)'; ctx.fillRect(0, ch - footerH, cw, footerH);
-  ctx.fillStyle = '#888'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('708works.jp', cw / 2, ch - 10);
-
-  return cv;
+    },
+  });
 }
+
 
 // ============================================================================
 // オーダー処理

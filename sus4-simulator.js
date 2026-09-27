@@ -354,30 +354,9 @@ async function sus4SaveImage() {
 // 縦横比に依存させず固定1:1スクエアに統一。上部に全幅の黒帯ヘッダーを敷く旧方式を廃止し、
 // 左上に控えめなモデル名ラベルを置くだけにして、正方形の大部分をアートワークに使う。
 async function buildSus4SaveCanvas() {
-  const SVG_VW = 462.79, SVG_VH = 996.72;
-  const SIZE = 1080;
-  const PAD = 56;
-
-  const cv = document.createElement('canvas');
-  cv.width = SIZE; cv.height = SIZE;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#f0ede8';
-  ctx.fillRect(0, 0, SIZE, SIZE);
-
-  // 左上：モデル名ラベル（全幅ヘッダー帯は廃止、控えめな見出しのみ）
-  ctx.fillStyle = '#1a1a1a';
-  ctx.font = 'bold 34px sans-serif';
-  ctx.textAlign = 'left';
-  ctx.fillText('SUS4', PAD, PAD + 30);
-  ctx.fillStyle = '#999';
-  ctx.font = '14px sans-serif';
-  ctx.fillText('COLOR SIMULATOR｜708works', PAD, PAD + 54);
-
   const kokuin = window.SUS4_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
 
-  // 凡例チップ（革1・革2・金具＋刻印）を先に幅を測って行数を決め、
-  // 逆算してアートワーク領域の高さを確定する（常に正方形1枚に収めるため）
   const chips = [...SUS4_ZONES, 'hardware'].map(zone => ({
     hex: zone === 'hardware' ? SUS4_HARDWARE_FIXED.hex : sus4Colors[zone],
     label: zone === 'hardware' ? SUS4_HARDWARE_FIXED.name : colorName(sus4Colors[zone]),
@@ -385,88 +364,18 @@ async function buildSus4SaveCanvas() {
   if (kokuinEnabled) {
     chips.push({ hex: engravingColor(sus4Colors.leather1), label: `刻印「${kokuin.text}」` });
   }
-  const measureCtx = ctx;
-  measureCtx.font = '15px sans-serif';
-  const chipWidths = chips.map(c => 22 + measureCtx.measureText(c.label).width);
-  const chipGap = 28;
-  const maxRowW = SIZE - PAD * 2;
-  let chipRows = 1, rowW = 0;
-  chipWidths.forEach(w => {
-    if (rowW > 0 && rowW + chipGap + w > maxRowW) { chipRows++; rowW = 0; }
-    rowW += (rowW > 0 ? chipGap : 0) + w;
-  });
-  const legendH = chipRows * 30 + (chipRows - 1) * 10;
-  const footerH = 28;
-  const artworkTop = PAD + 76;
-  const artworkBottom = SIZE - PAD - footerH - 16 - legendH;
-  const artworkBoxW = SIZE - PAD * 2;
-  const artworkBoxH = artworkBottom - artworkTop;
 
-  // SVGをシリアライズしてCanvasに描画（iOS Safari互換のためdata URIを使用）。
-  // 元SVGの縦横比を保ったまま、正方形の残り領域にcontainで収める。
-  const svgEl = document.querySelector('#sus4-svg-wrap svg');
-  if (svgEl) {
-    const cloned = svgEl.cloneNode(true);
-    cloned.style.margin = '0';
-    if (kokuinEnabled && kokuin?.fontFamily) {
-      await embedSus4KokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
-    }
-    const fitScale = Math.min(artworkBoxW / SVG_VW, artworkBoxH / SVG_VH);
-    const drawW = SVG_VW * fitScale, drawH = SVG_VH * fitScale;
-    cloned.setAttribute('width', drawW);
-    cloned.setAttribute('height', drawH);
-    const drawX = PAD + (artworkBoxW - drawW) / 2;
-    const drawY = artworkTop + (artworkBoxH - drawH) / 2;
-    const svgStr  = new XMLSerializer().serializeToString(cloned);
-    const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload  = () => { ctx.drawImage(img, drawX, drawY, drawW, drawH); resolve(); };
-      img.onerror = resolve;
-      img.src = dataUri;
-    });
-  }
-
-  // 凡例チップ（中央揃え、複数行になる場合は行ごとに中央揃え）
-  {
-    let x = PAD, y = artworkBottom + 16 + 20, lineStartIdx = 0, lineW = 0;
-    const lineStarts = [];
-    chipWidths.forEach((w, i) => {
-      if (lineW > 0 && lineW + chipGap + w > maxRowW) { lineStarts.push({ from: lineStartIdx, to: i, w: lineW }); lineStartIdx = i; lineW = 0; }
-      lineW += (lineW > 0 ? chipGap : 0) + w;
-    });
-    lineStarts.push({ from: lineStartIdx, to: chips.length, w: lineW });
-
-    lineStarts.forEach(line => {
-      let cx = PAD + (maxRowW - line.w) / 2;
-      for (let i = line.from; i < line.to; i++) {
-        const c = chips[i];
-        ctx.beginPath();
-        ctx.arc(cx + 7, y - 5, 7, 0, Math.PI * 2);
-        ctx.fillStyle = c.hex;
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        ctx.fillStyle = '#333';
-        ctx.font = '15px sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(c.label, cx + 20, y);
-
-        cx += chipWidths[i] + chipGap;
+  return build708SaveCanvas({
+    title: 'SUS4',
+    svgSelector: '#sus4-svg-wrap svg',
+    svgW: 462.79, svgH: 996.72,
+    chips,
+    prepareSvg: async (cloned) => {
+      if (kokuinEnabled && kokuin?.fontFamily) {
+        await embedSus4KokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
       }
-      y += 40;
-    });
-  }
-
-  // フッター（控えめな透かし、帯は敷かない）
-  ctx.fillStyle = '#aaa';
-  ctx.font = '13px sans-serif';
-  ctx.textAlign = 'right';
-  ctx.fillText('708works.jp', SIZE - PAD, SIZE - PAD + footerH - 10);
-
-  return cv;
+    },
+  });
 }
 
 // ============================================================================

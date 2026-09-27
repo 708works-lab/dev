@@ -1,0 +1,129 @@
+<!-- Soundhole Cover AG Color Simulator - Shopify埋め込み用 -->
+<link rel="stylesheet" href="https://708works-lab.github.io/dev/soundhole-cover-ag-simulator.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&family=Special+Elite&family=Lobster&family=Playball&family=Great+Vibes&family=Bebas+Neue&family=UnifrakturMaguntia&display=swap">
+
+<div class="shc-simulator">
+  <div class="shc-float-bar" id="shc-float-bar">
+    <div class="shc-float-jump-mode" id="shc-float-jump-mode">
+      <span class="shc-float-jump-label">🎨 カラーシミュレーターで自分だけの1枚を</span>
+      <button type="button" id="shc-float-jump-btn">今すぐ選ぶ ↓</button>
+    </div>
+    <div class="shc-float-order-mode" id="shc-float-order-mode" hidden>
+      <span class="shc-float-price">価格 <strong id="shc-float-price-value"></strong></span>
+      <button type="button" id="shc-float-order-btn">画像を保存してカートに入れる →</button>
+    </div>
+  </div>
+  <div class="app">
+    <div class="top-area">
+      <div class="ctrl-col">
+        <div class="pal-box">
+          <div class="box-label">装着予定の楽器</div>
+          <div class="shc-handedness-buttons" id="shc-handedness-buttons"></div>
+        </div>
+
+        <div class="pal-box">
+          <div class="box-label">サウンドホール適応サイズ</div>
+          <select id="shc-diameter-select"></select>
+        </div>
+
+        <div class="pal-box">
+          <div class="box-label">表面の色</div>
+          <div class="palette" id="shc-palette"></div>
+          <div class="shc-box-note">※裏面はBlack固定になります</div>
+        </div>
+
+        <div class="sum-box">
+          <div class="box-label">カラーサマリー</div>
+          <div class="summary">
+            <div class="shc-summary-row">
+              <span class="shc-summary-dot" id="shc-summary-color-dot"></span>
+              <span class="shc-summary-label">表面の色</span>
+              <span class="shc-summary-name" id="shc-summary-color-name"></span>
+            </div>
+            <div class="shc-summary-row">
+              <span class="shc-summary-dot" id="shc-summary-back-color-dot"></span>
+              <span class="shc-summary-label">裏面</span>
+              <span class="shc-summary-name" id="shc-summary-back-color-name"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="svg-col">
+        <div class="svg-scroll" id="shc-svg-scroll"></div>
+      </div>
+    </div>
+
+    <!-- 名入れ刻印（+1,100円） -->
+    <div class="kokuin-section" id="shc-kokuin-section">
+      <div class="kokuin-inner">
+        <div class="kokuin-section-title">
+          名入れ刻印<span class="kokuin-price">（+1,100円）</span>
+          <input type="checkbox" class="kokuin-toggle" id="shc-kokuin-toggle">
+        </div>
+        <div id="shc-kokuin-fields" hidden>
+          <div class="kokuin-field-label">刻印したい文字（半角英数字・12文字まで）</div>
+          <input type="text" class="shc-kokuin-input" id="shc-kokuin-text" maxlength="17" placeholder="例：Sample">
+          <div class="shc-char-count" id="shc-kokuin-char-count">0 / 12</div>
+          <div class="shc-warn" id="shc-kokuin-warn"></div>
+          <div class="shc-font-preview" id="shc-kokuin-font-preview"></div>
+
+          <div class="kokuin-field-label">フォントを選択</div>
+          <select id="shc-kokuin-font-select"></select>
+        </div>
+        <div class="kokuin-notice">
+          <strong>ご注意</strong><br>
+          こちらはあくまで仕上がりイメージの確認用です。実際の刻印は、バランスを見て文字サイズを弊社側で調整する場合があります。あらかじめご了承ください。
+        </div>
+      </div>
+    </div>
+
+    <div class="price-bar">
+      <span class="price-bar-label">価格</span>
+      <span class="price-bar-value" id="shc-price-display"></span>
+    </div>
+
+    <div class="order-note">※ボタンを押すと、確認用の画像が自動でダウンロードされます</div>
+
+    <div class="bottom-bar">
+      <button class="btn-reset" id="shc-btn-reset">リセット</button>
+      <button class="btn-undo" id="shc-btn-undo" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
+        </svg>戻る
+      </button>
+      <button class="btn-order" id="shc-btn-order">
+        画像を保存してカートに入れる →
+      </button>
+    </div>
+  </div>
+
+  <div class="modal" id="shc-confirm-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>オーダー内容確認</h2>
+        <button class="modal-close" onclick="closeShcModal()">&times;</button>
+      </div>
+      <img class="modal-image" id="shc-modal-image" src="" alt="オーダー画像">
+      <div class="modal-info" id="shc-modal-info"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn modal-btn-secondary" onclick="closeShcModal()">閉じる</button>
+        <button class="modal-btn modal-btn-primary" onclick="shcProceedToCart()">カートへ進む</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="shc-loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text" id="shc-loading-text">処理中...</div>
+    </div>
+  </div>
+
+  <div id="shc-toast"></div>
+</div>
+
+<script src="https://708works-lab.github.io/dev/save-canvas-common.js"></script>
+<script src="https://708works-lab.github.io/dev/soundhole-cover-ag-simulator.js"></script>
+<script>
+initializeSHCSimulator();
+</script>
