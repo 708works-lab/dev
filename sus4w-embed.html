@@ -76,13 +76,13 @@
 
   <!-- 下部ボタンバー -->
   <div class="bottom-bar">
-    <button class="btn-reset" onclick="sus4Reset()">リセット</button>
-    <button class="btn-undo" id="sus4w-btn-undo" onclick="sus4Undo()" disabled>
+    <button class="btn-reset" onclick="sus4wReset()">リセット</button>
+    <button class="btn-undo" id="sus4w-btn-undo" onclick="sus4wUndo()" disabled>
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M3 7v6h6"/><path d="M3 13C5 7 10 3 16 3a9 9 0 0 1 0 18H8"/>
       </svg>戻る
     </button>
-    <button class="btn-order" onclick="sus4GoOrder()">
+    <button class="btn-order" onclick="sus4wGoOrder()">
       <span id="sus4w-cart-label">画像を保存してカートに入れる →</span>
     </button>
   </div>
@@ -98,7 +98,7 @@
       <div class="modal-info" id="sus4w-modal-info"></div>
       <div class="modal-buttons">
         <button class="modal-btn modal-btn-secondary" onclick="closeSus4wModal()">閉じる</button>
-        <button class="modal-btn modal-btn-primary" onclick="sus4ProceedToCart()">カートへ進む</button>
+        <button class="modal-btn modal-btn-primary" onclick="sus4wProceedToCart()">カートへ進む</button>
       </div>
     </div>
   </div>
