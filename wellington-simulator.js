@@ -802,7 +802,7 @@ async function buildWlSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: `WELLINGTON (${branch.shortLabel})`,
+    title: wlActiveBranch === 'ukulele' ? 'Wellington for ukulele' : `Wellington for ukulele（${branch.shortLabel}）`,
     svgSelector: '#wl-strap-svg',
     svgW: vbW, svgH: vbH,
     chips,

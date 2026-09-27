@@ -721,7 +721,7 @@ async function buildDuetSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: 'DUET',
+    title: 'duet',
     svgSelector: '#duet-strap-wrap svg',
     svgW: 191.5, svgH: 1406.71,
     chips,

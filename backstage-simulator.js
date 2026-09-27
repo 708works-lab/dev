@@ -352,7 +352,7 @@ async function buildBackstageSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: 'BACKSTAGE',
+    title: 'Backstage for Bag',
     svgSelector: '#backstage-svg-wrap svg',
     svgW: 416.36, svgH: 908.1,
     chips,

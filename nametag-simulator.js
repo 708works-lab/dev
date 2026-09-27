@@ -605,7 +605,7 @@ async function buildNametagSaveCanvas() {
   const hasKokuinTextForSave = !!(nametagKokuinText.area1 || (nametagShape === 'ag' && nametagKokuinText.area2));
 
   return build708SaveCanvas({
-    title: 'GUITAR NAMETAG',
+    title: 'Guitar Nametag',
     svgSelector: '#nametag-svg-wrap svg',
     svgW: 247.78, svgH: 811.14,
     chips,

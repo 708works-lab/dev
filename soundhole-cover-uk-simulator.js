@@ -598,7 +598,7 @@ async function shcBuildSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: 'SOUNDHOLE COVER UKULELE',
+    title: 'Soundhole Cover (Ukulele)',
     svgSelector: '#shc-svg',
     svgW: 319.75, svgH: 832.24,
     chips,

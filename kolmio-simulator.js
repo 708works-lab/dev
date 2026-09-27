@@ -641,7 +641,7 @@ async function buildKolmioSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: 'KOLMIO',
+    title: 'kolmio for ukulele',
     svgSelector: '#kolmio-strap-svg',
     svgW: vbW, svgH: vbH,
     chips,

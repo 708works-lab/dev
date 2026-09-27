@@ -734,7 +734,7 @@ async function wcBuildSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: 'WELLINGTON CLEAR',
+    title: 'Wellington for ukulele Clear ver.',
     svgSelector: '#wc-strap-svg',
     svgW: vbW, svgH: vbH,
     chips,

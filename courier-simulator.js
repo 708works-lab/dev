@@ -647,7 +647,7 @@ async function buildCourierSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: 'COURIER',
+    title: 'Courier',
     svgSelector: '#courier-strap-wrap svg',
     svgW: 480, svgH: 1600,
     chips,

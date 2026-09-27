@@ -737,7 +737,7 @@ async function fcBuildSaveCanvas(){
   }
 
   return build708SaveCanvas({
-    title: 'FOLKLORE CLEAR',
+    title: 'folklore Clear ver.',
     svgSelector: '#folklore-strap-svg',
     svgW: FC_SVG_VW, svgH: vbH,
     chips,

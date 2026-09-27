@@ -1178,7 +1178,7 @@ async function buildSaveCanvas() {
   const vbH = vbBottom - vbTop;
 
   return build708SaveCanvas({
-    title: 'FOLKLORE',
+    title: 'folklore',
     svgSelector: '#folklore-strap-svg',
     svgW: SVG_VW, svgH: vbH,
     chips,

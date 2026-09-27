@@ -661,7 +661,7 @@ async function shcBuildSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: 'SOUNDHOLE COVER GUITAR',
+    title: 'Soundhole Cover (Guitar)',
     svgSelector: '#shc-svg',
     svgW: 381.94, svgH: 737.31,
     chips,

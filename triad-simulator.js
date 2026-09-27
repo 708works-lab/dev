@@ -511,7 +511,7 @@ async function buildTriadSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: 'TRIAD',
+    title: 'Triad',
     svgSelector: '#triad-strap-wrap svg',
     svgW: 470.31, svgH: 973.91,
     chips,

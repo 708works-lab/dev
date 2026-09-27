@@ -358,7 +358,7 @@ async function buildBackstageCameraSaveCanvas() {
   }
 
   return build708SaveCanvas({
-    title: 'BACKSTAGE for CAMERA',
+    title: 'Backstage for Camera',
     svgSelector: '#backstage-camera-svg-wrap svg',
     svgW: 413.5, svgH: 993.65,
     chips,
