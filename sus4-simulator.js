@@ -48,7 +48,7 @@ const SUS4_ZONE_LABEL = { leather1: '革1（ストラップ側）', leather2: '�
 // 金具（st4・st5）は常にSilver固定。装着イメージのロゴ（st0）は非対象（塗り替えない）
 const SUS4_HARDWARE_CLASSES = ['st4', 'st5'];
 
-const SUS4_DEFAULT_COLORS = { leather1: '#9e3820', leather2: '#4a2018' };
+const SUS4_DEFAULT_COLORS = { leather1: '#9e3820', leather2: '#1a1a1a' };
 
 // ============================================================================
 // 状態
