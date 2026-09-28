@@ -454,6 +454,8 @@ async function buildTriadSaveCanvas() {
     hex: triadColors[zone],
     label: `${TRIAD_ZONE_LABEL[zone]}：${colorName(triadColors[zone], zone)}`,
   }));
+  const selectedLength = TRIAD_LENGTHS[triadLengthIndex];
+  if (selectedLength) chips.unshift({ hex: null, label: `長さ：${selectedLength.label}（${selectedLength.range}）` });
 
   const kokuin = window.TRIAD_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);

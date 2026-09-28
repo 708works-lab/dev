@@ -590,6 +590,8 @@ async function buildCourierSaveCanvas() {
     { zone: 'front', label: '前' },
   ];
   const chips = zoneDefs.map(z => ({ hex: courierColors[z.zone], label: `${z.label}：${colorName(courierColors[z.zone], z.zone)}` }));
+  const selectedLen = COURIER_LENGTHS.find(l => l.id === courierSelectedLen);
+  if (selectedLen) chips.unshift({ hex: null, label: `長さ：${selectedLen.label}（${selectedLen.desc}）` });
 
   const kokuin = window.COURIER_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
@@ -780,7 +782,7 @@ async function courierProceedToCart() {
     const i = document.createElement('input');
     i.type='hidden'; i.name=k; i.value=v; form.appendChild(i);
   });
-  const properties = {'Order ID': courierLastUploadedImage.orderId, 'Colors': colorDataEN, 'Image URL': courierLastUploadedImage.imageUrl};
+  const properties = {'Order ID': courierLastUploadedImage.orderId, 'Colors': colorDataEN, 'Length': `${len.label}：${len.desc}`, 'Image URL': courierLastUploadedImage.imageUrl};
   if (kokuinEnabled) {
     properties['刻印文字'] = kokuin.text;
     properties['刻印フォント'] = kokuin.fontLabel;

@@ -664,6 +664,10 @@ async function buildDuetSaveCanvas() {
     { zone: 'front1', label: '先端①' },
   ];
   const chips = zoneDefs.map(z => ({ hex: duetColors[z.zone], label: `${z.label}：${colorName(duetColors[z.zone], z.zone)}` }));
+  const selectedStyle = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
+  const selectedLen = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
+  if (selectedLen) chips.unshift({ hex: null, label: `長さ：${selectedLen.label}（${selectedLen.desc}）` });
+  if (selectedStyle) chips.unshift({ hex: null, label: `先端パーツ：${selectedStyle.label}` });
 
   const kokuin = window.DUET_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
