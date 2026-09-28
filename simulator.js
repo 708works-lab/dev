@@ -1109,12 +1109,15 @@ async function embedKokuinFontIntoSvg(svgRoot, family, weight) {
 
 async function buildSaveCanvas() {
   const order = getDisplayOrder(N);
-  const chips = order.map((pn, i) => {
-    const color = partColors[i];
-    const frontNum = N - i;
-    const cname = COLORS.find(c => c.hex === color)?.name || '';
-    return { hex: color, label: `P${String(frontNum).padStart(2, '0')}：${cname}` };
-  });
+  const chips = [
+    { hex: null, label: `全長：約${1150 + (N - 20) * 60}mm／ウロコパーツ数：${N}個` },
+    ...order.map((pn, i) => {
+      const color = partColors[i];
+      const frontNum = N - i;
+      const cname = COLORS.find(c => c.hex === color)?.name || '';
+      return { hex: color, label: `P${String(frontNum).padStart(2, '0')}：${cname}` };
+    }),
+  ];
 
   const kokuin = window.FOLKLORE_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);

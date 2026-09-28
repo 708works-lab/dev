@@ -583,6 +583,7 @@ async function buildKolmioSaveCanvas() {
     const cname = KOLMIO_COLORS.find(c => c.hex === color)?.name || '';
     return { hex: color, label: `P${String(kN - i).padStart(2, '0')}：${cname}` };
   });
+  chips.unshift({ hex: null, label: `全長：約${970 + (kN - KOLMIO_STANDARD_COUNT) * 70}mm／パーツ数：${kN}個` });
   chips.push({ hex: null, label: `仕様：${kThick ? '厚革仕様（ギター向け、+¥' + KOLMIO_THICK_ADD.toLocaleString() + '）' : '標準厚み'}` });
 
   const kokuin = window.KOLMIO_KOKUIN_STATE;

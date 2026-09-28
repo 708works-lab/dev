@@ -673,7 +673,10 @@ async function fcBuildSaveCanvas(){
   const vbBottom = FC_SVG_VTOP + 19 * FC_PIECE_PITCH + shiftFixed + 90;
   const vbH = vbBottom - vbTop;
 
-  const chips = [{ hex: fcPvcColor.hex, label: `本体(PVC)：${fcPvcColor.name}` }];
+  const chips = [
+    { hex: null, label: `全長：約${1150 + (N - 20) * 60}mm／ウロコパーツ数：${N}個` },
+    { hex: fcPvcColor.hex, label: `本体(PVC)：${fcPvcColor.name}` },
+  ];
   if (fcLinked) {
     chips.push({ hex: fcFrontColor.hex, label: `本革(前後共通)：${fcFrontColor.name}` });
   } else {

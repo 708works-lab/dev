@@ -670,7 +670,10 @@ async function wcBuildSaveCanvas() {
   const vbW = liveVb ? liveVb[2] : WC_BRANCH.nativeWidth;
   const vbH = liveVb ? liveVb[3] : 1700;
 
-  const chips = [{ hex: wcPvcColor.hex, label: `本体(PVC)：${wcPvcColor.name}` }];
+  const chips = [
+    { hex: null, label: `全長：約${wcLengthCmForCount(wcN)}cm／パーツ数：${wcN}個` },
+    { hex: wcPvcColor.hex, label: `本体(PVC)：${wcPvcColor.name}` },
+  ];
   if (wcLinked) {
     chips.push({ hex: wcFrontColor.hex, label: `本革(前後共通)：${wcFrontColor.name}` });
   } else {

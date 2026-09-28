@@ -744,7 +744,7 @@ async function buildWlSaveCanvas() {
     return { hex: color, label: `P${String(st.n - i).padStart(2, '0')}：${cname}` };
   });
   const lenCm = wlLengthCmForCount(wlActiveBranch, st.n);
-  chips.push({ hex: null, label: `仕様：${branch.shortLabel}${lenCm != null ? '・全長約' + lenCm + 'cm' : ''}` });
+  chips.push({ hex: null, label: `仕様：${branch.shortLabel}${lenCm != null ? '・全長約' + lenCm + 'cm' : ''}・パーツ数：${st.n}個` });
 
   const kokuin = window.WL_KOKUIN_STATE;
   const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
