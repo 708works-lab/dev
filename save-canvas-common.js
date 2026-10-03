@@ -224,8 +224,8 @@ function sim708SetupOrderUI(cfg, _tries) {
     const st = document.createElement('style');
     st.id = 'sim708-style';
     st.textContent =
-      '.sim708-save-only{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:10px 12px;border:1.5px solid #c8a04a;border-radius:8px;background:#fff;color:#7a5a14;font-size:12px;font-weight:600;cursor:pointer;text-align:center;}' +
-      '.sim708-save-note{margin:4px 0 0;font-size:10.5px;color:#888;text-align:center;line-height:1.5;}' +
+      '.sim708-save-only{display:block;width:100%;box-sizing:border-box;margin:8px auto 0;padding:10px 12px;border:1.5px solid #c8a04a;border-radius:8px;background:#fff;color:#7a5a14;font-size:12px;font-weight:600;cursor:pointer;text-align:center;}' +
+      '.sim708-save-note{box-sizing:border-box;margin:4px auto 0;font-size:10.5px;color:#888;text-align:center;line-height:1.5;}' +
       '.modal-image[src=""]{display:none;}';
     document.head.appendChild(st);
   }
@@ -239,6 +239,17 @@ function sim708SetupOrderUI(cfg, _tries) {
   const bar = orderBtn.parentElement;
   bar.insertAdjacentElement('afterend', note);
   bar.insertAdjacentElement('afterend', saveBtn);
+  // 操作バー（リセット/戻る/カート）と同じ幅・中央揃えにそろえる（商品ごとにバーの最大幅が異なるため実測で合わせる）
+  const syncWidth = () => {
+    // バー自体の余白(padding)の内側＝リセット/戻る/カートが実際に並ぶ幅に合わせる
+    const cs = getComputedStyle(bar);
+    const w = bar.getBoundingClientRect().width - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
+    if (!(w > 0)) return;
+    [saveBtn, note].forEach((el) => { el.style.width = w + 'px'; el.style.marginLeft = 'auto'; el.style.marginRight = 'auto'; });
+  };
+  syncWidth();
+  if (window.ResizeObserver) new ResizeObserver(syncWidth).observe(bar);
+  window.addEventListener('resize', syncWidth);
   saveBtn.addEventListener('click', async () => {
     sim708Track('save_only_click', product);
     try {
