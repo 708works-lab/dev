@@ -335,7 +335,7 @@ async function backstageSaveImage() {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   backstageImageSaved = true;
   updateBackstageCartButtonState();
-  showBackstageToast('画像を保存しました ✓　カートに進めます');
+  showBackstageToast('画像を保存しました ✓');
 }
 
 // 保存・注文アップロード用のキャンバスを生成する（共通ヘルパー build708SaveCanvas に委譲）。
@@ -371,7 +371,7 @@ async function buildBackstageSaveCanvas() {
 
 function updateBackstageCartButtonState() {
   const cartLabel = document.getElementById('backstage-cart-label');
-  if (cartLabel) cartLabel.textContent = '画像を保存してカートに入れる →';
+  if (cartLabel) cartLabel.textContent = 'カートに入れる →';
 }
 
 async function backstageGoOrder() {
@@ -379,17 +379,15 @@ async function backstageGoOrder() {
     showBackstageToast('刻印する文字を正しく入力してください');
     return;
   }
-  if (!backstageImageSaved) {
-    await backstageSaveImage();
-  }
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
   const loadEl = document.getElementById('backstage-loading-overlay');
   if (loadEl) loadEl.classList.add('show');
   try {
     const svg = document.querySelector('#backstage-svg-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildBackstageSaveCanvas();
-    const result = await backstageUploadImage(canvas);
-    if (!result) throw new Error('画像アップロードに失敗しました');
+    let result = await backstageUploadImage(canvas);
+    if (!result) { sim708Track('upload_fail', 'backstage'); result = sim708FallbackUpload('BS'); }
     backstageLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showBackstageConfirmModal(result);
@@ -493,4 +491,13 @@ function showBackstageToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'backstage',
+    orderBtnSelector: '[onclick^="backstageGoOrder("]',
+    goOrder: 'backstageGoOrder', proceed: 'backstageProceedToCart', saveOnly: 'backstageSaveImage', buildCanvas: 'buildBackstageSaveCanvas',
+  });
 }

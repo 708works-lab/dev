@@ -709,12 +709,12 @@ async function khGoOrder() {
     showKhToast('刻印する文字を正しく入力してください');
     return;
   }
-  if (!khHasDownloadedImage) await khSaveImage();
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
   showKhLoading('画像をアップロード中...');
   try {
     const canvas = await khBuildSaveCanvas();
-    const uploadResult = await khUploadOrderImage(canvas);
-    if (!uploadResult) throw new Error('画像のアップロードに失敗しました');
+    let uploadResult = await khUploadOrderImage(canvas);
+    if (!uploadResult) { sim708Track('upload_fail', 'keyholder'); uploadResult = sim708FallbackUpload('KH'); }
     khLastUploadedImage = uploadResult;
     hideKhLoading();
     showKhConfirmModal(uploadResult);
@@ -1447,3 +1447,12 @@ const KH_SVG_INNER = `<defs>
       <rect x="187.81" y="145.73" width=".39" height=".39" transform="translate(-48.12 175.68) rotate(-45)"/>
     </g>
   </g>`;
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'keyholder',
+    orderBtnSelector: '[onclick^="khGoOrder("]',
+    goOrder: 'khGoOrder', proceed: 'khProceedToCart', saveOnly: 'khSaveImage', buildCanvas: 'khBuildSaveCanvas',
+  });
+}

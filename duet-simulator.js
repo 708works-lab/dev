@@ -587,7 +587,7 @@ async function duetSaveImage() {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   duetImageSaved = true;
   updateDuetCartButtonState();
-  showDuetToast('画像を保存しました ✓　カートに進めます');
+  showDuetToast('画像を保存しました ✓');
 }
 
 // ---- 名入れ刻印フォント埋め込み ----
@@ -747,7 +747,7 @@ async function buildDuetSaveCanvas() {
 
 function updateDuetCartButtonState() {
   const cartLabel = document.getElementById('duet-cart-label');
-  if (cartLabel) cartLabel.textContent = '画像を保存してカートに入れる →';
+  if (cartLabel) cartLabel.textContent = 'カートに入れる →';
 }
 
 async function duetGoOrder() {
@@ -755,17 +755,15 @@ async function duetGoOrder() {
     showDuetToast('刻印する文字を正しく入力してください');
     return;
   }
-  if (!duetImageSaved) {
-    await duetSaveImage();
-  }
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
   const loadEl = document.getElementById('duet-loading-overlay');
   if (loadEl) loadEl.classList.add('show');
   try {
     const svg    = document.querySelector('#duet-strap-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildDuetSaveCanvas();
-    const result = await duetUploadImage(canvas);
-    if (!result) throw new Error('画像アップロードに失敗しました');
+    let result = await duetUploadImage(canvas);
+    if (!result) { sim708Track('upload_fail', 'duet'); result = sim708FallbackUpload('DUE'); }
     duetLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showDuetConfirmModal(result);
@@ -897,4 +895,13 @@ function showDuetToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'duet',
+    orderBtnSelector: '[onclick^="duetGoOrder("]',
+    goOrder: 'duetGoOrder', proceed: 'duetProceedToCart', saveOnly: 'duetSaveImage', buildCanvas: 'buildDuetSaveCanvas',
+  });
 }

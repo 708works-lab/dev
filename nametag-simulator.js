@@ -512,7 +512,7 @@ async function nametagSaveImage() {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   nametagImageSaved = true;
   updateNametagCartButtonState();
-  showNametagToast('画像を保存しました ✓　カートに進めます');
+  showNametagToast('画像を保存しました ✓');
 }
 
 // 保存画像に含める選択内容の行（Backstageシリーズと同じく、SVGの横に
@@ -624,7 +624,7 @@ async function buildNametagSaveCanvas() {
 
 function updateNametagCartButtonState() {
   const cartLabel = document.getElementById('nametag-cart-label');
-  if (cartLabel) cartLabel.textContent = '画像を保存してカートに入れる →';
+  if (cartLabel) cartLabel.textContent = 'カートに入れる →';
 }
 
 async function nametagGoOrder() {
@@ -632,17 +632,15 @@ async function nametagGoOrder() {
     showNametagToast('刻印する文字をご確認ください');
     return;
   }
-  if (!nametagImageSaved) {
-    await nametagSaveImage();
-  }
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
   const loadEl = document.getElementById('nametag-loading-overlay');
   if (loadEl) loadEl.classList.add('show');
   try {
     const svg = document.querySelector('#nametag-svg-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildNametagSaveCanvas();
-    const result = await nametagUploadImage(canvas);
-    if (!result) throw new Error('画像アップロードに失敗しました');
+    let result = await nametagUploadImage(canvas);
+    if (!result) { sim708Track('upload_fail', 'nametag'); result = sim708FallbackUpload('NT'); }
     nametagLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showNametagConfirmModal(result);
@@ -747,4 +745,13 @@ function showNametagToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'nametag',
+    orderBtnSelector: '[onclick^="nametagGoOrder("]',
+    goOrder: 'nametagGoOrder', proceed: 'nametagProceedToCart', saveOnly: 'nametagSaveImage', buildCanvas: 'buildNametagSaveCanvas',
+  });
 }

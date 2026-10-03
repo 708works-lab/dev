@@ -392,7 +392,7 @@ async function capoSaveImage() {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   capoImageSaved = true;
   updateCapoCartButtonState();
-  showCapoToast('画像を保存しました ✓　カートに進めます');
+  showCapoToast('画像を保存しました ✓');
 }
 
 // 保存・注文アップロード用のキャンバスを生成する（共通ヘルパー build708SaveCanvas に委譲）。
@@ -428,7 +428,7 @@ async function buildCapoSaveCanvas() {
 
 function updateCapoCartButtonState() {
   const cartLabel = document.getElementById('capo-cart-label');
-  if (cartLabel) cartLabel.textContent = '画像を保存してカートに入れる →';
+  if (cartLabel) cartLabel.textContent = 'カートに入れる →';
 }
 
 async function capoGoOrder() {
@@ -436,17 +436,15 @@ async function capoGoOrder() {
     showCapoToast('刻印する文字を正しく入力してください');
     return;
   }
-  if (!capoImageSaved) {
-    await capoSaveImage();
-  }
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
   const loadEl = document.getElementById('capo-loading-overlay');
   if (loadEl) loadEl.classList.add('show');
   try {
     const svg = document.querySelector('#capo-svg-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildCapoSaveCanvas();
-    const result = await capoUploadImage(canvas);
-    if (!result) throw new Error('画像アップロードに失敗しました');
+    let result = await capoUploadImage(canvas);
+    if (!result) { sim708Track('upload_fail', 'capo'); result = sim708FallbackUpload('CAP'); }
     capoLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showCapoConfirmModal(result);
@@ -550,4 +548,13 @@ function showCapoToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'capo',
+    orderBtnSelector: '[onclick^="capoGoOrder("]',
+    goOrder: 'capoGoOrder', proceed: 'capoProceedToCart', saveOnly: 'capoSaveImage', buildCanvas: 'buildCapoSaveCanvas',
+  });
 }

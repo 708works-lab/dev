@@ -384,7 +384,7 @@ async function triadSaveImage() {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   triadImageSaved = true;
   updateTriadCartButtonState();
-  showTriadToast('画像を保存しました ✓　カートに進めます');
+  showTriadToast('画像を保存しました ✓');
 }
 
 // ---- 名入れ刻印フォント埋め込み ----
@@ -536,7 +536,7 @@ async function buildTriadSaveCanvas() {
 
 function updateTriadCartButtonState() {
   const cartLabel = document.getElementById('triad-cart-label');
-  if (cartLabel) cartLabel.textContent = '画像を保存してカートに入れる →';
+  if (cartLabel) cartLabel.textContent = 'カートに入れる →';
 }
 
 async function triadGoOrder() {
@@ -544,17 +544,15 @@ async function triadGoOrder() {
     showTriadToast('刻印する文字を正しく入力してください');
     return;
   }
-  if (!triadImageSaved) {
-    await triadSaveImage();
-  }
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
   const loadEl = document.getElementById('triad-loading-overlay');
   if (loadEl) loadEl.classList.add('show');
   try {
     const svg = document.querySelector('#triad-strap-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildTriadSaveCanvas();
-    const result = await triadUploadImage(canvas);
-    if (!result) throw new Error('画像アップロードに失敗しました');
+    let result = await triadUploadImage(canvas);
+    if (!result) { sim708Track('upload_fail', 'triad-ukulele'); result = sim708FallbackUpload('TRU'); }
     triadLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showTriadConfirmModal(result);
@@ -663,4 +661,13 @@ function showTriadToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'triad-ukulele',
+    orderBtnSelector: '[onclick^="triadGoOrder("]',
+    goOrder: 'triadGoOrder', proceed: 'triadProceedToCart', saveOnly: 'triadSaveImage', buildCanvas: 'buildTriadSaveCanvas',
+  });
 }

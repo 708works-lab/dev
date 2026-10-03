@@ -654,12 +654,12 @@ async function shcGoOrder() {
     showShcToast('刻印する文字を正しく入力してください');
     return;
   }
-  if (!shcHasDownloadedImage) await shcSaveImage();
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
   showShcLoading('画像をアップロード中...');
   try {
     const canvas = await shcBuildSaveCanvas();
-    const uploadResult = await shcUploadOrderImage(canvas);
-    if (!uploadResult) throw new Error('画像のアップロードに失敗しました');
+    let uploadResult = await shcUploadOrderImage(canvas);
+    if (!uploadResult) { sim708Track('upload_fail', 'soundhole-cover-uk'); uploadResult = sim708FallbackUpload('SHC'); }
     shcLastUploadedImage = uploadResult;
     hideShcLoading();
     showShcConfirmModal(uploadResult);
@@ -1924,3 +1924,12 @@ const SHC_SVG_INNER = `
     </g>
   </g>
 `;
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'soundhole-cover-uk',
+    orderBtnSelector: '#shc-btn-order',
+    goOrder: 'shcGoOrder', proceed: 'shcProceedToCart', saveOnly: 'shcSaveImage', buildCanvas: 'shcBuildSaveCanvas', bound: true,
+  });
+}

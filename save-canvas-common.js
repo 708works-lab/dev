@@ -153,3 +153,133 @@ async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepa
 
   return cv;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   【2026-10-03追加】注文導線の共通処理（保存とカート投入の分離）
+   背景：「画像を保存してカートに入れる」の1ボタン構成は、Instagram等のアプリ内ブラウザで
+   画像保存が機能せず、カート投入の妨げになりうる。配色の記録は注文情報(Colors/Image URL)に
+   残るため、保存は「任意」に分離した。
+   - sim708Track        : GA4へステップ計測（dataLayerにgtag形式でpush。GTM側の追加設定不要）
+   - sim708IsInApp      : アプリ内ブラウザ判定
+   - sim708FallbackUpload: 画像アップロード失敗時の代替（カート投入を止めない）
+   - sim708SetupOrderUI : ボタン文言の変更・「画像だけ保存」ボタンの追加・各関数の計測ラップ
+   各商品JSの末尾で sim708SetupOrderUI({...}) を1回呼ぶ。
+═══════════════════════════════════════════════════════════════════ */
+
+function sim708IsInApp() {
+  return /Instagram|FBAN|FBAV|FB_IAB|\bLine\/|MicroMessenger|TikTok|musical_ly|Bytedance|Twitter|Pinterest|Snapchat|KAKAOTALK/i
+    .test(navigator.userAgent || '');
+}
+
+function sim708Track(step, product, extra) {
+  try {
+    window.dataLayer = window.dataLayer || [];
+    const params = Object.assign({ sim_product: product, sim_in_app: sim708IsInApp() ? 'yes' : 'no' }, extra || {});
+    // gtag()と同じ形式（Argumentsオブジェクト）でpushすると、ページ上のGoogleタグがそのままGA4イベントとして送信する
+    (function () { window.dataLayer.push(arguments); })('event', 'sim_' + step, params);
+  } catch (e) { /* 計測失敗で操作を止めない */ }
+}
+
+function sim708FallbackUpload(prefix) {
+  return { orderId: prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7).toUpperCase(), imageUrl: '' };
+}
+
+function sim708ShowLongPressSave(canvas) {
+  const old = document.getElementById('sim708-longpress');
+  if (old) old.remove();
+  const wrap = document.createElement('div');
+  wrap.id = 'sim708-longpress';
+  wrap.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:16px;';
+  wrap.innerHTML =
+    '<div style="background:#fff;border-radius:12px;max-width:380px;width:100%;max-height:92vh;overflow:auto;padding:16px;text-align:center;">' +
+    '<p style="margin:0 0 10px;font-size:13px;font-weight:600;color:#1a1a1a;">画像を長押しして保存してください</p>' +
+    '<img alt="配色画像" style="width:100%;border-radius:8px;display:block;-webkit-touch-callout:default;user-select:auto;">' +
+    '<p style="margin:10px 0 12px;font-size:11px;color:#777;line-height:1.6;">iPhone：長押し →「“写真”に追加」<br>Android：長押し →「画像をダウンロード」</p>' +
+    '<button type="button" style="width:100%;padding:11px;border:1px solid #ccc;border-radius:8px;background:#fff;font-size:13px;cursor:pointer;">閉じる</button></div>';
+  wrap.querySelector('img').src = canvas.toDataURL('image/png');
+  wrap.querySelector('button').onclick = () => wrap.remove();
+  document.body.appendChild(wrap);
+}
+
+function sim708SetupOrderUI(cfg, _tries) {
+  _tries = _tries || 0;
+  const orderBtn = document.querySelector(cfg.orderBtnSelector);
+  if (!orderBtn) {
+    if (_tries < 40) setTimeout(() => sim708SetupOrderUI(cfg, _tries + 1), 250);
+    return;
+  }
+  if (orderBtn.dataset.sim708Setup) return;
+  orderBtn.dataset.sim708Setup = '1';
+  const product = cfg.product;
+
+  // 1) ボタン文言：保存の文言を外し、カート投入だと明示する
+  const label = orderBtn.querySelector('[id$="-cart-label"]') || orderBtn;
+  const setLabel = () => { if (label.textContent.indexOf('画像を保存して') !== -1) label.textContent = 'カートに入れる →'; };
+  setLabel();
+  new MutationObserver(setLabel).observe(label, { childList: true, characterData: true, subtree: true });
+
+  // 2) 「配色画像だけ保存」ボタン（任意・カートに入れずに保存したい人向け）
+  if (!document.getElementById('sim708-style')) {
+    const st = document.createElement('style');
+    st.id = 'sim708-style';
+    st.textContent =
+      '.sim708-save-only{display:block;width:100%;box-sizing:border-box;margin:8px 0 0;padding:10px 12px;border:1.5px solid #c8a04a;border-radius:8px;background:#fff;color:#7a5a14;font-size:12px;font-weight:600;cursor:pointer;text-align:center;}' +
+      '.sim708-save-note{margin:4px 0 0;font-size:10.5px;color:#888;text-align:center;line-height:1.5;}' +
+      '.modal-image[src=""]{display:none;}';
+    document.head.appendChild(st);
+  }
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'sim708-save-only';
+  saveBtn.textContent = '配色イメージを画像で保存する';
+  const note = document.createElement('p');
+  note.className = 'sim708-save-note';
+  note.textContent = 'SNSへの投稿や、ご家族・お仲間との相談、じっくりご検討したいときに。カートには入りません。';
+  const bar = orderBtn.parentElement;
+  bar.insertAdjacentElement('afterend', note);
+  bar.insertAdjacentElement('afterend', saveBtn);
+  saveBtn.addEventListener('click', async () => {
+    sim708Track('save_only_click', product);
+    try {
+      if (sim708IsInApp() && window[cfg.buildCanvas]) {
+        sim708ShowLongPressSave(await window[cfg.buildCanvas]());
+        sim708Track('save_only_longpress', product);
+      } else {
+        await window[cfg.saveOnly]();
+        sim708Track('save_only_done', product);
+      }
+    } catch (e) {
+      console.error(e);
+      sim708Track('save_only_error', product, { sim_error: String(e && e.message || e).slice(0, 80) });
+    }
+  });
+
+  // 3) 既存関数を計測ラップ（onclick属性はwindow上の関数名を引くため、差し替えが効く）
+  const wrap = (name, before, after) => {
+    const orig = window[name];
+    if (typeof orig !== 'function') return;
+    window[name] = async function () {
+      if (before) before();
+      const r = await orig.apply(this, arguments);
+      if (after) after();
+      return r;
+    };
+  };
+  const afterOrder = () => {
+    const shown = document.querySelector('.modal.show, .kolmio-modal.show, [id$="-confirm-modal"].show');
+    sim708Track(shown ? 'modal_shown' : 'order_blocked', product);
+  };
+  if (cfg.bound) {
+    // addEventListenerで関数が直接バインドされている商品：関数の差し替えが効かないため、クリックを直接計測する
+    orderBtn.addEventListener('click', () => { sim708Track('order_click', product); setTimeout(afterOrder, 3500); });
+  } else {
+    wrap(cfg.goOrder, () => sim708Track('order_click', product), afterOrder);
+  }
+  wrap(cfg.proceed, () => sim708Track('cart_submit', product));
+
+  // 4) 画面内の他のカートボタン（フローティングバー等）の旧文言も差し替える
+  document.querySelectorAll('button').forEach((b) => {
+    if (b.textContent.indexOf('画像を保存してカートに入れる') !== -1) b.textContent = 'カートに入れる →';
+  });
+}

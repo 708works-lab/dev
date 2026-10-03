@@ -516,7 +516,7 @@ async function courierSaveImage() {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   courierImageSaved = true;
   updateCartButtonState();
-  showCourierToast('画像を保存しました ✓　カートに進めます');
+  showCourierToast('画像を保存しました ✓');
 }
 
 // ---- 名入れ刻印フォント埋め込み ----
@@ -671,7 +671,7 @@ async function buildCourierSaveCanvas() {
 
 function updateCartButtonState() {
   const cartLabel = document.getElementById('courier-cart-label');
-  if (cartLabel) cartLabel.textContent = '画像を保存してカートに入れる →';
+  if (cartLabel) cartLabel.textContent = 'カートに入れる →';
 }
 
 async function courierGoOrder() {
@@ -679,17 +679,15 @@ async function courierGoOrder() {
     showCourierToast('刻印する文字を正しく入力してください');
     return;
   }
-  if (!courierImageSaved) {
-    await courierSaveImage();
-  }
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
   const loadEl = document.getElementById('courier-loading-overlay');
   if (loadEl) loadEl.classList.add('show');
   try {
     const svg    = document.querySelector('#courier-strap-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildCourierSaveCanvas();
-    const result = await courierUploadImage(canvas);
-    if (!result) throw new Error('画像アップロードに失敗しました');
+    let result = await courierUploadImage(canvas);
+    if (!result) { sim708Track('upload_fail', 'courier'); result = sim708FallbackUpload('COU'); }
     courierLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showCourierConfirmModal(result);
@@ -807,4 +805,13 @@ function showCourierToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'courier',
+    orderBtnSelector: '[onclick^="courierGoOrder("]',
+    goOrder: 'courierGoOrder', proceed: 'courierProceedToCart', saveOnly: 'courierSaveImage', buildCanvas: 'buildCourierSaveCanvas',
+  });
 }

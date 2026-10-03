@@ -338,7 +338,7 @@ async function sus4wSaveImage() {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
   sus4wImageSaved = true;
   updateSus4wCartButtonState();
-  showSus4wToast('画像を保存しました ✓　カートに進めます');
+  showSus4wToast('画像を保存しました ✓');
 }
 
 async function buildSus4wSaveCanvas() {
@@ -372,7 +372,7 @@ async function buildSus4wSaveCanvas() {
 
 function updateSus4wCartButtonState() {
   const cartLabel = document.getElementById('sus4w-cart-label');
-  if (cartLabel) cartLabel.textContent = '画像を保存してカートに入れる →';
+  if (cartLabel) cartLabel.textContent = 'カートに入れる →';
 }
 
 async function sus4wGoOrder() {
@@ -380,17 +380,15 @@ async function sus4wGoOrder() {
     showSus4wToast('刻印する文字を正しく入力してください');
     return;
   }
-  if (!sus4wImageSaved) {
-    await sus4wSaveImage();
-  }
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
   const loadEl = document.getElementById('sus4w-loading-overlay');
   if (loadEl) loadEl.classList.add('show');
   try {
     const svg = document.querySelector('#sus4w-svg-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildSus4wSaveCanvas();
-    const result = await sus4wUploadImage(canvas);
-    if (!result) throw new Error('画像アップロードに失敗しました');
+    let result = await sus4wUploadImage(canvas);
+    if (!result) { sim708Track('upload_fail', 'sus4w'); result = sim708FallbackUpload('S4W'); }
     sus4wLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showSus4wConfirmModal(result);
@@ -498,4 +496,13 @@ function showSus4wToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'sus4w',
+    orderBtnSelector: '[onclick^="sus4wGoOrder("]',
+    goOrder: 'sus4wGoOrder', proceed: 'sus4wProceedToCart', saveOnly: 'sus4wSaveImage', buildCanvas: 'buildSus4wSaveCanvas',
+  });
 }
