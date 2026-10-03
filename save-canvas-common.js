@@ -294,3 +294,34 @@ function sim708SetupOrderUI(cfg, _tries) {
     if (b.textContent.indexOf('画像を保存してカートに入れる') !== -1) b.textContent = 'カートに入れる →';
   });
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   【2026-10-03追加】オーダー画像URLを独自ドメイン(img.708works.jp)に寄せる暫定処理
+   画像アップロード用Worker(folklore-image-upload)が旧URL(pub-…r2.dev。レート制限あり・本番非推奨)を
+   返すため、Workerの返答に含まれる旧URLを新ドメインへ書き換える。
+   Worker側が最初から新ドメインを返すようになれば、書き換え対象が無くなり自然に何もしなくなる。
+═══════════════════════════════════════════════════════════════════ */
+(function () {
+  if (typeof window === 'undefined' || window.__sim708FetchPatched) return;
+  window.__sim708FetchPatched = true;
+  const WORKER = /folklore-image-upload\.708works\.workers\.dev/;
+  const OLD_BASE = /https:\/\/pub-a69e6e3c6bce4a1f87270114ca884ad8\.r2\.dev\//g;
+  const NEW_BASE = 'https://img.708works.jp/';
+  const orig = window.fetch;
+  window.fetch = function (input) {
+    const url = typeof input === 'string' ? input : (input && input.url) || '';
+    const p = orig.apply(this, arguments);
+    if (!WORKER.test(url)) return p;
+    return p.then(async (res) => {
+      try {
+        const text = await res.clone().text();
+        const fixed = text.replace(OLD_BASE, NEW_BASE);
+        if (fixed === text) return res;
+        return new Response(fixed, { status: res.status, statusText: res.statusText, headers: res.headers });
+      } catch (e) {
+        return res; // 失敗しても元の応答をそのまま返す（購入を止めない）
+      }
+    });
+  };
+})();
