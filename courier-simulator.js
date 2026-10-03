@@ -686,8 +686,12 @@ async function courierGoOrder() {
     const svg    = document.querySelector('#courier-strap-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildCourierSaveCanvas();
-    let result = await courierUploadImage(canvas);
-    if (!result) { sim708Track('upload_fail', 'courier'); result = sim708FallbackUpload('COU'); }
+    let result = null;
+    try { result = await courierUploadImage(canvas); } catch (e) { console.error(e); }
+    if (!result) {
+      if (window.sim708Track) sim708Track('upload_fail', 'courier');
+      result = window.sim708FallbackUpload ? sim708FallbackUpload('COU') : { orderId: 'COU-' + Date.now(), imageUrl: '' };
+    }
     courierLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showCourierConfirmModal(result);

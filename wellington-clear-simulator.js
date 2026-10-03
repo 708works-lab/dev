@@ -804,8 +804,12 @@ async function wcGoOrder() {
   showWcLoading('画像をアップロード中...');
   try {
     const canvas = await wcBuildSaveCanvas();
-    let uploadResult = await wcUploadOrderImage(canvas);
-    if (!uploadResult) { sim708Track('upload_fail', 'wellington-clear'); uploadResult = sim708FallbackUpload('WC'); }
+    let uploadResult = null;
+    try { uploadResult = await wcUploadOrderImage(canvas); } catch (e) { console.error(e); }
+    if (!uploadResult) {
+      if (window.sim708Track) sim708Track('upload_fail', 'wellington-clear');
+      uploadResult = window.sim708FallbackUpload ? sim708FallbackUpload('WC') : { orderId: 'WC-' + Date.now(), imageUrl: '' };
+    }
     wcLastUploadedImage = uploadResult;
     hideWcLoading();
     showWcConfirmModal(uploadResult);

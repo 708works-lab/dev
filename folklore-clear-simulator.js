@@ -805,8 +805,12 @@ async function goOrder(){
   showLoading('画像をアップロード中...');
   try {
     const canvas = await fcBuildSaveCanvas();
-    let uploadResult = await fcUploadOrderImage(canvas);
-    if (!uploadResult) { sim708Track('upload_fail', 'folklore-clear'); uploadResult = sim708FallbackUpload('FC'); }
+    let uploadResult = null;
+    try { uploadResult = await fcUploadOrderImage(canvas); } catch (e) { console.error(e); }
+    if (!uploadResult) {
+      if (window.sim708Track) sim708Track('upload_fail', 'folklore-clear');
+      uploadResult = window.sim708FallbackUpload ? sim708FallbackUpload('FC') : { orderId: 'FC-' + Date.now(), imageUrl: '' };
+    }
     fcLastUploadedImage = uploadResult;
     hideLoading();
     showConfirmModal(uploadResult);

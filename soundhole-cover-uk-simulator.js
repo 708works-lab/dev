@@ -658,8 +658,12 @@ async function shcGoOrder() {
   showShcLoading('画像をアップロード中...');
   try {
     const canvas = await shcBuildSaveCanvas();
-    let uploadResult = await shcUploadOrderImage(canvas);
-    if (!uploadResult) { sim708Track('upload_fail', 'soundhole-cover-uk'); uploadResult = sim708FallbackUpload('SHC'); }
+    let uploadResult = null;
+    try { uploadResult = await shcUploadOrderImage(canvas); } catch (e) { console.error(e); }
+    if (!uploadResult) {
+      if (window.sim708Track) sim708Track('upload_fail', 'soundhole-cover-uk');
+      uploadResult = window.sim708FallbackUpload ? sim708FallbackUpload('SHC') : { orderId: 'SHC-' + Date.now(), imageUrl: '' };
+    }
     shcLastUploadedImage = uploadResult;
     hideShcLoading();
     showShcConfirmModal(uploadResult);

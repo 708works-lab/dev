@@ -386,8 +386,12 @@ async function backstageGoOrder() {
     const svg = document.querySelector('#backstage-svg-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildBackstageSaveCanvas();
-    let result = await backstageUploadImage(canvas);
-    if (!result) { sim708Track('upload_fail', 'backstage'); result = sim708FallbackUpload('BS'); }
+    let result = null;
+    try { result = await backstageUploadImage(canvas); } catch (e) { console.error(e); }
+    if (!result) {
+      if (window.sim708Track) sim708Track('upload_fail', 'backstage');
+      result = window.sim708FallbackUpload ? sim708FallbackUpload('BS') : { orderId: 'BS-' + Date.now(), imageUrl: '' };
+    }
     backstageLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showBackstageConfirmModal(result);

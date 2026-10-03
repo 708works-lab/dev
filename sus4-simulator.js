@@ -399,8 +399,12 @@ async function sus4GoOrder() {
     const svg = document.querySelector('#sus4-svg-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildSus4SaveCanvas();
-    let result = await sus4UploadImage(canvas);
-    if (!result) { sim708Track('upload_fail', 'sus4'); result = sim708FallbackUpload('S4'); }
+    let result = null;
+    try { result = await sus4UploadImage(canvas); } catch (e) { console.error(e); }
+    if (!result) {
+      if (window.sim708Track) sim708Track('upload_fail', 'sus4');
+      result = window.sim708FallbackUpload ? sim708FallbackUpload('S4') : { orderId: 'S4-' + Date.now(), imageUrl: '' };
+    }
     sus4LastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showSus4ConfirmModal(result);

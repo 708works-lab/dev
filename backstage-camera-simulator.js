@@ -392,8 +392,12 @@ async function backstageCameraGoOrder() {
     const svg = document.querySelector('#backstage-camera-svg-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildBackstageCameraSaveCanvas();
-    let result = await backstageCameraUploadImage(canvas);
-    if (!result) { sim708Track('upload_fail', 'backstage-camera'); result = sim708FallbackUpload('BSC'); }
+    let result = null;
+    try { result = await backstageCameraUploadImage(canvas); } catch (e) { console.error(e); }
+    if (!result) {
+      if (window.sim708Track) sim708Track('upload_fail', 'backstage-camera');
+      result = window.sim708FallbackUpload ? sim708FallbackUpload('BSC') : { orderId: 'BSC-' + Date.now(), imageUrl: '' };
+    }
     backstageCameraLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showBackstageCameraConfirmModal(result);

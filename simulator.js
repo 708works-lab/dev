@@ -780,8 +780,12 @@ async function goOrder(){
   showLoading('画像をアップロード中...');
   try {
     const canvas = await buildSaveCanvas();
-    let uploadResult = await uploadOrderImage(canvas);
-    if (!uploadResult) { sim708Track('upload_fail', 'folklore'); uploadResult = sim708FallbackUpload('FL'); }
+    let uploadResult = null;
+    try { uploadResult = await uploadOrderImage(canvas); } catch (e) { console.error(e); }
+    if (!uploadResult) {
+      if (window.sim708Track) sim708Track('upload_fail', 'folklore');
+      uploadResult = window.sim708FallbackUpload ? sim708FallbackUpload('FL') : { orderId: 'FL-' + Date.now(), imageUrl: '' };
+    }
     
     lastUploadedImage = uploadResult;
     hideLoading();

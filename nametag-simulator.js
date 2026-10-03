@@ -639,8 +639,12 @@ async function nametagGoOrder() {
     const svg = document.querySelector('#nametag-svg-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildNametagSaveCanvas();
-    let result = await nametagUploadImage(canvas);
-    if (!result) { sim708Track('upload_fail', 'nametag'); result = sim708FallbackUpload('NT'); }
+    let result = null;
+    try { result = await nametagUploadImage(canvas); } catch (e) { console.error(e); }
+    if (!result) {
+      if (window.sim708Track) sim708Track('upload_fail', 'nametag');
+      result = window.sim708FallbackUpload ? sim708FallbackUpload('NT') : { orderId: 'NT-' + Date.now(), imageUrl: '' };
+    }
     nametagLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showNametagConfirmModal(result);

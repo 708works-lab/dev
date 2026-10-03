@@ -551,8 +551,12 @@ async function triadGoOrder() {
     const svg = document.querySelector('#triad-strap-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildTriadSaveCanvas();
-    let result = await triadUploadImage(canvas);
-    if (!result) { sim708Track('upload_fail', 'triad-ukulele'); result = sim708FallbackUpload('TRU'); }
+    let result = null;
+    try { result = await triadUploadImage(canvas); } catch (e) { console.error(e); }
+    if (!result) {
+      if (window.sim708Track) sim708Track('upload_fail', 'triad-ukulele');
+      result = window.sim708FallbackUpload ? sim708FallbackUpload('TRU') : { orderId: 'TRU-' + Date.now(), imageUrl: '' };
+    }
     triadLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showTriadConfirmModal(result);

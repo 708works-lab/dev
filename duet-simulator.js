@@ -762,8 +762,12 @@ async function duetGoOrder() {
     const svg    = document.querySelector('#duet-strap-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildDuetSaveCanvas();
-    let result = await duetUploadImage(canvas);
-    if (!result) { sim708Track('upload_fail', 'duet'); result = sim708FallbackUpload('DUE'); }
+    let result = null;
+    try { result = await duetUploadImage(canvas); } catch (e) { console.error(e); }
+    if (!result) {
+      if (window.sim708Track) sim708Track('upload_fail', 'duet');
+      result = window.sim708FallbackUpload ? sim708FallbackUpload('DUE') : { orderId: 'DUE-' + Date.now(), imageUrl: '' };
+    }
     duetLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showDuetConfirmModal(result);

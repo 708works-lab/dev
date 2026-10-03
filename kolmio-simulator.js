@@ -672,8 +672,12 @@ async function kolmioGoOrder() {
   showKolmioLoading('画像をアップロード中...');
   try {
     const canvas = await buildKolmioSaveCanvas();
-    let uploadResult = await kolmioUploadOrderImage(canvas);
-    if (!uploadResult) { sim708Track('upload_fail', 'kolmio'); uploadResult = sim708FallbackUpload('kolmio'); }
+    let uploadResult = null;
+    try { uploadResult = await kolmioUploadOrderImage(canvas); } catch (e) { console.error(e); }
+    if (!uploadResult) {
+      if (window.sim708Track) sim708Track('upload_fail', 'kolmio');
+      uploadResult = window.sim708FallbackUpload ? sim708FallbackUpload('kolmio') : { orderId: 'kolmio-' + Date.now(), imageUrl: '' };
+    }
     kLastUploadedImage = uploadResult;
     hideKolmioLoading();
     showKolmioConfirmModal(uploadResult);

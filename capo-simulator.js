@@ -443,8 +443,12 @@ async function capoGoOrder() {
     const svg = document.querySelector('#capo-svg-wrap svg');
     if (!svg) throw new Error('SVGが見つかりません');
     const canvas = await buildCapoSaveCanvas();
-    let result = await capoUploadImage(canvas);
-    if (!result) { sim708Track('upload_fail', 'capo'); result = sim708FallbackUpload('CAP'); }
+    let result = null;
+    try { result = await capoUploadImage(canvas); } catch (e) { console.error(e); }
+    if (!result) {
+      if (window.sim708Track) sim708Track('upload_fail', 'capo');
+      result = window.sim708FallbackUpload ? sim708FallbackUpload('CAP') : { orderId: 'CAP-' + Date.now(), imageUrl: '' };
+    }
     capoLastUploadedImage = result;
     if (loadEl) loadEl.classList.remove('show');
     showCapoConfirmModal(result);

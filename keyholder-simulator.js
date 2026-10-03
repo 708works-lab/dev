@@ -713,8 +713,12 @@ async function khGoOrder() {
   showKhLoading('画像をアップロード中...');
   try {
     const canvas = await khBuildSaveCanvas();
-    let uploadResult = await khUploadOrderImage(canvas);
-    if (!uploadResult) { sim708Track('upload_fail', 'keyholder'); uploadResult = sim708FallbackUpload('KH'); }
+    let uploadResult = null;
+    try { uploadResult = await khUploadOrderImage(canvas); } catch (e) { console.error(e); }
+    if (!uploadResult) {
+      if (window.sim708Track) sim708Track('upload_fail', 'keyholder');
+      uploadResult = window.sim708FallbackUpload ? sim708FallbackUpload('KH') : { orderId: 'KH-' + Date.now(), imageUrl: '' };
+    }
     khLastUploadedImage = uploadResult;
     hideKhLoading();
     showKhConfirmModal(uploadResult);
@@ -1449,10 +1453,17 @@ const KH_SVG_INNER = `<defs>
   </g>`;
 
 // 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
-if (typeof sim708SetupOrderUI === 'function') {
-  sim708SetupOrderUI({
+// keyholderのページは共通ヘルパーを読み込んでいないため、未読み込みならここで動的に読み込む
+(function () {
+  const cfg = {
     product: 'keyholder',
     orderBtnSelector: '[onclick^="khGoOrder("]',
     goOrder: 'khGoOrder', proceed: 'khProceedToCart', saveOnly: 'khSaveImage', buildCanvas: 'khBuildSaveCanvas',
-  });
-}
+  };
+  const run = () => { if (typeof sim708SetupOrderUI === 'function') sim708SetupOrderUI(cfg); };
+  if (typeof sim708SetupOrderUI === 'function') { run(); return; }
+  const sc = document.createElement('script');
+  sc.src = 'https://708works-lab.github.io/dev/save-canvas-common.js';
+  sc.onload = run;
+  document.head.appendChild(sc);
+})();

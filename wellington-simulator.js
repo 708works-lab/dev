@@ -837,8 +837,12 @@ async function wlGoOrder() {
   showWlLoading('画像をアップロード中...');
   try {
     const canvas = await buildWlSaveCanvas();
-    let uploadResult = await wlUploadOrderImage(canvas);
-    if (!uploadResult) { sim708Track('upload_fail', 'wellington'); uploadResult = sim708FallbackUpload('WL'); }
+    let uploadResult = null;
+    try { uploadResult = await wlUploadOrderImage(canvas); } catch (e) { console.error(e); }
+    if (!uploadResult) {
+      if (window.sim708Track) sim708Track('upload_fail', 'wellington');
+      uploadResult = window.sim708FallbackUpload ? sim708FallbackUpload('WL') : { orderId: 'WL-' + Date.now(), imageUrl: '' };
+    }
     wlLastUploadedImage = uploadResult;
     hideWlLoading();
     showWlConfirmModal(uploadResult);
