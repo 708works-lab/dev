@@ -85,12 +85,35 @@ let triadLastUploadedImage = null;
 // 初期化
 // ============================================================================
 
+// URL ?triad=ベルト①-ベルト②-ベルト③-取付け革-金具 （各パーツのid）で初期配色を指定できる
+// （例: ?triad=camel-red-navy-brown-gold）。カラーアイデアページからの遷移用。不正値は無視する。
+function applyTriadColorsFromUrl() {
+  try {
+    const q = new URLSearchParams(location.search).get('triad');
+    if (!q) return;
+    const ids = q.split('-');
+    if (ids.length !== 5) return;
+    const find = (list, id) => list.find(c => c.id === id);
+    const picked = [
+      find(TRIAD_BELT_COLORS, ids[0]), find(TRIAD_BELT_COLORS, ids[1]), find(TRIAD_BELT_COLORS, ids[2]),
+      find(TRIAD_PARTS_COLORS, ids[3]), find(TRIAD_HARDWARE_COLORS, ids[4])
+    ];
+    if (picked.some(c => !c)) return;
+    triadColors = {
+      leather1: picked[0].hex, leather2: picked[1].hex, leather3: picked[2].hex,
+      parts: picked[3].hex, hardware: picked[4].hex
+    };
+  } catch (e) {}
+}
+
 function initTriadSimulator() {
   if (window.triadSimulatorInitialized) return;
   const palette = document.getElementById('triad-palette');
   const wrap    = document.getElementById('triad-strap-wrap');
   if (!palette || !wrap) { setTimeout(initTriadSimulator, 100); return; }
   window.triadSimulatorInitialized = true;
+
+  applyTriadColorsFromUrl();
 
   buildTriadZoneButtons();
   buildTriadPalette();
