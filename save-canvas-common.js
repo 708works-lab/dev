@@ -224,7 +224,10 @@ function sim708SetupOrderUI(cfg, _tries) {
     const st = document.createElement('style');
     st.id = 'sim708-style';
     st.textContent =
-      '.sim708-save-only{display:block;width:100%;box-sizing:border-box;margin:8px auto 0;padding:10px 12px;border:1.5px solid #c8a04a;border-radius:8px;background:#fff;color:#7a5a14;font-size:12px;font-weight:600;cursor:pointer;text-align:center;}' +
+      // 主役の「カートに入れる」を1行まるごと・大きく(リセット/戻るはその下)。補助の「画像で保存」は文字リンク化
+      '.sim708-bar{flex-wrap:wrap !important;row-gap:8px !important;}' +
+      '.sim708-order{order:-1 !important;flex:1 1 100% !important;width:100% !important;box-sizing:border-box !important;min-height:50px !important;padding:14px 12px !important;font-size:15px !important;font-weight:700 !important;border-radius:10px !important;box-shadow:0 2px 6px rgba(138,109,50,.25) !important;letter-spacing:.02em;}' +
+      '.sim708-save-only{display:block;width:100%;box-sizing:border-box;margin:4px auto 0;padding:8px;border:none;background:transparent;color:#7a5a14;font-size:12px;font-weight:500;text-decoration:underline;cursor:pointer;text-align:center;}' +
       '.sim708-save-note{box-sizing:border-box;margin:4px auto 0;font-size:10.5px;color:#888;text-align:center;line-height:1.5;}' +
       '.modal-image[src=""]{display:none;}';
     document.head.appendChild(st);
@@ -237,6 +240,8 @@ function sim708SetupOrderUI(cfg, _tries) {
   note.className = 'sim708-save-note';
   note.textContent = 'SNSへの投稿や、ご家族・お仲間との相談、じっくりご検討したいときに。カートには入りません。';
   const bar = orderBtn.parentElement;
+  bar.classList.add('sim708-bar');
+  orderBtn.classList.add('sim708-order');
   bar.insertAdjacentElement('afterend', note);
   bar.insertAdjacentElement('afterend', saveBtn);
   // 操作バー（リセット/戻る/カート）と同じ幅・中央揃えにそろえる（商品ごとにバーの最大幅が異なるため実測で合わせる）
