@@ -250,7 +250,10 @@ function sim708SetupOrderUI(cfg, _tries) {
     const cs = getComputedStyle(bar);
     const w = bar.getBoundingClientRect().width - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
     if (!(w > 0)) return;
-    [saveBtn, note].forEach((el) => { el.style.width = w + 'px'; el.style.marginLeft = 'auto'; el.style.marginRight = 'auto'; });
+    // 価格の枠も「カートに入れる」ボタンと同じ幅にそろえる(背景の端から端まで広がるのを防ぐ)
+    const scope = bar.closest('.app') || bar.closest('[class$="-simulator"]') || bar.parentElement;
+    const priceBar = scope && scope.querySelector('.price-bar');
+    [saveBtn, note].concat(priceBar ? [priceBar] : []).forEach((el) => { el.style.width = w + 'px'; el.style.boxSizing = 'border-box'; el.style.marginLeft = 'auto'; el.style.marginRight = 'auto'; });
   };
   syncWidth();
   if (window.ResizeObserver) new ResizeObserver(syncWidth).observe(bar);
