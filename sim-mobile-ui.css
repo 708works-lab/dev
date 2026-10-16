@@ -2,12 +2,18 @@
    JSが root に .sim-mui を付けたときだけ有効(JS失敗時は従来表示のまま)。≤480px のみ。
    構成: 上=プレビュー(ストラップ拡大/全身正面/全身背面のタブ。固定はしない) → パーツチップ(横スクロール) → カラー → 長さ・名入れ → 価格・カート。下=価格+カートの固定バー */
 @media (max-width: 480px) {
-  .sim-mui .app { display: flex !important; flex-direction: column-reverse !important; padding: 0 !important; gap: 0 !important; }
+  .sim-mui .app:has(> .preview-col) { display: flex !important; flex-direction: column-reverse !important; padding: 0 !important; gap: 0 !important; }
   .sim-mui .app > .preview-col {
     position: static !important; flex: none !important;
     width: 100% !important; max-width: none !important; margin: 0 !important;
     background: #f0ede8; padding: 6px 0 8px;
   }
+  /* サウンドホールカバー: プレビュー(.svg-col)を先頭に、色パレットはJSでその直下へ */
+  .sim-mui .top-area:has(> .svg-col) { display: flex !important; flex-direction: column !important; }
+  .sim-mui .top-area > .svg-col { order: -1; width: 100% !important; max-width: none !important; align-items: center; display: flex; flex-direction: column; padding: 6px 0 8px; background: #f0ede8; box-sizing: border-box; }
+  .sim-mui .svg-col .svg-scroll { height: min(34svh, 320px) !important; width: 100% !important; }
+  .sim-mui .svg-col .svg-scroll svg { width: 100% !important; height: 100% !important; }
+  .sim-mui .svg-col > .pal-box { margin: 0 12px !important; align-self: stretch !important; width: auto !important; box-sizing: border-box; }
   .sim-mui .dir-tag-v { display: none !important; }
   .sim-mui .strap-wrap { height: min(34svh, 320px) !important; width: 100% !important; transition: height .2s ease; }
   .sim-mui .strap-wrap svg { width: 100% !important; height: 100% !important; }
@@ -54,6 +60,21 @@
   .sim-mui-bar .p b { font-size: 17px; color: #1a1a1a; letter-spacing: .01em; }
   .sim-mui-bar button { flex: 1 1 auto; height: 46px; border: 0; border-radius: 999px; background: #c9a14a; color: #1a1a1a; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
 }
+/* ===== スケール系(folklore / folklore Clear / wellington / kolmio): 操作とストラップを1画面に ===== */
+@media (max-width: 480px) {
+  .sim-mui2 .top-area { align-items: flex-start !important; }
+  /* ストラップ列は固定して、色を選ぶ間も常に見えるように(中身は内部スクロール) */
+  .sim-mui2 .top-area .strap-col { position: sticky !important; top: 8px; align-self: flex-start; flex: 0 0 96px !important; width: 96px !important; }
+  .sim-mui2 .top-area .strap-col .strap-scroll { height: min(62svh, 540px) !important; width: 100% !important; }
+  .sim-mui2 .top-area .ctrl-col { flex: 1 1 0 !important; min-width: 0 !important; width: auto !important; }
+  /* カラー: 名前付き2列リストをやめ、丸だけの密なグリッドに(520px→約190px) */
+  .sim-mui2 .top-area .palette { grid-template-columns: repeat(auto-fill, 36px) !important; gap: 6px 8px !important; justify-content: center; }
+  .sim-mui2 .top-area .palette .cb-wrap { gap: 0 !important; padding: 0 !important; min-width: 0 !important; }
+  .sim-mui2 .top-area .palette .color-name { display: none !important; }
+  .sim-mui2 .top-area .pal-box { padding: 8px 6px !important; }
+  .sim-mui2 .top-area .pal-box .box-label { margin-bottom: 6px !important; }
+}
+
 /* 新バーが出ている間は既存の追従バーを隠す(二重表示防止) */
 body.sim-mui-bar-on .sim-sticky { display: none !important; }
 @media (min-width: 481px) { .sim-mui-tabs, .sim-mui-bar { display: none !important; } }

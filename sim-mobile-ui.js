@@ -20,7 +20,21 @@
     'sus4-attachment': { root: '.sus4-simulator', svg: '.strap-wrap svg', palettes: true,
       views: HALF2({ t: '商品', vb: '35 0 392 410' }, { t: '使用イメージ', vb: '0 496 463 501' }) },
     'sus4-with-wellington': { root: '.sus4w-simulator', svg: '.strap-wrap svg', palettes: true,
-      views: HALF2({ t: '商品', vb: '10 0 334 548' }, { t: '使用イメージ', vb: '0 591 354 590' }) }
+      views: HALF2({ t: '商品', vb: '10 0 334 548' }, { t: '使用イメージ', vb: '0 591 354 590' }) },
+    // --- プレビュー切替のない商品(レイアウトだけ調整+固定バー)。cls があれば root に付く(courier/duet等は既存CSSの [class$="-simulator"] 判定を壊さないよう付けない) ---
+    'folklore': { root: '.folklore-simulator', cls: 'sim-mui2' },
+    'folklole-clear': { root: '.folklore-simulator', cls: 'sim-mui2' },
+    'wellington-ukulele': { root: '.wellington-simulator', cls: 'sim-mui2' },
+    'wellington-ukulele-clear': { root: '.wellington-simulator', cls: 'sim-mui2' },
+    'kolmio-ukulele': { root: '.kolmio-simulator', cls: 'sim-mui2' },
+    'soundhole-cover-ag': { root: '.shc-simulator', svg: '#shc-svg-scroll svg', pcol: '.svg-col', stage: ['.ctrl-col > .pal-box:nth-child(3)'],
+      views: HALF2({ t: 'カバー', vb: '70 0 240 290' }, { t: 'ギターに装着', vb: '0 350 382 390' }) },
+    'soundhole-cover-uk': { root: '.shc-simulator', svg: '#shc-svg-scroll svg', pcol: '.svg-col', stage: ['.ctrl-col > .pal-box:nth-child(3)'],
+      views: HALF2({ t: 'カバー', vb: '40 0 240 290' }, { t: 'ウクレレに装着', vb: '0 330 320 505' }) },
+    'courier': { root: '.courier-simulator' },
+    'duet-cw73r': { root: '.duet-simulator' },
+    'keyholder01': { root: '.keyholder-simulator' },
+    'nametag-ag': { root: '.nametag-simulator' }
   };
   var handle = (location.pathname.match(/\/products\/([^\/?#]+)/) || [])[1];
   var cfg = CONFIG[handle];
@@ -29,8 +43,10 @@
 
   function init(tries) {
     var root = document.querySelector(cfg.root);
-    var svg = root && root.querySelector(cfg.svg);
-    var pcol = root && root.querySelector('.preview-col');
+    var light = !cfg.svg;   // プレビュー切替なし(レイアウトCSS+固定バーのみ)
+    var svg = light ? document.createElementNS('http://www.w3.org/2000/svg', 'svg') : (root && root.querySelector(cfg.svg));
+    var pcol = light ? document.createElement('div') : (root && root.querySelector(cfg.pcol || '.preview-col'));   // light時はダミー(未接続)
+    if (light) cfg.views = [{ k: 'x', t: 'x', vb: '0 0 1 1' }];
     var orderBtn = document.querySelector('.btn-order');
     if (!root || !svg || !pcol || !orderBtn) { if ((tries || 0) < 40) setTimeout(function () { init((tries || 0) + 1); }, 250); return; }
     if (root.dataset.simMui) return; root.dataset.simMui = '1';
@@ -129,6 +145,7 @@
 
     function apply() {
       moveStage(mq.matches);
+      if (light) { if (cfg.cls) root.classList.toggle(cfg.cls, mq.matches); upd(); return; }
       if (mq.matches) { root.classList.add('sim-mui'); var a = btns.findIndex(function (b) { return b.getAttribute('aria-pressed') === 'true'; }); svg.setAttribute('viewBox', vbOf(cfg.views[Math.max(a, 0)])); }
       else { root.classList.remove('sim-mui'); svg.setAttribute('viewBox', origVB); }
       upd();
