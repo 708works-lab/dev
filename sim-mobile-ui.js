@@ -143,23 +143,32 @@
     window.addEventListener('scroll', req, { passive: true }); window.addEventListener('resize', req);
     new IntersectionObserver(function (es) { btnVisible = es[0].isIntersecting; req(); }, { threshold: 0.6 }).observe(orderBtn);
 
-    // 内部スクロールするストラップ列に「スクロールできる」ことを示す(下端のグラデ+「▼ スクロール」、初回に少し動かす)
-    var hintEl = null, hintScroller = null, nudged = false;
+    // 内部スクロールするストラップ列: 先端(下端)の意匠が特徴なので、初期は下端を見せる。
+    // 上下どちらにスクロールできるかを、端のグラデ+「▲/▼ スクロール」で示す。初回に少し動かす
+    var hintEl = null, hintTop = null, hintScroller = null, nudged = false, started = false;
     function ensureHint(on) {
       if (!cfg.hint) return;
-      if (!on) { if (hintEl) { hintEl.remove(); hintEl = null; } return; }
+      if (!on) { if (hintEl) { hintEl.remove(); hintTop.remove(); hintEl = hintTop = null; } return; }
       var sc = root.querySelector(cfg.hint); if (!sc) return;
       if (hintEl && hintScroller === sc) return;
       hintScroller = sc;
+      hintTop = document.createElement('div'); hintTop.className = 'sim-mui-hint sim-mui-hint-top'; hintTop.innerHTML = '<span>▲ スクロール</span>';
       hintEl = document.createElement('div'); hintEl.className = 'sim-mui-hint'; hintEl.innerHTML = '<span>▼ スクロール</span>';
-      sc.parentNode.insertBefore(hintEl, sc.nextSibling);
-      function sync() { var more = sc.scrollHeight - sc.clientHeight > 8 && sc.scrollTop + sc.clientHeight < sc.scrollHeight - 6; hintEl.classList.toggle('is-on', more); }
-      sc.addEventListener('scroll', sync, { passive: true }); window.addEventListener('resize', sync); setTimeout(sync, 300); setTimeout(sync, 1200);
+      sc.parentNode.insertBefore(hintTop, sc); sc.parentNode.insertBefore(hintEl, sc.nextSibling);
+      function sync() {
+        var max = sc.scrollHeight - sc.clientHeight;
+        if (!started && max > 8) { started = true; sc.scrollTop = max; }   // 初期は先端(下端)
+        hintEl.classList.toggle('is-on', max > 8 && sc.scrollTop < max - 6);
+        hintTop.classList.toggle('is-on', max > 8 && sc.scrollTop > 6);
+      }
+      sc.addEventListener('scroll', function () { sync(); }, { passive: true }); window.addEventListener('resize', sync);
+      [150, 500, 1200, 2500].forEach(function (ms) { setTimeout(sync, ms); });
       if (!nudged && 'IntersectionObserver' in window) {
         var io = new IntersectionObserver(function (es) {
           if (!es[0].isIntersecting || nudged) return;
           nudged = true; io.disconnect();
-          if (sc.scrollHeight - sc.clientHeight > 40 && sc.scrollTop < 5) { sc.scrollTo({ top: 56, behavior: 'smooth' }); setTimeout(function () { if (sc.scrollTop < 80) sc.scrollTo({ top: 0, behavior: 'smooth' }); }, 700); }
+          var max = sc.scrollHeight - sc.clientHeight;
+          if (max > 40 && sc.scrollTop > max - 5) { sc.scrollTo({ top: max - 56, behavior: 'smooth' }); setTimeout(function () { if (sc.scrollTop > max - 80) sc.scrollTo({ top: max, behavior: 'smooth' }); }, 700); }
         }, { threshold: 0.6 }); io.observe(sc);
       }
     }

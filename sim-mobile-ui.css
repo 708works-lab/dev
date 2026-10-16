@@ -83,6 +83,11 @@
   .sim-mui-hint.is-on { opacity: 1; }
   .sim-mui-hint span { position: absolute; left: 0; right: 0; bottom: 4px; white-space: nowrap; font-size: 11px; font-weight: 700; color: #8a6d32; letter-spacing: .04em; animation: sim-mui-bob 1.4s ease-in-out infinite; }
 }
+@media (max-width: 480px) {
+  .sim-mui-hint-top { margin-top: 0; margin-bottom: -38px; background: linear-gradient(to top, rgba(240,237,232,0), rgba(240,237,232,.95) 70%); }
+  .sim-mui-hint-top span { bottom: auto; top: 4px; animation-name: sim-mui-bob-up; }
+}
+@keyframes sim-mui-bob-up { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @keyframes sim-mui-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 
 /* ===== courier / duet: ストラップ列を高さ上限つきの内部スクロールに(folkloreと同じ動き) ===== */
@@ -93,9 +98,9 @@
 
 /* ===== nametag: プレビューを右に傾けて縦の占有を抑える ===== */
 @media (max-width: 480px) {
-  .sim-mui5 .app > .preview-col { width: 100% !important; max-width: none !important; margin: 0 !important; height: min(30svh, 260px); position: relative; overflow: hidden; align-items: center; }
+  .sim-mui5 .app > .preview-col { width: 100% !important; max-width: none !important; margin: 0 !important; height: min(37svh, 320px); position: relative; overflow: hidden; align-items: center; }
   .sim-mui5 .app > .preview-col .dir-tag-v { position: absolute; top: 4px; left: 8px; z-index: 2; width: auto; }
-  .sim-mui5 .app > .preview-col .strap-wrap { position: absolute; left: 50%; top: 50%; width: calc(min(30svh, 260px) / 3.05) !important; height: auto !important;
+  .sim-mui5 .app > .preview-col .strap-wrap { position: absolute; left: 50%; top: 50%; width: calc(min(37svh, 320px) / 3.05) !important; height: auto !important;
     transform: translate(-50%, -50%) rotate(45deg); transform-origin: center; }
   .sim-mui5 .app > .preview-col .strap-wrap svg { width: 100% !important; height: auto !important; }
 }
