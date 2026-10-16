@@ -75,6 +75,31 @@
   .sim-mui2 .top-area .pal-box .box-label { margin-bottom: 6px !important; }
 }
 
+/* 内部スクロールの合図(下端グラデ+ラベル)。スクロール末端に達したら消える */
+.sim-mui-hint { display: none; }
+@media (max-width: 480px) {
+  .sim-mui-hint { display: block; position: relative; z-index: 3; align-self: stretch; width: 100%; box-sizing: border-box; height: 38px; margin-top: -38px; pointer-events: none; opacity: 0; transition: opacity .2s ease;
+    background: linear-gradient(to bottom, rgba(240,237,232,0), rgba(240,237,232,.95) 70%); text-align: center; }
+  .sim-mui-hint.is-on { opacity: 1; }
+  .sim-mui-hint span { position: absolute; left: 0; right: 0; bottom: 4px; white-space: nowrap; font-size: 11px; font-weight: 700; color: #8a6d32; letter-spacing: .04em; animation: sim-mui-bob 1.4s ease-in-out infinite; }
+}
+@keyframes sim-mui-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
+/* ===== courier / duet: ストラップ列を高さ上限つきの内部スクロールに(folkloreと同じ動き) ===== */
+@media (max-width: 480px) {
+  .courier-simulator .preview-col .strap-wrap, .duet-simulator .preview-col .strap-wrap { max-height: min(62svh, 540px); overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .courier-simulator .preview-col .strap-wrap::-webkit-scrollbar, .duet-simulator .preview-col .strap-wrap::-webkit-scrollbar { display: none; }
+}
+
+/* ===== nametag: プレビューを右に傾けて縦の占有を抑える ===== */
+@media (max-width: 480px) {
+  .sim-mui5 .app > .preview-col { width: 100% !important; max-width: none !important; margin: 0 !important; height: min(30svh, 260px); position: relative; overflow: hidden; align-items: center; }
+  .sim-mui5 .app > .preview-col .dir-tag-v { position: absolute; top: 4px; left: 8px; z-index: 2; width: auto; }
+  .sim-mui5 .app > .preview-col .strap-wrap { position: absolute; left: 50%; top: 50%; width: calc(min(30svh, 260px) / 3.05) !important; height: auto !important;
+    transform: translate(-50%, -50%) rotate(45deg); transform-origin: center; }
+  .sim-mui5 .app > .preview-col .strap-wrap svg { width: 100% !important; height: auto !important; }
+}
+
 /* 新バーが出ている間は既存の追従バーを隠す(二重表示防止) */
 body.sim-mui-bar-on .sim-sticky { display: none !important; }
 @media (min-width: 481px) { .sim-mui-tabs, .sim-mui-bar { display: none !important; } }

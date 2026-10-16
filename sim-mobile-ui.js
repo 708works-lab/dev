@@ -22,19 +22,19 @@
     'sus4-with-wellington': { root: '.sus4w-simulator', svg: '.strap-wrap svg', palettes: true,
       views: HALF2({ t: '商品', vb: '10 0 334 548' }, { t: '使用イメージ', vb: '0 591 354 590' }) },
     // --- プレビュー切替のない商品(レイアウトだけ調整+固定バー)。cls があれば root に付く(courier/duet等は既存CSSの [class$="-simulator"] 判定を壊さないよう付けない) ---
-    'folklore': { root: '.folklore-simulator', cls: 'sim-mui2' },
-    'folklole-clear': { root: '.folklore-simulator', cls: 'sim-mui2' },
-    'wellington-ukulele': { root: '.wellington-simulator', cls: 'sim-mui2' },
-    'wellington-ukulele-clear': { root: '.wellington-simulator', cls: 'sim-mui2' },
-    'kolmio-ukulele': { root: '.kolmio-simulator', cls: 'sim-mui2' },
+    'folklore': { root: '.folklore-simulator', cls: 'sim-mui2', hint: '.strap-col .strap-scroll' },
+    'folklole-clear': { root: '.folklore-simulator', cls: 'sim-mui2', hint: '.strap-col .strap-scroll' },
+    'wellington-ukulele': { root: '.wellington-simulator', cls: 'sim-mui2', hint: '.strap-col .strap-scroll' },
+    'wellington-ukulele-clear': { root: '.wellington-simulator', cls: 'sim-mui2', hint: '.strap-col .strap-scroll' },
+    'kolmio-ukulele': { root: '.kolmio-simulator', cls: 'sim-mui2', hint: '.strap-col .strap-scroll' },
     'soundhole-cover-ag': { root: '.shc-simulator', svg: '#shc-svg-scroll svg', pcol: '.svg-col', stage: ['.ctrl-col > .pal-box:nth-child(3)'],
-      views: HALF2({ t: 'カバー', vb: '70 0 240 290' }, { t: 'ギターに装着', vb: '0 350 382 390' }) },
+      views: [{ k: 'worn', t: 'ギターに装着', vb: '0 350 382 390' }, { k: 'back', t: 'カバー（裏面）', vb: '70 0 240 290' }] },
     'soundhole-cover-uk': { root: '.shc-simulator', svg: '#shc-svg-scroll svg', pcol: '.svg-col', stage: ['.ctrl-col > .pal-box:nth-child(3)'],
-      views: HALF2({ t: 'カバー', vb: '40 0 240 290' }, { t: 'ウクレレに装着', vb: '0 330 320 505' }) },
-    'courier': { root: '.courier-simulator' },
-    'duet-cw73r': { root: '.duet-simulator' },
+      views: [{ k: 'worn', t: 'ウクレレに装着', vb: '0 330 320 505' }, { k: 'back', t: 'カバー（裏面）', vb: '40 0 240 290' }] },
+    'courier': { root: '.courier-simulator', hint: '.preview-col .strap-wrap' },
+    'duet-cw73r': { root: '.duet-simulator', hint: '.preview-col .strap-wrap' },
     'keyholder01': { root: '.keyholder-simulator' },
-    'nametag-ag': { root: '.nametag-simulator' }
+    'nametag-ag': { root: '.nametag-simulator', cls: 'sim-mui5' }
   };
   var handle = (location.pathname.match(/\/products\/([^\/?#]+)/) || [])[1];
   var cfg = CONFIG[handle];
@@ -143,8 +143,29 @@
     window.addEventListener('scroll', req, { passive: true }); window.addEventListener('resize', req);
     new IntersectionObserver(function (es) { btnVisible = es[0].isIntersecting; req(); }, { threshold: 0.6 }).observe(orderBtn);
 
+    // 内部スクロールするストラップ列に「スクロールできる」ことを示す(下端のグラデ+「▼ スクロール」、初回に少し動かす)
+    var hintEl = null, hintScroller = null, nudged = false;
+    function ensureHint(on) {
+      if (!cfg.hint) return;
+      if (!on) { if (hintEl) { hintEl.remove(); hintEl = null; } return; }
+      var sc = root.querySelector(cfg.hint); if (!sc) return;
+      if (hintEl && hintScroller === sc) return;
+      hintScroller = sc;
+      hintEl = document.createElement('div'); hintEl.className = 'sim-mui-hint'; hintEl.innerHTML = '<span>▼ スクロール</span>';
+      sc.parentNode.insertBefore(hintEl, sc.nextSibling);
+      function sync() { var more = sc.scrollHeight - sc.clientHeight > 8 && sc.scrollTop + sc.clientHeight < sc.scrollHeight - 6; hintEl.classList.toggle('is-on', more); }
+      sc.addEventListener('scroll', sync, { passive: true }); window.addEventListener('resize', sync); setTimeout(sync, 300); setTimeout(sync, 1200);
+      if (!nudged && 'IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (es) {
+          if (!es[0].isIntersecting || nudged) return;
+          nudged = true; io.disconnect();
+          if (sc.scrollHeight - sc.clientHeight > 40 && sc.scrollTop < 5) { sc.scrollTo({ top: 56, behavior: 'smooth' }); setTimeout(function () { if (sc.scrollTop < 80) sc.scrollTo({ top: 0, behavior: 'smooth' }); }, 700); }
+        }, { threshold: 0.6 }); io.observe(sc);
+      }
+    }
     function apply() {
       moveStage(mq.matches);
+      ensureHint(mq.matches);
       if (light) { if (cfg.cls) root.classList.toggle(cfg.cls, mq.matches); upd(); return; }
       if (mq.matches) { root.classList.add('sim-mui'); var a = btns.findIndex(function (b) { return b.getAttribute('aria-pressed') === 'true'; }); svg.setAttribute('viewBox', vbOf(cfg.views[Math.max(a, 0)])); }
       else { root.classList.remove('sim-mui'); svg.setAttribute('viewBox', origVB); }
