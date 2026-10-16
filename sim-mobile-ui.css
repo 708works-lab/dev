@@ -26,6 +26,19 @@
   .sim-mui .sim-mui-zones::-webkit-scrollbar { display: none; }
   .sim-mui .sim-mui-zones > * { flex: 0 0 auto !important; width: auto !important; white-space: nowrap; padding: 8px 14px !important; }
 
+  /* パレット切替チップ(Backstage/Capo/Sus4: パーツごとに1つのパレットだけ表示) */
+  .sim-mui .sim-mui-label-off { display: none !important; }
+  .sim-mui .sim-mui-pal-off { display: none !important; }
+  .sim-mui-pchips { display: flex; flex-direction: row; gap: 6px; padding: 0 12px 6px; align-self: stretch; width: 100%; box-sizing: border-box; overflow-x: auto; scrollbar-width: none; }
+  .sim-mui-pchips::-webkit-scrollbar { display: none; }
+  .sim-mui-pchip { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; white-space: nowrap; padding: 8px 14px; border: 1.5px solid #ddd; border-radius: 7px; background: #fff; color: #222; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .sim-mui-pchip i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,.2); background: #ccc; display: block; }
+  .sim-mui-pchip.on { background: #222; border-color: #222; color: #fff; }
+  .sim-mui-palhost { align-self: stretch; width: 100%; box-sizing: border-box; padding: 0 12px; }
+  .sim-mui .sim-mui-palhost .pal-box { margin: 0 !important; width: auto !important; max-width: 100%; box-sizing: border-box; }
+  .sim-mui-pchips, .sim-mui-palhost { display: none; }
+  .sim-mui .sim-mui-pchips { display: flex; } .sim-mui .sim-mui-palhost { display: block; }
+
   /* プレビュー切替タブ */
   .sim-mui-tabs { display: flex; justify-content: center; gap: 6px; padding: 0 12px 6px; align-self: stretch; width: 100%; box-sizing: border-box; }
   .sim-mui-tabs button { flex: 1 1 0; min-width: 0; max-width: 140px; white-space: nowrap; border: 1.5px solid #d9d3c8; background: #fff; color: #555; border-radius: 999px; padding: 7px 2px; font-family: inherit; font-size: 11.5px; letter-spacing: 0; font-weight: 600; cursor: pointer; }

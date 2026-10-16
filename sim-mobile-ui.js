@@ -5,9 +5,22 @@
    設定は商品ごと(CONFIG)。対象外の商品・PC幅では何もしない。 */
 (function () {
   'use strict';
+  var HALF2 = function (a, b) { return [{ k: 'prod', t: a.t, vb: a.vb }, { k: 'worn', t: b.t, vb: b.vb }]; };
   var CONFIG = {
     'triad': { root: '.triad-simulator', svg: '#triad-strap-wrap svg', zones: '#triad-zones', stage: ['#triad-zones', '#triad-palette-label', '.pal-box'],
-      views: [{ k: 'close', t: 'ストラップ', vb: '150 40 230 300' }, { k: 'front', t: '全身（正面）', half: 0 }, { k: 'back', t: '全身（背面）', half: 1 }] }
+      views: [{ k: 'close', t: 'ストラップ', vb: '150 40 230 300' }, { k: 'front', t: '全身（正面）', half: 0 }, { k: 'back', t: '全身（背面）', half: 1 }] },
+    'triad-ukulele': { root: '.triad-simulator', svg: '#triad-strap-wrap svg', zones: '#triad-zones', stage: ['#triad-zones', '#triad-palette-label', '.pal-box'],
+      views: [{ k: 'close', t: 'ストラップ', vb: '120 30 220 300' }, { k: 'front', t: '全身（正面）', vb: '19 0 319 458' }, { k: 'back', t: '全身（背面）', vb: '0 500 356 458' }] },
+    'backstage-bag': { root: '.backstage-simulator', svg: '.strap-wrap svg', palettes: true,
+      views: HALF2({ t: '商品', vb: '0 0 416 430' }, { t: '使用イメージ', vb: '10 500 400 410' }) },
+    'backstage-camera': { root: '.backstage-camera-simulator', svg: '.strap-wrap svg', palettes: true,
+      views: HALF2({ t: '商品', vb: '0 0 414 552' }, { t: '使用イメージ', vb: '95 568 275 430' }) },
+    'capo': { root: '.capo-simulator', svg: '.strap-wrap svg', palettes: true,
+      views: HALF2({ t: '商品', vb: '20 0 410 303' }, { t: '使用イメージ', vb: '0 415 451 565' }) },
+    'sus4-attachment': { root: '.sus4-simulator', svg: '.strap-wrap svg', palettes: true,
+      views: HALF2({ t: '商品', vb: '35 0 392 410' }, { t: '使用イメージ', vb: '0 496 463 501' }) },
+    'sus4-with-wellington': { root: '.sus4w-simulator', svg: '.strap-wrap svg', palettes: true,
+      views: HALF2({ t: '商品', vb: '10 0 334 548' }, { t: '使用イメージ', vb: '0 591 354 590' }) }
   };
   var handle = (location.pathname.match(/\/products\/([^\/?#]+)/) || [])[1];
   var cfg = CONFIG[handle];
@@ -42,12 +55,47 @@
     pcol.insertBefore(tabs, pcol.firstChild);
     var zones = cfg.zones && root.querySelector(cfg.zones); if (zones) zones.classList.add('sim-mui-zones');
     // ステージ: パーツチップ+カラーパレットもプレビューと一緒に固定(色を選ぶたびに変化が見える)。DOMを移動するだけでイベントは保持される
+    // パレットが複数ある商品(Backstage/Capo/Sus4): ボックスの見出しからチップを生成し、選んだパーツのパレットだけを表示する
+    var palMoves = [], palHomes = [], palHost = null;
+    if (cfg.palettes) {
+      var cl = root.querySelector('.ctrl-left'), pairs = [];
+      [].slice.call(cl.children).forEach(function (el, i, arr) {
+        if (el.classList.contains('pal-box') && arr[i - 1] && arr[i - 1].classList.contains('box-label')) pairs.push({ label: arr[i - 1], box: el });
+      });
+      if (pairs.length > 1) {
+        var chipRow = document.createElement('div'); chipRow.className = 'sim-mui-pchips';
+        var host = document.createElement('div'); host.className = 'sim-mui-palhost';
+        var short = function (t) { return t.replace(/の色を選択.*$/, '').replace(/を選択.*$/, '').replace(/（.*$/, '').trim() || t; };
+        var chips = pairs.map(function (p, i) {
+          var b = document.createElement('button'); b.type = 'button'; b.className = 'sim-mui-pchip' + (i === 0 ? ' on' : '');
+          b.innerHTML = '<i></i><span></span>'; b.lastChild.textContent = short(p.label.textContent);
+          p.label.classList.add('sim-mui-label-off');
+          b.addEventListener('click', function () {
+            chips.forEach(function (c, j) { c.classList.toggle('on', c === b); pairs[j].box.classList.toggle('sim-mui-pal-off', j !== i); });
+            track('sim_mui_part_' + (i + 1));
+          });
+          return b;
+        });
+        pairs.forEach(function (p, i) { chipRow.appendChild(chips[i]); if (i !== 0) p.box.classList.add('sim-mui-pal-off'); });
+        function dot(i) {
+          var sel = pairs[i].box.querySelector('.selected'); if (!sel) return;
+          var sw = sel.querySelector('.hw-chip-swatch') || sel; var c = getComputedStyle(sw).backgroundColor;
+          chips[i].firstChild.style.background = c;
+        }
+        pairs.forEach(function (p, i) { new MutationObserver(function () { dot(i); }).observe(p.box, { attributes: true, subtree: true, attributeFilter: ['class'] }); dot(i); });
+        pairs.forEach(function (p) { palMoves.push(p.box); });
+        pcol.appendChild(chipRow); pcol.appendChild(host);
+        palHomes = palMoves.map(function (bx) { var ph = document.createComment('sim-mui-pal-home'); bx.parentNode.insertBefore(ph, bx); return ph; });
+        palHost = host;
+      }
+    }
     var stageEls = (cfg.stage || []).map(function (s) { return root.querySelector(s); }).filter(Boolean);
     var homes = stageEls.map(function (el) { var ph = document.createComment('sim-mui-home'); el.parentNode.insertBefore(ph, el); return ph; });
     function moveStage(on) {
       stageEls.forEach(function (el, i) {
         if (on) pcol.appendChild(el); else homes[i].parentNode.insertBefore(el, homes[i].nextSibling);
       });
+      palMoves.forEach(function (bx, i) { if (on) palHost.appendChild(bx); else palHomes[i].parentNode.insertBefore(bx, palHomes[i].nextSibling); });
       if (zones) zones.scrollLeft = 0;
     }
 
