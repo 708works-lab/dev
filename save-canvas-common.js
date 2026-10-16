@@ -297,6 +297,20 @@ function sim708SetupOrderUI(cfg, _tries) {
   }
   wrap(cfg.proceed, () => sim708Track('cart_submit', product));
 
+  // 操作計測（2026-10-16追加）：シミュレーター内の最初のタップ=interact、8回目=interact_deep
+  // 「見たが触らなかった人」と「触ったが注文に進まなかった人」を切り分けるため
+  const simRoot = document.getElementById('color-simulator') || document.querySelector('[id$="__simulator"]') || orderBtn.parentElement;
+  if (simRoot && !simRoot.dataset.sim708Interact) {
+    simRoot.dataset.sim708Interact = '1';
+    let taps = 0;
+    simRoot.addEventListener('click', (ev) => {
+      if (ev.target.closest && ev.target.closest(cfg.orderBtnSelector)) return;
+      taps++;
+      if (taps === 1) sim708Track('interact', product);
+      else if (taps === 8) sim708Track('interact_deep', product);
+    }, true);
+  }
+
   // 4) 画面内の他のカートボタン（フローティングバー等）の旧文言も差し替える
   document.querySelectorAll('button').forEach((b) => {
     if (b.textContent.indexOf('画像を保存してカートに入れる') !== -1) b.textContent = 'カートに入れる →';
