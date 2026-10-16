@@ -47,4 +47,6 @@
   .sim-mui-bar .p b { font-size: 17px; color: #1a1a1a; letter-spacing: .01em; }
   .sim-mui-bar button { flex: 1 1 auto; height: 46px; border: 0; border-radius: 999px; background: #c9a14a; color: #1a1a1a; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
 }
+/* 新バーが出ている間は既存の追従バーを隠す(二重表示防止) */
+body.sim-mui-bar-on .sim-sticky { display: none !important; }
 @media (min-width: 481px) { .sim-mui-tabs, .sim-mui-bar { display: none !important; } }

@@ -64,11 +64,20 @@
     readPrice();
     bar.querySelector('button').addEventListener('click', function () { track('sim_mui_bar_click'); orderBtn.click(); });
 
-    // 固定バーの表示: シミュレーターが画面内にあり、本体のカートボタンが見えていない間
-    var simVisible = false, btnVisible = false;
-    function upd() { bar.classList.toggle('is-on', mq.matches && simVisible && !btnVisible); }
-    new IntersectionObserver(function (es) { simVisible = es[0].isIntersecting; upd(); }, { threshold: 0.05 }).observe(root);
-    new IntersectionObserver(function (es) { btnVisible = es[0].isIntersecting; upd(); }, { threshold: 0.6 }).observe(orderBtn);
+    // 固定バーの表示: 既存の「色を選んで注文する↓」バー(シミュレーター上端が画面の75%より下にある間だけ表示)と
+    // 完全に排他にする。シミュレーター上端が75%より上に来たら新バーに切り替え、本体のカートボタンが見えている間は出さない
+    var host = document.getElementById('color-simulator') || root;
+    var btnVisible = false, tick = false;
+    function upd() {
+      tick = false;
+      var r = host.getBoundingClientRect(), vh = window.innerHeight || document.documentElement.clientHeight;
+      var on = mq.matches && r.top <= vh * 0.75 && r.bottom > 0 && !btnVisible;
+      bar.classList.toggle('is-on', on);
+      document.body.classList.toggle('sim-mui-bar-on', on);
+    }
+    function req() { if (!tick) { tick = true; requestAnimationFrame(upd); } }
+    window.addEventListener('scroll', req, { passive: true }); window.addEventListener('resize', req);
+    new IntersectionObserver(function (es) { btnVisible = es[0].isIntersecting; req(); }, { threshold: 0.6 }).observe(orderBtn);
 
     // 名入れ刻印ON中は固定を解除(CSS側: .sim-kokuin)
     var kk = root.querySelector(cfg.kokuin || '.kokuin-toggle input[type=checkbox]');
