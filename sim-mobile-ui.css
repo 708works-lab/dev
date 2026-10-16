@@ -1,18 +1,16 @@
 /* 708works カラーシミュレーター スマホ新UI(2026-10-16)
    JSが root に .sim-mui を付けたときだけ有効(JS失敗時は従来表示のまま)。≤480px のみ。
-   構成: 上=プレビュー固定(ストラップ拡大/全身正面/全身背面のタブ) → パーツチップ(横スクロール) → カラー → 長さ・名入れ → 価格・カート。下=価格+カートの固定バー */
+   構成: 上=プレビュー(ストラップ拡大/全身正面/全身背面のタブ。固定はしない) → パーツチップ(横スクロール) → カラー → 長さ・名入れ → 価格・カート。下=価格+カートの固定バー */
 @media (max-width: 480px) {
   .sim-mui .app { display: flex !important; flex-direction: column-reverse !important; padding: 0 !important; gap: 0 !important; }
   .sim-mui .app > .preview-col {
-    position: sticky !important; top: 0 !important; z-index: 20; flex: none !important;
+    position: static !important; flex: none !important;
     width: 100% !important; max-width: none !important; margin: 0 !important;
-    background: #f0ede8; padding: 6px 0 8px; box-shadow: 0 8px 12px -10px rgba(0,0,0,.35);
+    background: #f0ede8; padding: 6px 0 8px;
   }
   .sim-mui .dir-tag-v { display: none !important; }
   .sim-mui .strap-wrap { height: min(34svh, 320px) !important; width: 100% !important; transition: height .2s ease; }
   .sim-mui .strap-wrap svg { width: 100% !important; height: 100% !important; }
-  .sim-mui.sim-kb .strap-wrap { height: 20svh !important; }
-  .sim-mui.sim-kb .preview-col .sim-mui-zones, .sim-mui.sim-kb .preview-col .pal-box, .sim-mui.sim-kb .preview-col .box-label { display: none !important; }
   .sim-mui .preview-col .box-label { margin: 6px 12px 3px !important; font-size: 11px !important; }
   .sim-mui .preview-col .sim-mui-zones { margin: 0 12px; align-self: stretch !important; width: auto !important; min-width: 0; max-width: calc(100% - 24px); box-sizing: border-box; }
   .sim-mui .preview-col .pal-box { margin: 0 12px !important; align-self: stretch !important; width: auto !important; max-width: calc(100% - 24px); box-sizing: border-box; padding: 6px 4px !important; }
@@ -32,10 +30,6 @@
   .sim-mui-tabs { display: flex; justify-content: center; gap: 6px; padding: 0 12px 6px; align-self: stretch; width: 100%; box-sizing: border-box; }
   .sim-mui-tabs button { flex: 1 1 0; min-width: 0; max-width: 140px; white-space: nowrap; border: 1.5px solid #d9d3c8; background: #fff; color: #555; border-radius: 999px; padding: 7px 2px; font-family: inherit; font-size: 11.5px; letter-spacing: 0; font-weight: 600; cursor: pointer; }
   .sim-mui-tabs button[aria-pressed="true"] { background: #222; border-color: #222; color: #fff; }
-
-  /* 名入れ刻印ON中: 固定を解除(名入れ側の専用プレビューを見ながら入力できるように)。プレビューは通常フローでスクロールして流れる */
-  .sim-mui.sim-kokuin .app > .preview-col { position: static !important; box-shadow: none; }
-  .sim-mui.sim-kokuin .strap-wrap { height: min(30svh, 260px) !important; }
 
   /* 画面下の固定バー(価格+カートに入れる) */
   .sim-mui-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; display: flex; align-items: center; gap: 10px;

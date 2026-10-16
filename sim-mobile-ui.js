@@ -1,5 +1,5 @@
 /* 708works カラーシミュレーター スマホ新UI(2026-10-16)  ※既存シミュレーターのロジックは触らず、表示の再配置だけ行う
-   - プレビューを上部固定+タブ切替(ストラップ拡大/全身正面/全身背面)
+   - プレビュー+タブ切替(固定表示はしない)(ストラップ拡大/全身正面/全身背面)
    - パーツ選択を横スクロールのチップに
    - 画面下に価格+「カートに入れる」の固定バー(既存の注文ボタンのclickを呼ぶだけ)
    設定は商品ごと(CONFIG)。対象外の商品・PC幅では何もしない。 */
@@ -78,14 +78,6 @@
     function req() { if (!tick) { tick = true; requestAnimationFrame(upd); } }
     window.addEventListener('scroll', req, { passive: true }); window.addEventListener('resize', req);
     new IntersectionObserver(function (es) { btnVisible = es[0].isIntersecting; req(); }, { threshold: 0.6 }).observe(orderBtn);
-
-    // 名入れ刻印ON中は固定を解除(CSS側: .sim-kokuin)
-    var kk = root.querySelector(cfg.kokuin || '.kokuin-toggle input[type=checkbox]');
-    function syncKokuin() { root.classList.toggle('sim-kokuin', !!(kk && kk.checked)); }
-    if (kk) { kk.addEventListener('change', syncKokuin); syncKokuin(); }
-    // 入力中(キーボード表示)はプレビューを縮める
-    root.addEventListener('focusin', function (e) { if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) && e.target.type !== 'checkbox') root.classList.add('sim-kb'); });
-    root.addEventListener('focusout', function () { root.classList.remove('sim-kb'); });
 
     function apply() {
       moveStage(mq.matches);
