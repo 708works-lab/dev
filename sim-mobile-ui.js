@@ -36,6 +36,19 @@
     'keyholder01': { root: '.keyholder-simulator' },
     'nametag-ag': { root: '.nametag-simulator', cls: 'sim-mui5' }
   };
+  // --- 多言語(ja / zh-TW / en)。新UIで足した文言のみ。キーは日本語(設定・ページ上の表記)。未登録なら日本語のまま ---
+  var LANG = (function () { var l = (document.documentElement.lang || 'ja').toLowerCase(); return /^zh/.test(l) ? 'zh' : (/^ja/.test(l) ? 'ja' : 'en'); })();
+  var I18N = {
+    zh: { 'ストラップ': '背帶特寫', '全身（正面）': '全身（正面）', '全身（背面）': '全身（背面）', '商品': '商品', '使用イメージ': '使用示意',
+      'ギターに装着': '裝在吉他上', 'ウクレレに装着': '裝在烏克麗麗上', 'カバー（裏面）': '音孔蓋（背面）',
+      '革': '皮革', '金具': '五金', '本体': '本體', 'バッグ接続部分': '包包連接部分', 'バネホック': '彈簧釦',
+      '価格（税込）': '價格（含稅）', 'カートに入れる →': '加入購物車 →', '▲ スクロール': '▲ 向上捲動', '▼ スクロール': '▼ 向下捲動', 'プレビュー切替': '切換預覽' },
+    en: { 'ストラップ': 'Strap close-up', '全身（正面）': 'Full body (front)', '全身（背面）': 'Full body (back)', '商品': 'Product', '使用イメージ': 'In use',
+      'ギターに装着': 'On guitar', 'ウクレレに装着': 'On ukulele', 'カバー（裏面）': 'Cover (back)',
+      '革': 'Leather', '金具': 'Hardware', '本体': 'Body', 'バッグ接続部分': 'Bag connector', 'バネホック': 'Snap button',
+      '価格（税込）': 'Price (tax incl.)', 'カートに入れる →': 'Add to cart →', '▲ スクロール': 'Scroll ▲', '▼ スクロール': 'Scroll ▼', 'プレビュー切替': 'Switch preview' }
+  };
+  function tr(s) { return (I18N[LANG] && I18N[LANG][s]) || s; }
   var handle = (location.pathname.match(/\/products\/([^\/?#]+)/) || [])[1];
   var cfg = CONFIG[handle];
   if (!cfg) return;
@@ -58,9 +71,9 @@
       var h = full[3] / 2; return full[0] + ' ' + (full[1] + v.half * h) + ' ' + full[2] + ' ' + h;
     }
     // タブ
-    var tabs = document.createElement('div'); tabs.className = 'sim-mui-tabs'; tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', 'プレビュー切替');
+    var tabs = document.createElement('div'); tabs.className = 'sim-mui-tabs'; tabs.setAttribute('role', 'group'); tabs.setAttribute('aria-label', tr('プレビュー切替'));
     var btns = cfg.views.map(function (v, i) {
-      var b = document.createElement('button'); b.type = 'button'; b.textContent = v.t; b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = tr(v.t); b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
       b.addEventListener('click', function () {
         btns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
         if (mq.matches) svg.setAttribute('viewBox', vbOf(v));
@@ -84,7 +97,7 @@
         var short = function (t) { return t.replace(/の色を選択.*$/, '').replace(/を選択.*$/, '').replace(/（.*$/, '').trim() || t; };
         var chips = pairs.map(function (p, i) {
           var b = document.createElement('button'); b.type = 'button'; b.className = 'sim-mui-pchip' + (i === 0 ? ' on' : '');
-          b.innerHTML = '<i></i><span></span>'; b.lastChild.textContent = short(p.label.textContent);
+          b.innerHTML = '<i></i><span></span>'; b.lastChild.textContent = tr(short(p.label.textContent));
           p.label.classList.add('sim-mui-label-off');
           b.addEventListener('click', function () {
             chips.forEach(function (c, j) { c.classList.toggle('on', c === b); pairs[j].box.classList.toggle('sim-mui-pal-off', j !== i); });
@@ -117,7 +130,8 @@
 
     // 固定バー
     var bar = document.createElement('div'); bar.className = 'sim-mui-bar';
-    bar.innerHTML = '<div class="p"><small>価格（税込）</small><b>—</b></div><button type="button">カートに入れる →</button>';
+    bar.innerHTML = '<div class="p"><small></small><b>—</b></div><button type="button"></button>';
+    bar.querySelector('small').textContent = tr('価格（税込）'); bar.querySelector('button').textContent = tr('カートに入れる →');
     document.body.appendChild(bar);
     var priceEl = bar.querySelector('b');
     function readPrice() {
@@ -152,8 +166,8 @@
       var sc = root.querySelector(cfg.hint); if (!sc) return;
       if (hintEl && hintScroller === sc) return;
       hintScroller = sc;
-      hintTop = document.createElement('div'); hintTop.className = 'sim-mui-hint sim-mui-hint-top'; hintTop.innerHTML = '<span>▲ スクロール</span>';
-      hintEl = document.createElement('div'); hintEl.className = 'sim-mui-hint'; hintEl.innerHTML = '<span>▼ スクロール</span>';
+      hintTop = document.createElement('div'); hintTop.className = 'sim-mui-hint sim-mui-hint-top'; hintTop.innerHTML = '<span></span>'; hintTop.firstChild.textContent = tr('▲ スクロール');
+      hintEl = document.createElement('div'); hintEl.className = 'sim-mui-hint'; hintEl.innerHTML = '<span></span>'; hintEl.firstChild.textContent = tr('▼ スクロール');
       sc.parentNode.insertBefore(hintTop, sc); sc.parentNode.insertBefore(hintEl, sc.nextSibling);
       function sync() {
         var max = sc.scrollHeight - sc.clientHeight;
