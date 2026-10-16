@@ -132,6 +132,7 @@ function initKolmioSimulator() {
   buildKolmioStrapSVG();
   updateKolmioPriceDisplay();
   updateKolmioCountDisplay();
+  setKolmioMode('all');   // 初期は「一括」(2026-10-16)
 }
 
 if (document.readyState === 'loading') {
@@ -181,6 +182,7 @@ function kolmioUndo() {
   updateKolmioPriceDisplay();
   const selInfo = document.getElementById('kolmio-sel-info');
   if (selInfo) selInfo.textContent = 'パーツをタップ';
+  kolmioReselectIfAll();
   buildKolmioStrapSVG();
   updateKolmioSummary();
   const btn = document.getElementById('kolmio-btn-undo');
@@ -212,6 +214,7 @@ function kolmioChangeCount(d) {
   kSelected.clear();
   const selInfo = document.getElementById('kolmio-sel-info');
   if (selInfo) selInfo.textContent = 'パーツをタップ';
+  kolmioReselectIfAll();
   updateKolmioCountDisplay();
   updateKolmioPriceDisplay();
   buildKolmioStrapSVG();
@@ -340,6 +343,16 @@ function kolmioHandleTap(displayIdx) {
   kolmioRedrawSVG();
 }
 
+
+// 「一括」モード中は、枚数変更・元に戻す・リセット後も全選択を維持する(2026-10-16)
+function kolmioReselectIfAll() {
+  if (kMode !== 'all') return;
+  kSelected.clear();
+  kolmioDisplayOrder(kN).forEach(p => kSelected.add(p));
+  const el = document.getElementById('kolmio-sel-info');
+  if (el) el.innerHTML = `全 <b>${kN}枚</b>`;
+}
+
 function kolmioUpdateSelInfo() {
   const el = document.getElementById('kolmio-sel-info');
   if (!el) return;
@@ -458,6 +471,7 @@ function kolmioResetAll() {
   kSelected.clear();
   const selInfo = document.getElementById('kolmio-sel-info');
   if (selInfo) selInfo.textContent = 'パーツをタップ';
+  kolmioReselectIfAll();
   kolmioRedrawSVG();
   updateKolmioSummary();
 }

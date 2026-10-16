@@ -150,7 +150,7 @@ function wlMakeDefaultState(branchKey) {
   const colors = {};
   // 0=rear,1=front,2..maxクローンまでを常時保持（Kolmio同様、鱗数を変えても色データの移動が不要）
   for (let p = 0; p <= b.max; p++) colors[p] = '#c46030';
-  return { n: b.standard, colors, selected: new Set(), mode: 'single', rangeStartIdx: null, history: [] };
+  return { n: b.standard, colors, selected: new Set(), mode: 'all', rangeStartIdx: null, history: [] };
 }
 
 let wlState = {
@@ -185,6 +185,7 @@ function initWellingtonSimulator() {
   buildWlStrapSVG();
   updateWlPriceDisplay();
   updateWlCountDisplay();
+  setWlMode('all');   // 初期は「一括」(2026-10-16)
 }
 
 if (document.readyState === 'loading') {
@@ -208,6 +209,7 @@ function setWlBranch(branchKey) {
   st.selected.clear();
   const selInfo = document.getElementById('wl-sel-info');
   if (selInfo) selInfo.textContent = 'パーツをタップ';
+  wlReselectIfAll();
   updateWlBranchUI();
   updateWlCountDisplay();
   updateWlPriceDisplay();
@@ -265,6 +267,7 @@ function wlUndo() {
   updateWlPriceDisplay();
   const selInfo = document.getElementById('wl-sel-info');
   if (selInfo) selInfo.textContent = 'パーツをタップ';
+  wlReselectIfAll();
   buildWlStrapSVG();
   updateWlSummary();
   const btn = document.getElementById('wl-btn-undo');
@@ -299,6 +302,7 @@ function wlChangeCount(d) {
   st.selected.clear();
   const selInfo = document.getElementById('wl-sel-info');
   if (selInfo) selInfo.textContent = 'パーツをタップ';
+  wlReselectIfAll();
   updateWlCountDisplay();
   updateWlPriceDisplay();
   buildWlStrapSVG();
@@ -509,6 +513,17 @@ function wlUpdateSelInfo() {
 // モード切替
 // ============================================================================
 
+
+// 「一括」モード中は、枚数変更・元に戻す・リセット・ブランチ切替後も全選択を維持する(2026-10-16)
+function wlReselectIfAll() {
+  const st = wlCurState();
+  if (st.mode !== 'all') return;
+  st.selected.clear();
+  wlDisplayOrder(wlActiveBranch, st.n).forEach(p => st.selected.add(p));
+  const el = document.getElementById('wl-sel-info');
+  if (el) el.innerHTML = `全 <b>${st.n}枚</b>`;
+}
+
 function setWlMode(m) {
   const st = wlCurState();
   st.mode = m; st.rangeStartIdx = null;
@@ -615,6 +630,7 @@ function wlResetAll() {
   st.selected.clear();
   const selInfo = document.getElementById('wl-sel-info');
   if (selInfo) selInfo.textContent = 'パーツをタップ';
+  wlReselectIfAll();
   wlRedrawSVG();
   updateWlSummary();
 }

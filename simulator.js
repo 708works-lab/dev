@@ -141,6 +141,7 @@ function initializeSimulator() {
   buildStrapRows();
   updatePriceDisplay();
   updateCountDisplay();
+  setMode('all');   // 初期は「一括」(全体を同じ色にする使い方が多いため。2026-10-16)
   // カートボタンは常に有効（モーダルで制御）
   
   console.log('FOLKLORE: Initialization complete');
@@ -193,6 +194,7 @@ function undo(){
   updatePriceDisplay();
   const selInfo = document.getElementById('sel-info');
   if (selInfo) selInfo.textContent='パーツをタップ';
+  reselectIfAll();
   buildStrapRows(); updateSummary();
   const btn = document.getElementById('btn-undo');
   if(!history.length && btn) btn.disabled=true;
@@ -229,6 +231,7 @@ function changeCount(d){
   selected.clear();
   const selInfo=document.getElementById('sel-info');
   if(selInfo) selInfo.textContent='パーツをタップ';
+  reselectIfAll();
   updateCountDisplay();
   updatePriceDisplay();
   buildStrapRows();
@@ -575,6 +578,14 @@ function setMode(m){
   redrawAll();
 }
 
+
+// 「一括」モード中は、枚数変更・元に戻す・リセット後も全選択を維持する(2026-10-16)
+function reselectIfAll(){
+  if(mode!=='all') return;
+  selected.clear(); for(let i=0;i<N;i++) selected.add(i);
+  const el=document.getElementById('sel-info'); if(el) el.innerHTML=`全 <b>${N}枚</b>`;
+}
+
 function updateSelInfo(){
   const el=document.getElementById('sel-info');
   if (!el) return;
@@ -707,6 +718,7 @@ function resetAll(){
   partColors=Array(N).fill('#c46030'); selected.clear();
   const selInfo = document.getElementById('sel-info');
   if (selInfo) selInfo.textContent='パーツをタップ';
+  reselectIfAll();
   buildStrapRows(); updateSummary();
 }
 
