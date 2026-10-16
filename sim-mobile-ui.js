@@ -70,6 +70,10 @@
     new IntersectionObserver(function (es) { simVisible = es[0].isIntersecting; upd(); }, { threshold: 0.05 }).observe(root);
     new IntersectionObserver(function (es) { btnVisible = es[0].isIntersecting; upd(); }, { threshold: 0.6 }).observe(orderBtn);
 
+    // 名入れ刻印ON中は固定を解除(CSS側: .sim-kokuin)
+    var kk = root.querySelector(cfg.kokuin || '.kokuin-toggle input[type=checkbox]');
+    function syncKokuin() { root.classList.toggle('sim-kokuin', !!(kk && kk.checked)); }
+    if (kk) { kk.addEventListener('change', syncKokuin); syncKokuin(); }
     // 入力中(キーボード表示)はプレビューを縮める
     root.addEventListener('focusin', function (e) { if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) && e.target.type !== 'checkbox') root.classList.add('sim-kb'); });
     root.addEventListener('focusout', function () { root.classList.remove('sim-kb'); });
