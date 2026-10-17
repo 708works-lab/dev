@@ -141,6 +141,7 @@ function initializeSimulator() {
   
   // 各要素を初期化
   buildPalette();
+  fkUpdatePalLabel();
   buildGrads();
   updateSummary();
   fkInitViews();
@@ -651,6 +652,7 @@ function buildPalette(){
         b.style.cssText = `background: ${bgColor} !important; width: 32px; height: 32px; border-radius: 50%; display: block; flex-shrink: 0; border: 3px solid ${isActive?'#111':'transparent'};`;
       });
       document.querySelectorAll('.color-name').forEach(b=>b.classList.toggle('on',b.closest('.cb-wrap')?.dataset.id===c.id));
+      fkUpdatePalLabel();
       if(!selected.size)return;
       saveHistory();
       [...selected].forEach(i=>partColors[i]=c.hex);
@@ -1434,6 +1436,11 @@ const FK_ARCH_W = 430, FK_ARCH_K = 0.93;   // アーチの幅 / 曲がる部分�
 let fkView = 'prod', fkShape = null, fkWornState = 'idle'; // idle | loading | ready | error
 
 function fkEl(id){ return document.getElementById(id); }
+// パレットの見出しに、いま選んでいる色の名前を出す(スマホでは色名を丸の横に出さないため)
+function fkUpdatePalLabel(){
+  const lab = document.querySelector('.pal-box .box-label');
+  if (lab) lab.innerHTML = 'カラー<span class="fk-colname">' + activeColor.name + '</span>';
+}
 
 // 商品イメージ用: 元の縦長SVGからウロコの形(後端20・中間12・3番(ロゴ)・先端1)と中心を取り出す
 function fkEnsureShapes(){

@@ -28,3 +28,51 @@
 .folklore-simulator .fk-model { position: absolute; left: -10000px; top: 0; width: 80px; pointer-events: none; }
 .folklore-simulator .grad-row .gb-shuffle { flex: 1 1 100%; }
 .folklore-simulator .grad-row .grad-result { flex: 1 1 100%; font-size: 11px; color: #777; margin-top: 2px; }
+
+/* ===== スマホ(≤600px): 「プレビュー→色選択」を1画面に収める compact 配置 (2026-10-17) =====
+   並び: タブ → プレビュー → 一括/1枚ずつ → カラー(色名なしの小さな丸・2段) → 選択中 → 枚数 → おすすめ配色 → サマリー
+   Triadと同様にプレビューは固定しない(名入れ刻印を足したときに邪魔になるため) */
+@media (max-width: 600px) {
+  .folklore-simulator .top-area { padding: 8px 10px 0; gap: 6px; }
+  .folklore-simulator .fk-preview { gap: 6px; }
+  .folklore-simulator .fk-tabs button { padding: 6px 2px; font-size: 11.5px; }
+  .folklore-simulator .fk-stage { aspect-ratio: auto; height: min(34svh, 300px); }
+  .folklore-simulator .fk-tag { bottom: 6px; font-size: 9.5px; padding: 0 7px; }
+  .folklore-simulator .fk-cap { font-size: 11px; line-height: 1.5; min-height: 0; }
+  .folklore-simulator .fk-note { font-size: 10px; }
+
+  .folklore-simulator .ctrl-col { gap: 6px; }
+  .folklore-simulator .ctrl-col > .mode-row { order: 1; }
+  .folklore-simulator .ctrl-col > .pal-box { order: 2; }
+  .folklore-simulator .ctrl-col > .sel-box { order: 3; }
+  .folklore-simulator .ctrl-col > .count-row { order: 4; }
+  .folklore-simulator .ctrl-col > .grad-box { order: 5; }
+  .folklore-simulator .ctrl-col > .sum-box { order: 6; }
+
+  .folklore-simulator .mbt { padding: 7px 2px; font-size: 11px; }
+
+  /* パレット: 色名なしの丸を10列(20色=2段)。丸は30px、押しやすい余白を確保 */
+  .folklore-simulator .pal-box { padding: 6px 8px 8px; }
+  .folklore-simulator .pal-box .box-label { margin-bottom: 4px; }
+  .folklore-simulator .pal-box .box-label .fk-colname { color: #222; font-weight: 600; letter-spacing: 0; text-transform: none; margin-left: 4px; }
+  .folklore-simulator .palette { grid-template-columns: repeat(10, 1fr); gap: 4px 0; }
+  .folklore-simulator .cb-wrap { justify-content: center !important; gap: 0 !important; padding: 3px 0 !important; }
+  .folklore-simulator .cb { width: 30px !important; height: 30px !important; }
+  .folklore-simulator .color-name { display: none !important; }
+
+  /* 選択中: 1行の細い帯 */
+  .folklore-simulator .sel-box { padding: 4px 10px; display: flex; align-items: center; gap: 8px; }
+  .folklore-simulator .sel-box .box-label { display: none; }
+  .folklore-simulator .sel-info { font-size: 11.5px; }
+
+  /* 枚数: 小さく1行 */
+  .folklore-simulator .count-row { padding: 3px 8px; border-radius: 10px; }
+  .folklore-simulator .cnt-btn { width: 28px; height: 28px; font-size: 17px; }
+  .folklore-simulator .cnt-num { font-size: 13px; line-height: 1.2; }
+  .folklore-simulator .cnt-sub { font-size: 10px; margin-top: 0; line-height: 1.2; }
+
+  .folklore-simulator .grad-box { padding: 8px 10px; }
+  .folklore-simulator .grad-note { font-size: 9.5px; margin-bottom: 5px; }
+  .folklore-simulator .gb-shuffle { padding: 8px 11px; }
+  .folklore-simulator .sum-box { padding: 8px 10px; }
+}
