@@ -71,8 +71,11 @@
   .folklore-simulator .cnt-num { font-size: 13px; line-height: 1.2; }
   .folklore-simulator .cnt-sub { font-size: 10px; margin-top: 0; line-height: 1.2; }
 
-  .folklore-simulator .grad-box { padding: 8px 10px; }
-  .folklore-simulator .grad-note { font-size: 9.5px; margin-bottom: 5px; }
-  .folklore-simulator .gb-shuffle { padding: 8px 11px; }
+  /* おすすめ配色: 見出しと注意書きを外し、ボタン+一言の1行に(押すたびに別パターン・「戻る」で元に戻せる) */
+  .folklore-simulator .grad-box { padding: 6px 8px; }
+  .folklore-simulator .grad-box .box-label, .folklore-simulator .grad-note { display: none; }
+  .folklore-simulator .grad-row { flex-wrap: nowrap; align-items: center; gap: 10px; }
+  .folklore-simulator .grad-row .gb-shuffle { flex: 0 0 auto; padding: 8px 14px; }
+  .folklore-simulator .grad-row .grad-result { flex: 1 1 auto; margin: 0; font-size: 11px; min-width: 0; }
   .folklore-simulator .sum-box { padding: 8px 10px; }
 }

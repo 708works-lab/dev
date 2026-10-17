@@ -258,7 +258,7 @@ function isLightColor(hex) {
 
 function buildStrapRows(){
   buildStrapSVG();
-  fkDrawArch(); fkPaint();
+  fkDrawArch(); fkPaint(); fkCaption();
 }
 
 function buildStrapSVG(){
@@ -692,6 +692,7 @@ function buildGrads(){
   btn.textContent='おすすめ配色を試す';
   const msg=document.createElement('div');
   msg.className='grad-result';
+  msg.textContent='押すと全体の色が変わります';
   btn.onclick=()=>{
     if(!bag.length) bag=GENS.map((_,i)=>i).sort(()=>Math.random()-.5);
     const [name,make]=GENS[bag.pop()], f=make();
@@ -700,7 +701,7 @@ function buildGrads(){
     redrawAll();
     updateSummary();
     hasDownloadedImage = false;
-    msg.textContent=`今回の配色: ${name}（もう一度押すと別の配色になります）`;
+    msg.textContent=`今回: ${name}`;
   };
   row.appendChild(btn);
   row.appendChild(msg);
@@ -1221,6 +1222,8 @@ async function buildSaveCanvas() {
     topCaption: '▲ 後ろ（エンドピン側）',
     bottomCaption: '▼ 前（ボディ上部側）',
     prepareSvg: async (cloned) => {
+      // 画面上の選択中を示す黄色い縁取りは、保存画像には入れない
+      cloned.querySelectorAll('[stroke="#ffd700"]').forEach(e => { e.setAttribute('stroke', '#000'); e.setAttribute('stroke-width', '0.5'); });
       if (kokuinEnabled && kokuin?.fontFamily) {
         await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
       }
@@ -1500,7 +1503,7 @@ function fkDrawArch(){
     svg._p.push(pg);
   }
   // 表示範囲は位置から計算する(非表示中でも正しく求まるよう getBBox は使わない)
-  const top = minY - 56, h = Math.max(maxY + SH.rear.h / 2 + 24 - top, 300);
+  const top = minY - 56, h = Math.max(maxY + SH.rear.h / 2 + 24 + 46 - top, 300);   // +46: 下端の「後ろ/前」ラベル行の分
   svg.setAttribute('viewBox', `-240 ${top.toFixed(1)} 480 ${h.toFixed(1)}`);
 }
 

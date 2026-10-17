@@ -19,7 +19,7 @@
                                                     // シリアライズ前にcloneしたSVGへ行う処理
        topCaption: '▲ 後ろ（エンドピン側）',        // 任意。アートワーク直上に出す小さな見出し
        bottomCaption: '▼ 前（ボディ上部側）',       // 任意。アートワーク直下に出す小さな見出し
-       sideArtworks: [{                            // 任意(2026-10-17追加、folklore)。右カラムのメイン図(細い帯)の右隣に、縦に並べて描く追加の図
+       sideArtworks: [{                            // 任意(2026-10-17追加、folklore)。右カラムのメイン図(細い帯)を右端に寄せ、その左側(中央)に縦に並べて描く追加の図
          svgSelector: '#x svg', svgW: 480, svgH: 570,  // 描画するSVGと元の縦横比
          label: '着用イメージ（前）',                   // 図の上に出す小見出し
          prepareSvg: async (cloned) => {...},           // 任意。シリアライズ前にcloneへ行う処理
@@ -116,10 +116,11 @@ async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepa
   const artworkBottom = SIZE - PAD - bottomCaptionH;
   const artworkBoxH = artworkBottom - artworkTop;
 
-  // sideArtworks があるときは、メイン図を左の細い帯に寄せ、残りの幅に追加の図を縦に並べる
+  // sideArtworks があるときは、メイン図を右端の細い帯に寄せ、残りの幅に追加の図を縦に並べる
   const hasSide = Array.isArray(sideArtworks) && sideArtworks.length > 0;
   const stripW = hasSide ? 150 : rightW;
-  const mainX = rightX, mainW = stripW;
+  // メイン図の細い帯は右端に置き、追加の図(着用イメージ等)は中央側に並べる
+  const mainX = hasSide ? rightX + rightW - stripW : rightX, mainW = stripW;
   const capFont = hasSide ? 'bold 12px sans-serif' : 'bold 13px sans-serif';
   if (topCaption) {
     ctx.fillStyle = '#444';
@@ -156,7 +157,7 @@ async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepa
   }
 
   if (hasSide) {
-    const sx = rightX + stripW + 14, sw = rightW - stripW - 14;
+    const sx = rightX, sw = rightW - stripW - 14;
     const labelH = 24, gap = 14, n = sideArtworks.length;
     const slotH = (artworkTop + artworkBoxH + (bottomCaption ? bottomCaptionH : 0) - artworkTop + topCaptionH - gap * (n - 1)) / n;
     const top0 = PAD;
