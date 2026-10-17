@@ -362,6 +362,35 @@ function fcSetColor(c){
 }
 
 // ============================================================================
+// おすすめ配色(2026-10-18): 本体(PVC)・前端・後端の3か所をランダムに提案する
+//  前後が同じ色になる割合を高め(約6割)にし、残りは前後で別の色(楽しい組み合わせ)。押すたびに前回と違う組み合わせにする
+// ============================================================================
+const FC_SHUFFLE_SAME_RATE = 0.6;
+function fcShuffle(){
+  const rnd=n=>Math.floor(Math.random()*n), pick=a=>a[rnd(a.length)];
+  const prev=[fcPvcColor.id,fcRearColor.id,fcFrontColor.id,fcLinked].join();
+  let pvc, rear, front, linked, key, guard=0;
+  do{
+    pvc=pick(FC_PVC_COLORS);
+    linked=Math.random()<FC_SHUFFLE_SAME_RATE;
+    rear=pick(FC_LEATHER_COLORS);
+    front=rear;
+    if(!linked){ do{ front=pick(FC_LEATHER_COLORS); }while(front.id===rear.id); }
+    key=[pvc.id,rear.id,front.id,linked].join();
+  }while(key===prev && ++guard<20);
+  fcSaveHistory();
+  fcPvcColor=pvc; fcRearColor=rear; fcFrontColor=front; fcLinked=linked;
+  // 前後共通/別色でゾーンの種類が変わるので、選択中のゾーンを有効なものに直す
+  if(fcActiveZone!=='pvc') fcActiveZone=fcLinked?'leather':'rear';
+  fcBuildZoneButtons();
+  fcBuildPalette();
+  fcUpdatePaletteLabel();
+  fcOnColorChange();
+  const msg=document.getElementById('fc-shuffle-msg');
+  if(msg) msg.textContent=`今回: ${linked?'前後は同じ色':'前後は別の色'}`;
+}
+
+// ============================================================================
 // サマリー
 // ============================================================================
 
