@@ -107,3 +107,19 @@
   .folklore-simulator .cb-wrap { padding: 4px !important; gap: 6px !important; }
   .folklore-simulator .color-name { font-size: 11px !important; }
 }
+
+/* ===== Folklore Clear ver. 用(ゾーン選択 + 7色/20色パレット)  2026-10-17 ===== */
+.folklore-simulator .fc-zones { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+.folklore-simulator .fc-zone-btn { width: auto; flex: 1 1 auto; justify-content: center; padding: 8px 10px; font-size: 11.5px; }
+.folklore-simulator .fc-split-toggle { flex: 1 1 100%; justify-content: center; margin-top: 0; }
+@media (max-width: 600px) {
+  .folklore-simulator .fc-zones { gap: 5px; }
+  .folklore-simulator .fc-zone-btn { padding: 7px 8px; font-size: 11px; }
+  .folklore-simulator .fc-split-toggle { padding: 5px 8px; }
+  /* パレット: 押しやすい30pxの丸(本体7色/本革20色) */
+  .folklore-simulator #fc-palette { gap: 8px 7px !important; justify-content: center; padding: 2px 0; }
+  .folklore-simulator .fc-swatch { width: 30px !important; height: 30px !important; }
+  .folklore-simulator .fc-summary-row { padding: 1px 0; }
+}
+/* Clear版: Clear Whiteの本体が白い背景に溶けないよう、プレビューの背景を少しグレーに */
+.folklore-simulator .fk-stage.fk-stage-clear { background: #ecebe6; }
