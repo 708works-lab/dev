@@ -29,6 +29,23 @@
 .folklore-simulator .grad-row .gb-shuffle { flex: 1 1 100%; }
 .folklore-simulator .grad-row .grad-result { flex: 1 1 100%; font-size: 11px; color: #777; margin-top: 2px; }
 
+
+/* 操作の並び(全幅共通): 一括/1枚ずつ → カラー → 選択中 → 枚数 → おすすめ配色 → サマリー */
+.folklore-simulator .ctrl-col > .mode-row { order: 1; }
+.folklore-simulator .ctrl-col > .pal-box { order: 2; }
+.folklore-simulator .ctrl-col > .sel-box { order: 3; }
+.folklore-simulator .ctrl-col > .count-row { order: 4; }
+.folklore-simulator .ctrl-col > .grad-box { order: 5; }
+.folklore-simulator .ctrl-col > .sum-box { order: 6; }
+
+
+/* おすすめ配色: 見出しと注意書きを外し、ボタン+一言の1行に(押すたびに別パターン・「戻る」で元に戻せる) */
+.folklore-simulator .grad-box { padding: 6px 8px; }
+.folklore-simulator .grad-box .box-label, .folklore-simulator .grad-note { display: none; }
+.folklore-simulator .grad-row { flex-wrap: nowrap; align-items: center; gap: 10px; }
+.folklore-simulator .grad-row .gb-shuffle { flex: 0 0 auto; padding: 8px 14px; }
+.folklore-simulator .grad-row .grad-result { flex: 1 1 auto; margin: 0; font-size: 11px; min-width: 0; }
+
 /* ===== スマホ(≤600px): 「プレビュー→色選択」を1画面に収める compact 配置 (2026-10-17) =====
    並び: タブ → プレビュー → 一括/1枚ずつ → カラー(色名なしの小さな丸・2段) → 選択中 → 枚数 → おすすめ配色 → サマリー
    Triadと同様にプレビューは固定しない(名入れ刻印を足したときに邪魔になるため) */
@@ -42,12 +59,6 @@
   .folklore-simulator .fk-note { font-size: 10px; }
 
   .folklore-simulator .ctrl-col { gap: 6px; }
-  .folklore-simulator .ctrl-col > .mode-row { order: 1; }
-  .folklore-simulator .ctrl-col > .pal-box { order: 2; }
-  .folklore-simulator .ctrl-col > .sel-box { order: 3; }
-  .folklore-simulator .ctrl-col > .count-row { order: 4; }
-  .folklore-simulator .ctrl-col > .grad-box { order: 5; }
-  .folklore-simulator .ctrl-col > .sum-box { order: 6; }
 
   .folklore-simulator .mbt { padding: 7px 2px; font-size: 11px; }
 
@@ -71,11 +82,28 @@
   .folklore-simulator .cnt-num { font-size: 13px; line-height: 1.2; }
   .folklore-simulator .cnt-sub { font-size: 10px; margin-top: 0; line-height: 1.2; }
 
-  /* おすすめ配色: 見出しと注意書きを外し、ボタン+一言の1行に(押すたびに別パターン・「戻る」で元に戻せる) */
-  .folklore-simulator .grad-box { padding: 6px 8px; }
-  .folklore-simulator .grad-box .box-label, .folklore-simulator .grad-note { display: none; }
-  .folklore-simulator .grad-row { flex-wrap: nowrap; align-items: center; gap: 10px; }
-  .folklore-simulator .grad-row .gb-shuffle { flex: 0 0 auto; padding: 8px 14px; }
-  .folklore-simulator .grad-row .grad-result { flex: 1 1 auto; margin: 0; font-size: 11px; min-width: 0; }
   .folklore-simulator .sum-box { padding: 8px 10px; }
+}
+
+/* ===== PC(≥900px): 2カラム。左=プレビュー(スクロールしても見える位置に固定)、右=操作〜価格〜カート  (2026-10-17) =====
+   スマホと違い、PCでは名入れ刻印の入力欄も右カラムに収まるため、プレビューを固定しても邪魔にならない */
+@media (min-width: 900px) {
+  .folklore-simulator .app {
+    max-width: 1040px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+    column-gap: 28px; align-items: start;
+  }
+  .folklore-simulator .top-area { display: contents; }
+  .folklore-simulator .fk-preview { grid-column: 1; grid-row: 1 / span 8; position: sticky; top: 16px; margin: 10px 0 0 10px; }
+  .folklore-simulator .top-area > .ctrl-col { grid-column: 2; margin: 10px 10px 0 0; }
+  .folklore-simulator .app > :not(.top-area) { grid-column: 2; margin-left: 0 !important; margin-right: 10px !important; width: auto !important; max-width: none !important; }
+  .folklore-simulator .kokuin-toggle-area, .folklore-simulator .kokuin-section { padding-left: 0; padding-right: 0; }
+  .folklore-simulator .fk-stage { aspect-ratio: auto; max-height: none; height: min(calc(100svh - 190px), 640px); min-height: 420px; }
+  .folklore-simulator .fk-cap { min-height: 3.4em; }
+}
+
+@media (min-width: 900px) {
+  /* PCのパレット: 4列(色名つき)で縦に長くならないように */
+  .folklore-simulator .palette { grid-template-columns: repeat(4, 1fr); gap: 2px; }
+  .folklore-simulator .cb-wrap { padding: 4px !important; gap: 6px !important; }
+  .folklore-simulator .color-name { font-size: 11px !important; }
 }
