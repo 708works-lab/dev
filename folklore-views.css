@@ -1,0 +1,30 @@
+/* FOLKLORE(本革版) プレビューのタブ切替(商品イメージ=逆U字 / 着用 前 / 着用 後ろ)  2026-10-17 */
+.folklore-simulator .top-area { flex-direction: column; gap: 10px; }
+.folklore-simulator .fk-preview { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.folklore-simulator .fk-tabs { display: flex; gap: 6px; }
+.folklore-simulator .fk-tabs button {
+  flex: 1 1 0; min-width: 0; white-space: nowrap; border: 1.5px solid #d9d3c8; background: #fff; color: #555;
+  border-radius: 999px; padding: 8px 2px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.folklore-simulator .fk-tabs button[aria-pressed="true"] { background: #222; border-color: #222; color: #fff; }
+.folklore-simulator .fk-stage {
+  position: relative; background: #fff; border-radius: 12px; overflow: hidden;
+  width: 100%; aspect-ratio: 480 / 540; max-height: 72svh;
+}
+.folklore-simulator .fk-stage svg { display: block; width: 100%; height: 100%; touch-action: manipulation; }
+.folklore-simulator .fk-stage svg[hidden] { display: none; }
+.folklore-simulator .fk-stage .st0 { fill: #7c7c7c; }
+.folklore-simulator .fk-tag {
+  position: absolute; bottom: 8px; font-size: 10px; color: #666; background: #fff; border: 1px solid #ddd;
+  border-radius: 999px; padding: 1px 9px; pointer-events: none;
+}
+.folklore-simulator .fk-tag[hidden] { display: none; }
+.folklore-simulator .fk-tag-l { left: 8px; }
+.folklore-simulator .fk-tag-r { right: 8px; }
+.folklore-simulator .fk-cap { margin: 0; font-size: 12px; color: #666; line-height: 1.6; min-height: 3.2em; }
+.folklore-simulator .fk-cap b { color: #222; font-weight: 600; }
+.folklore-simulator .fk-note { font-size: 11px; color: #888; }
+/* 画像保存用の縦長SVG(画面外に置く。非表示にはしない) */
+.folklore-simulator .fk-model { position: absolute; left: -10000px; top: 0; width: 80px; pointer-events: none; }
+.folklore-simulator .grad-row .gb-shuffle { flex: 1 1 100%; }
+.folklore-simulator .grad-row .grad-result { flex: 1 1 100%; font-size: 11px; color: #777; margin-top: 2px; }

@@ -19,6 +19,11 @@
                                                     // シリアライズ前にcloneしたSVGへ行う処理
        topCaption: '▲ 後ろ（エンドピン側）',        // 任意。アートワーク直上に出す小さな見出し
        bottomCaption: '▼ 前（ボディ上部側）',       // 任意。アートワーク直下に出す小さな見出し
+       sideArtworks: [{                            // 任意(2026-10-17追加、folklore)。右カラムのメイン図(細い帯)の右隣に、縦に並べて描く追加の図
+         svgSelector: '#x svg', svgW: 480, svgH: 570,  // 描画するSVGと元の縦横比
+         label: '着用イメージ（前）',                   // 図の上に出す小見出し
+         prepareSvg: async (cloned) => {...},           // 任意。シリアライズ前にcloneへ行う処理
+       }],
        extra: {                                    // 任意。左カラムのチップ凡例の下に追加パネルを1枠確保する
          height: 130,                              // （courierの刻印クローズアッププレビュー等）
          draw: async (ctx, box) => {...},           // box = {x, y, width, height}
@@ -43,7 +48,7 @@ function _wrapTextByChar(ctx, text, maxWidth) {
   return lines;
 }
 
-async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepareSvg, topCaption, bottomCaption, extra, size = 1080, pad = 48 }) {
+async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepareSvg, topCaption, bottomCaption, extra, sideArtworks, size = 1080, pad = 48 }) {
   const SIZE = size, PAD = pad;
   const leftW = 380;
   const colGap = 36;
@@ -111,17 +116,22 @@ async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepa
   const artworkBottom = SIZE - PAD - bottomCaptionH;
   const artworkBoxH = artworkBottom - artworkTop;
 
+  // sideArtworks があるときは、メイン図を左の細い帯に寄せ、残りの幅に追加の図を縦に並べる
+  const hasSide = Array.isArray(sideArtworks) && sideArtworks.length > 0;
+  const stripW = hasSide ? 150 : rightW;
+  const mainX = rightX, mainW = stripW;
+  const capFont = hasSide ? 'bold 12px sans-serif' : 'bold 13px sans-serif';
   if (topCaption) {
     ctx.fillStyle = '#444';
-    ctx.font = 'bold 13px sans-serif';
+    ctx.font = capFont;
     ctx.textAlign = 'center';
-    ctx.fillText(topCaption, rightX + rightW / 2, artworkTop - 8);
+    ctx.fillText(topCaption, mainX + mainW / 2, artworkTop - 8);
   }
   if (bottomCaption) {
     ctx.fillStyle = '#444';
-    ctx.font = 'bold 13px sans-serif';
+    ctx.font = capFont;
     ctx.textAlign = 'center';
-    ctx.fillText(bottomCaption, rightX + rightW / 2, artworkBottom + 18);
+    ctx.fillText(bottomCaption, mainX + mainW / 2, artworkBottom + 18);
   }
 
   const svgEl = document.querySelector(svgSelector);
@@ -129,11 +139,11 @@ async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepa
     const cloned = svgEl.cloneNode(true);
     cloned.style.margin = '0';
     if (typeof prepareSvg === 'function') await prepareSvg(cloned);
-    const fitScale = Math.min(rightW / svgW, artworkBoxH / svgH);
+    const fitScale = Math.min(mainW / svgW, artworkBoxH / svgH);
     const drawW = svgW * fitScale, drawH = svgH * fitScale;
     cloned.setAttribute('width', drawW);
     cloned.setAttribute('height', drawH);
-    const drawX = rightX + (rightW - drawW) / 2;
+    const drawX = mainX + (mainW - drawW) / 2;
     const drawY = artworkTop + (artworkBoxH - drawH) / 2;
     const svgStr  = new XMLSerializer().serializeToString(cloned);
     const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
@@ -143,6 +153,39 @@ async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepa
       img.onerror = resolve;
       img.src = dataUri;
     });
+  }
+
+  if (hasSide) {
+    const sx = rightX + stripW + 14, sw = rightW - stripW - 14;
+    const labelH = 24, gap = 14, n = sideArtworks.length;
+    const slotH = (artworkTop + artworkBoxH + (bottomCaption ? bottomCaptionH : 0) - artworkTop + topCaptionH - gap * (n - 1)) / n;
+    const top0 = PAD;
+    for (let k = 0; k < n; k++) {
+      const a = sideArtworks[k];
+      const slotY = top0 + k * (slotH + gap);
+      ctx.fillStyle = '#444';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'left';
+      if (a.label) ctx.fillText(a.label, sx, slotY + 15);
+      const el = document.querySelector(a.svgSelector);
+      if (!el) continue;
+      const c2 = el.cloneNode(true);
+      c2.style.margin = '0';
+      if (typeof a.prepareSvg === 'function') await a.prepareSvg(c2);
+      const areaH = slotH - labelH;
+      const sc = Math.min(sw / a.svgW, areaH / a.svgH);
+      const w2 = a.svgW * sc, h2 = a.svgH * sc;
+      c2.setAttribute('width', w2);
+      c2.setAttribute('height', h2);
+      const uri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(new XMLSerializer().serializeToString(c2))));
+      const x2 = sx + (sw - w2) / 2, y2 = slotY + labelH + (areaH - h2) / 2;
+      await new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => { ctx.drawImage(img, x2, y2, w2, h2); resolve(); };
+        img.onerror = resolve;
+        img.src = uri;
+      });
+    }
   }
 
   // フッター（控えめな透かし、帯は敷かない）

@@ -189,7 +189,7 @@
     function apply() {
       moveStage(mq.matches);
       ensureHint(mq.matches);
-      if (light) { if (cfg.cls) root.classList.toggle(cfg.cls, mq.matches); upd(); return; }
+      if (light) { if (cfg.cls) root.classList.toggle(cfg.cls, mq.matches && !!root.querySelector('.strap-col')); upd(); return; }  // .strap-col が無い新レイアウト(folklore タブ版)では固定列にしない
       if (mq.matches) { root.classList.add('sim-mui'); var a = btns.findIndex(function (b) { return b.getAttribute('aria-pressed') === 'true'; }); svg.setAttribute('viewBox', vbOf(cfg.views[Math.max(a, 0)])); }
       else { root.classList.remove('sim-mui'); svg.setAttribute('viewBox', origVB); }
       upd();
