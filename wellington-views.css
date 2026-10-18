@@ -106,3 +106,21 @@
   .wellington-simulator .cb-wrap { padding: 4px !important; gap: 6px !important; }
   .wellington-simulator .color-name { font-size: 11px !important; }
 }
+
+/* ===== Wellington Clear ver. 用(ゾーン選択 + 7色/20色パレット)  2026-10-18 ===== */
+.wellington-simulator .wc-zones { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+.wellington-simulator .wc-zone-btn { width: auto; flex: 1 1 auto; justify-content: center; padding: 8px 10px; font-size: 11.5px; }
+.wellington-simulator .wc-split-toggle { flex: 1 1 100%; justify-content: center; margin-top: 0; }
+@media (max-width: 600px) {
+  .wellington-simulator .wc-zones { gap: 5px; }
+  .wellington-simulator .wc-zone-btn { padding: 7px 8px; font-size: 11px; }
+  .wellington-simulator .wc-split-toggle { padding: 5px 8px; }
+  /* パレット: 押しやすい30pxの丸(本体7色/本革20色) */
+  .wellington-simulator #wc-palette { gap: 8px 7px !important; justify-content: center; padding: 2px 0; }
+  .wellington-simulator .wc-swatch { width: 30px !important; height: 30px !important; }
+  .wellington-simulator .wc-summary-row { padding: 1px 0; }
+}
+/* Clear版: Clear Whiteの本体が白い背景に溶けないよう、プレビューの背景を少しグレーに */
+.wellington-simulator .fk-stage.fk-stage-clear { background: #ecebe6; }
+
+.wellington-simulator .fk-colname { margin-left: 6px; }
