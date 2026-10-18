@@ -694,7 +694,7 @@ async function buildKolmioSaveCanvas() {
   const wornOk = await Promise.race([fkLoadWorn(), new Promise(r => setTimeout(() => r(false), 4000))]);
   fkPaint();
   const sideArtworks = wornOk ? [
-    { svgSelector: '#fk-front', svgW: FK_VB_FRONT[2], svgH: FK_VB_FRONT[3], label: '着用イメージ（前）先端から1〜5番目', prepareSvg: fkPrepareWornForSave },
+    { svgSelector: '#fk-front', svgW: FK_VB_FRONT[2], svgH: FK_VB_FRONT[3], label: '着用イメージ（前）先端から1〜6番目', prepareSvg: fkPrepareWornForSave },
     { svgSelector: '#fk-back',  svgW: FK_VB_BACK[2],  svgH: FK_VB_BACK[3],  label: `着用イメージ（後ろ）末端から${Math.min(9, kN)}番目〜末端`, prepareSvg: fkPrepareWornForSave },
   ] : undefined;
 
@@ -866,7 +866,7 @@ async function kolmioProceedToCart() {
 // 表示ビュー: 商品イメージ(逆U字) / 着用イメージ(前) / 着用イメージ(後ろ)  (2026-10-18)
 //  - 色や選択は従来どおり kPieceColors / kSelected(ピース番号)を唯一の状態として持つ
 //  - 表示順 i(0=末端 … N-1=先端)は kolmioDisplayOrder() の添字。着用イメージは配色の位置の目安:
-//    前=先端から1〜5番目、後ろ=末端から9番目〜末端(標準の14個で見える範囲)
+//    前=先端から1〜6番目、後ろ=末端から9番目〜末端(標準の14個で見える範囲)
 // ============================================================================
 const FK_BASE = (document.currentScript && document.currentScript.src || '').replace(/[^\/]*$/, '');
 const FK_NS = 'http://www.w3.org/2000/svg';
@@ -951,14 +951,16 @@ function fkDrawArch() {
 }
 
 // 着用イメージ用SVG(別ファイルを初回に読み込む)
-function fkDecode(id) { return +id.replace(/_x(\d\d)_/g, (m, c) => String.fromCharCode(+('0x' + c))); }
+function fkDecode(id, inFront) {
+  if (inFront && id === '_x36_1') return 6;   // 前の6番は背面の6番とID重複を避けた名前
+  return +id.replace(/_x(\d\d)_/g, (m, c) => String.fromCharCode(+('0x' + c))); }
 function fkInitWorn(svgId) {
   const svg = fkEl(svgId), front = svgId === 'fk-front';
   svg.innerHTML = window.KOLMIO_WORN_INNER;
   svg._p = [];
   svg.querySelector(front ? '#back' : '#front').remove();   // 使わない側は取り除く(描画・保存を軽くする)
   svg.querySelectorAll(front ? '#strap1 > g' : '#strap > g').forEach(g => {
-    g.dataset.num = fkDecode(g.id);
+    g.dataset.num = fkDecode(g.id, front);
     g.style.cursor = 'pointer';
     g.addEventListener('click', () => { const i = fkWornIdx(g, front); if (i >= 0 && i < kN) kolmioHandleTap(i); });
     svg._p.push(g);
@@ -973,7 +975,7 @@ function fkLoadWorn() {
   fkWornState = 'loading'; fkCaption();
   fkWornPromise = new Promise(resolve => {
     const sc = document.createElement('script');
-    sc.src = FK_BASE + 'kolmio-worn-svg.js?v=1';
+    sc.src = FK_BASE + 'kolmio-worn-svg.js?v=2';
     sc.onload = () => { fkInitWorn('fk-front'); fkInitWorn('fk-back'); fkWornState = 'ready'; fkPaint(); fkCaption(); resolve(true); };
     sc.onerror = () => { fkWornState = 'error'; fkWornPromise = null; fkCaption(); resolve(false); };
     document.head.appendChild(sc);
@@ -1027,7 +1029,7 @@ function fkCaption() {
   if (fkView === 'prod') t = `${base}　全体の並びと正確な配色を確認できます。`;
   else if (fkWornState === 'loading') t = '読み込み中…';
   else if (fkWornState === 'error') t = '着用イメージを読み込めませんでした。ページを再読み込みしてください。';
-  else if (fkView === 'front') t = `${base}　先端から1〜5番目の色を表示しています。${note}`;
+  else if (fkView === 'front') t = `${base}　先端から1〜6番目の色を表示しています。${note}`;
   else t = `${base}　末端から${Math.min(9, n)}番目〜末端の色を表示しています。${note}`;
   el.innerHTML = t;
 }
