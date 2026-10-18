@@ -1,0 +1,110 @@
+/* KOLMIO(ウクレレ) プレビューのタブ切替(商品イメージ=逆U字 / 着用 前 / 着用 後ろ)  2026-10-18 */
+.kolmio-simulator .top-area { flex-direction: column; gap: 10px; }
+.kolmio-simulator .fk-preview { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.kolmio-simulator .fk-tabs { display: flex; gap: 6px; }
+.kolmio-simulator .fk-tabs button {
+  flex: 1 1 0; min-width: 0; white-space: nowrap; border: 1.5px solid #d9d3c8; background: #fff; color: #555;
+  border-radius: 999px; padding: 8px 2px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.kolmio-simulator .fk-tabs button[aria-pressed="true"] { background: #222; border-color: #222; color: #fff; }
+.kolmio-simulator .fk-stage {
+  position: relative; background: #fff; border-radius: 12px; overflow: hidden;
+  width: 100%; aspect-ratio: 480 / 540; max-height: 72svh;
+}
+.kolmio-simulator .fk-stage svg { display: block; width: 100%; height: 100%; touch-action: manipulation; }
+.kolmio-simulator .fk-stage svg[hidden] { display: none; }
+.kolmio-simulator .fk-tag {
+  position: absolute; bottom: 8px; font-size: 10px; color: #666; background: #fff; border: 1px solid #ddd;
+  border-radius: 999px; padding: 1px 9px; pointer-events: none;
+}
+.kolmio-simulator .fk-tag[hidden] { display: none; }
+.kolmio-simulator .fk-tag-l { left: 8px; }
+.kolmio-simulator .fk-tag-r { right: 8px; }
+.kolmio-simulator .fk-cap { margin: 0; font-size: 12px; color: #666; line-height: 1.6; min-height: 3.2em; }
+.kolmio-simulator .fk-cap b { color: #222; font-weight: 600; }
+.kolmio-simulator .fk-note { font-size: 11px; color: #888; }
+/* 画像保存用の縦長SVG(画面外に置く。非表示にはしない) */
+.kolmio-simulator .fk-model { position: absolute; left: -10000px; top: 0; width: 80px; pointer-events: none; }
+.kolmio-simulator .grad-row .gb-shuffle { flex: 1 1 100%; }
+.kolmio-simulator .grad-row .grad-result { flex: 1 1 100%; font-size: 11px; color: #777; margin-top: 2px; }
+
+
+/* 操作の並び(全幅共通): 一括/1枚ずつ → カラー → 選択中 → 枚数 → おすすめ配色 → サマリー */
+.kolmio-simulator .ctrl-col > .mode-row { order: 1; }
+.kolmio-simulator .ctrl-col > .pal-box { order: 2; }
+.kolmio-simulator .ctrl-col > .sel-box { order: 3; }
+.kolmio-simulator .ctrl-col > .count-row { order: 4; }
+.kolmio-simulator .ctrl-col > .grad-box { order: 5; }
+.kolmio-simulator .ctrl-col > .sum-box { order: 6; }
+
+
+/* おすすめ配色: 見出しと注意書きを外し、ボタン+一言の1行に(押すたびに別パターン・「戻る」で元に戻せる) */
+.kolmio-simulator .grad-box { padding: 6px 8px; }
+.kolmio-simulator .grad-box .box-label, .kolmio-simulator .grad-note { display: none; }
+.kolmio-simulator .grad-row { flex-wrap: nowrap; align-items: center; gap: 10px; }
+.kolmio-simulator .grad-row .gb-shuffle { flex: 0 0 auto; padding: 8px 14px; }
+.kolmio-simulator .grad-row .grad-result { flex: 1 1 auto; margin: 0; font-size: 11px; min-width: 0; }
+
+/* ===== スマホ(≤600px): 「プレビュー→色選択」を1画面に収める compact 配置 (2026-10-17) =====
+   並び: タブ → プレビュー → 一括/1枚ずつ → カラー(色名なしの小さな丸・2段) → 選択中 → 枚数 → おすすめ配色 → サマリー
+   Triadと同様にプレビューは固定しない(名入れ刻印を足したときに邪魔になるため) */
+@media (max-width: 600px) {
+  .kolmio-simulator .top-area { padding: 8px 10px 0; gap: 6px; }
+  .kolmio-simulator .fk-preview { gap: 6px; }
+  .kolmio-simulator .fk-tabs button { padding: 6px 2px; font-size: 11.5px; }
+  .kolmio-simulator .fk-stage { aspect-ratio: auto; height: min(34svh, 300px); }
+  .kolmio-simulator .fk-tag { bottom: 6px; font-size: 9.5px; padding: 0 7px; }
+  .kolmio-simulator .fk-cap { font-size: 11px; line-height: 1.5; min-height: 0; }
+  .kolmio-simulator .fk-note { font-size: 10px; }
+
+  .kolmio-simulator .ctrl-col { gap: 6px; }
+
+  .kolmio-simulator .mbt { padding: 7px 2px; font-size: 11px; }
+
+  /* パレット: 色名なしの丸を10列(20色=2段)。丸は30px、押しやすい余白を確保 */
+  .kolmio-simulator .pal-box { padding: 6px 8px 8px; }
+  .kolmio-simulator .pal-box .box-label { margin-bottom: 4px; }
+  .kolmio-simulator .pal-box .box-label .fk-colname { color: #222; font-weight: 600; letter-spacing: 0; text-transform: none; margin-left: 4px; }
+  .kolmio-simulator .palette { grid-template-columns: repeat(10, 1fr); gap: 4px 0; }
+  .kolmio-simulator .cb-wrap { justify-content: center !important; gap: 0 !important; padding: 3px 0 !important; }
+  .kolmio-simulator .cb { width: 30px !important; height: 30px !important; }
+  .kolmio-simulator .color-name { display: none !important; }
+
+  /* 選択中: 1行の細い帯 */
+  .kolmio-simulator .sel-box { padding: 4px 10px; display: flex; align-items: center; gap: 8px; }
+  .kolmio-simulator .sel-box .box-label { display: none; }
+  .kolmio-simulator .sel-info { font-size: 11.5px; }
+
+  /* 枚数: 小さく1行 */
+  .kolmio-simulator .count-row { padding: 3px 8px; border-radius: 10px; }
+  .kolmio-simulator .cnt-btn { width: 28px; height: 28px; font-size: 17px; }
+  .kolmio-simulator .cnt-num { font-size: 13px; line-height: 1.2; }
+  .kolmio-simulator .cnt-sub { font-size: 10px; margin-top: 0; line-height: 1.2; }
+
+  .kolmio-simulator .sum-box { padding: 8px 10px; }
+}
+
+/* ===== PC(≥900px): 2カラム。左=プレビュー(スクロールしても見える位置に固定)、右=操作〜価格〜カート  (2026-10-17) =====
+   スマホと違い、PCでは名入れ刻印の入力欄も右カラムに収まるため、プレビューを固定しても邪魔にならない */
+@media (min-width: 900px) {
+  .kolmio-simulator .app {
+    max-width: 1040px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+    column-gap: 28px; align-items: start;
+  }
+  .kolmio-simulator .top-area { display: contents; }
+  .kolmio-simulator .fk-preview { grid-column: 1; grid-row: 1 / span 8; position: sticky; top: 16px; margin: 10px 0 0 10px; }
+  .kolmio-simulator .top-area > .ctrl-col { grid-column: 2; margin: 10px 10px 0 0; }
+  .kolmio-simulator .app > :not(.top-area) { grid-column: 2; margin-left: 0 !important; margin-right: 10px !important; width: auto !important; max-width: none !important; }
+  .kolmio-simulator .kokuin-toggle-area, .kolmio-simulator .kokuin-section { padding-left: 0; padding-right: 0; }
+  .kolmio-simulator .fk-stage { aspect-ratio: auto; max-height: none; height: min(calc(100svh - 190px), 640px); min-height: 420px; }
+  .kolmio-simulator .fk-cap { min-height: 3.4em; }
+}
+
+@media (min-width: 900px) {
+  /* PCのパレット: 4列(色名つき)で縦に長くならないように */
+  .kolmio-simulator .palette { grid-template-columns: repeat(4, 1fr); gap: 2px; }
+  .kolmio-simulator .cb-wrap { padding: 4px !important; gap: 6px !important; }
+  .kolmio-simulator .color-name { font-size: 11px !important; }
+}
+
+.kolmio-simulator .fk-colname { margin-left: 6px; }
