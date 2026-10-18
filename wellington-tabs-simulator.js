@@ -1,0 +1,1242 @@
+// WELLINGTON(ウクレレ)シミュレーター: 商品イメージ=逆U字 / 着用イメージ(前・後ろ)のタブ切替版 (2026-10-18)
+// 元の wellington-simulator.js からの変更点(Folklore本革版 folklore-leather-simulator.js と同じ構成):
+//  - プレビューをタブ化(商品イメージ=逆U字、着用前、着用後ろ)。縦長SVG(#wl-strap-svg)は画像保存用に画面外へ残す
+//  - 枚数増減で色を保つ(中央付近に隣と同色を挿入/削除) / おすすめ配色は押すたびに別パターン
+//  - ギター用は未商品化のためUIから外した(コードは残してある。商品化の際に改めて作る)
+// ============================================================================
+// 設定（Kolmio(kolmio-simulator.js)を土台に、Wellington用に移植。
+// Wellingtonは「ギター用」「ウクレレ用」で物理サイズが異なる2種のSVGパーツ
+// （wellington-guitar / wellington-ukulele グループ）を持つため、ブランチ切り替え
+// の概念が新たに必要。詳細はメモリ project_kolmio_color_simulator.md 参照。）
+// ============================================================================
+
+const WL_WORKER_URL     = 'https://folklore-image-upload.708works.workers.dev';
+const WL_SHOPIFY_DOMAIN = '708works.jp';
+
+// ウロコの実物パーツはギター/ウクレレとも18枚（front=1〜rear=18、間にfixedのlogoパーツ）
+// しかSVG内に存在しない。レンジがそれを超える分（ギター最大22・ウクレレ最大24）は
+// クローン合成（Folkloreのsimulator.jsのextraピース挿入と同じ考え方）で補う。
+const WL_BRANCHES = {
+  guitar: {
+    label: 'ギターストラップ',
+    shortLabel: 'ギター用',
+    groupId: 'wellington-guitar',
+    frontDomId: 'front',
+    rearDomId: 'rear',
+    logoDomId: 'logo',
+    // 物理パーツ（2〜17番）のSVG内ID。1番=front, 18番=rearは上記で別管理
+    middleDomIds: {
+      2:'_x32_', 3:'_x33_', 4:'_x34_', 5:'_x35_', 6:'_x36_', 7:'_x37_', 8:'_x38_', 9:'_x39_',
+      10:'_x31_0', 11:'_x31_1', 12:'_x31_2', 13:'_x31_3', 14:'_x31_4', 15:'_x31_5', 16:'_x31_6', 17:'_x31_7'
+    },
+    frontY: 1194.81,     // front(1番)の実測Y（常に固定・不動）
+    nativeRearY: 68.53,  // rear(18番)の実測Y（N=18のときの本来位置。translateの基準点）
+    pitch: 66.5,         // 隣接パーツ間の実測ピッチ（2〜17番で一貫）
+    nativeWidth: 58.01,  // getBBox実測のストラップ幅（SVG単位）。ukuleleとの比率で実サイズ差を表示に反映する
+    min: 14, max: 22, standard: 18,
+    // ギター用は未商品化のため価格・全長情報はすべてTBD（ユーザーから提供され次第埋める）
+    purchasable: false,
+    basePrice: null, perPiecePrice: null, perPieceCm: null, baseLengthCm: null,
+  },
+  ukulele: {
+    label: 'ウクレレストラップ',
+    shortLabel: 'ウクレレ用',
+    groupId: 'wellington-ukulele',
+    frontDomId: 'front1',
+    rearDomId: 'rear1',
+    logoDomId: 'logo1',
+    middleDomIds: {
+      2:'_x32_1', 3:'_x33_1', 4:'_x34_1', 5:'_x35_1', 6:'_x36_1', 7:'_x37_1', 8:'_x38_1', 9:'_x39_1',
+      10:'_x31_01', 11:'_x31_11', 12:'_x31_21', 13:'_x31_31', 14:'_x31_41', 15:'_x31_51', 16:'_x31_61', 17:'_x31_71'
+    },
+    frontY: 1063.52,
+    nativeRearY: 189.68,
+    pitch: 51.6,
+    nativeWidth: 45.03,  // ギター用の58.01に対し約77.6%。ギターの方が一回り大きい実サイズ差
+    min: 16, max: 24, standard: 20,
+    // 確定値：現行Wellington for ukulele商品ページ（¥21,560・標準20枚）と
+    // 既存の長さ調整オプション（ウロコ1つ追加=+約4cm/+¥1,078）の実績値をそのまま採用
+    purchasable: true,
+    basePrice: 21560, perPiecePrice: 1078, perPieceCm: 4, baseLengthCm: 97,
+  },
+};
+
+// 両ブランチで共通の縮尺（SVG単位→px）。ukulele幅(45.03)が従来のdispW=30pxになる比率を基準にする。
+// ブランチごとにscaleを再計算して表示幅を揃えてしまうと、ギター/ウクレレの実サイズ差
+// （幅・全長とも約1.29倍、guitar.nativeWidth/ukulele.nativeWidth）が見た目上消えてしまうため、
+// 固定スケールを両ブランチに適用して実寸差がそのまま伝わるようにする。
+const WL_PX_PER_UNIT = 30 / WL_BRANCHES.ukulele.nativeWidth;
+
+function wlPriceForCount(branchKey, n) {
+  const b = WL_BRANCHES[branchKey];
+  if (!b.purchasable || b.basePrice == null) return null;
+  return b.basePrice + (n - b.standard) * b.perPiecePrice;
+}
+
+function wlLengthCmForCount(branchKey, n) {
+  const b = WL_BRANCHES[branchKey];
+  if (b.baseLengthCm == null) return null;
+  return b.baseLengthCm + (n - b.standard) * b.perPieceCm;
+}
+
+// Shopify商品「wellington-color-order」の実バリエーションID（ウロコの数 × 名入れ刻印）。
+// ウクレレ用のみ購入可能。ギター用は価格未定のため現時点でバリエーションを持たない。
+// create-wellington-color-order-template.mjs 実行後、実際のIDに置き換えること（現在は仮のnull）。
+const WL_VARIANT_MAP = {
+  16: { noeng: 46634549936378, eng: 50230364963066 },
+  17: { noeng: 50230364995834, eng: 50230365028602 },
+  18: { noeng: 50230365061370, eng: 50230365094138 },
+  19: { noeng: 50230365126906, eng: 50230365159674 },
+  20: { noeng: 50230365192442, eng: 50230365225210 },
+  21: { noeng: 50230365257978, eng: 50230365290746 },
+  22: { noeng: 50230365323514, eng: 50230365356282 },
+  23: { noeng: 50230365389050, eng: 50230365421818 },
+  24: { noeng: 50230365454586, eng: 50230365487354 },
+};
+
+const WL_KOKUIN_PRICE_ADD = 1100; // 他ライン（Folklore/Kolmio/Triad/Duet/Courier）と同額を仮採用（要確認）
+
+// カラー定義（Folklore/Kolmio(ukulele)と共通の20色パレット）
+const WL_COLORS = [
+  {id:'white',   name:'White',     hex:'#f2f0ec'},
+  {id:'yellow',  name:'Yellow',    hex:'#e8c84a'},
+  {id:'lgrn',    name:'Light GRN', hex:'#a8c43a'},
+  {id:'lbl',     name:'Light BL',  hex:'#7baed0'},
+  {id:'orange',  name:'Orange',    hex:'#e04e1a'},
+  {id:'sakura',  name:'Sakura',    hex:'#f0a0a8'},
+  {id:'pink',    name:'Pink',      hex:'#d96090'},
+  {id:'red',     name:'Red',       hex:'#b82828'},
+  {id:'winered', name:'Wine Red',  hex:'#7a2035'},
+  {id:'navy',    name:'Navy',      hex:'#1e2540'},
+  {id:'natural', name:'Natural',   hex:'#e8c4a0'},
+  {id:'tan',     name:'Tan',       hex:'#d4742a'},
+  {id:'camel',   name:'Camel',     hex:'#c46030'},
+  {id:'brown',   name:'Brown',     hex:'#9e3820'},
+  {id:'choco',   name:'Choco',     hex:'#4a2018'},
+  {id:'grey',    name:'Grey',      hex:'#9090a0'},
+  {id:'olive',   name:'Olive',     hex:'#7a7848'},
+  {id:'green',   name:'Green',     hex:'#3a5030'},
+  {id:'greenbl', name:'Green Blue',hex:'#2a5060'},
+  {id:'black',   name:'Black',     hex:'#1a1a1a'},
+];
+
+const WL_GRADS = [
+  {name:'オーシャン', fn:i=>['#1e2540','#2a5060','#7baed0','#3a5030','#2a5060','#1e2540'][i%6]},
+  {name:'サンセット', fn:i=>['#1a1a1a','#7a2035','#b82828','#d4742a','#e8c84a','#d4742a'][i%6]},
+  {name:'フォレスト', fn:i=>['#1a1a1a','#3a5030','#7a7848','#a8c43a','#3a5030','#1a1a1a'][i%6]},
+  {name:'ヴィンテージ',fn:i=>['#4a2018','#9e3820','#c46030','#d4742a','#e8c4a0','#c46030'][i%6]},
+  {name:'キャンディ', fn:i=>['#d96090','#f0a0a8','#e8c84a','#7baed0','#a8c43a','#d96090'][i%6]},
+];
+
+// 論理ピース番号：0=rear(末端・可変位置), 1=front(先端・常に固定), 2〜17=物理パーツ,
+// 18以降=クローン合成パーツ（物理17番より後ろ側に必要な分だけ挿入）
+function wlDisplayOrder(branchKey, n) {
+  const middlesNeeded = n - 2; // front/rearを除いた中間パーツの必要数
+  const order = [0];
+  for (let id = middlesNeeded + 1; id >= 2; id--) order.push(id);
+  order.push(1);
+  return order;
+}
+
+function wlPieceY(branch, logicalId, n) {
+  if (logicalId === 1) return branch.frontY;
+  if (logicalId === 0) return branch.frontY - (n - 1) * branch.pitch;
+  return branch.frontY - (logicalId - 1) * branch.pitch;
+}
+
+// ============================================================================
+// グローバル状態（ブランチごとに独立して保持。切り替えても編集内容は消えない）
+// ============================================================================
+
+let wlActiveBranch = 'ukulele'; // デフォルトは販売可能なウクレレ用
+
+function wlMakeDefaultState(branchKey) {
+  const b = WL_BRANCHES[branchKey];
+  const colors = {};
+  // 0=rear,1=front,2..maxクローンまでを常時保持（Kolmio同様、鱗数を変えても色データの移動が不要）
+  for (let p = 0; p <= b.max; p++) colors[p] = '#c46030';
+  return { n: b.standard, colors, selected: new Set(), mode: 'all', rangeStartIdx: null, history: [] };
+}
+
+let wlState = {
+  guitar: wlMakeDefaultState('guitar'),
+  ukulele: wlMakeDefaultState('ukulele'),
+};
+
+let wlActiveColor = WL_COLORS[12]; // Camel
+let wlKokuinEnabled = false; // 名入れ刻印トグル状態（ブランチ共通）
+let wlLastUploadedImage = null;
+let wlHasDownloadedImage = false;
+
+function wlBranch() { return WL_BRANCHES[wlActiveBranch]; }
+function wlCurState() { return wlState[wlActiveBranch]; }
+
+// ============================================================================
+// 初期化
+// ============================================================================
+
+function initWellingtonSimulator() {
+  if (window.wellingtonSimulatorInitialized) return;
+  const paletteEl = document.getElementById('wl-palette');
+  const gradRowEl = document.getElementById('wl-grad-row');
+  const strapScrollEl = document.getElementById('wl-strap-scroll');
+  if (!paletteEl || !gradRowEl || !strapScrollEl) { setTimeout(initWellingtonSimulator, 100); return; }
+  window.wellingtonSimulatorInitialized = true;
+
+  buildWlPalette();
+  buildWlGrads();
+  fkInitViews();
+  updateWlBranchUI();
+  updateWlSummary();
+  buildWlStrapSVG();
+  updateWlPriceDisplay();
+  updateWlCountDisplay();
+  setWlMode('all');   // 初期は「一括」(2026-10-16)
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initWellingtonSimulator);
+} else {
+  initWellingtonSimulator();
+}
+
+window.addEventListener('resize', () => {
+  if (window.wellingtonSimulatorInitialized) buildWlStrapSVG();
+});
+
+// ============================================================================
+// ブランチ切り替え（ギター/ウクレレ）
+// ============================================================================
+
+function setWlBranch(branchKey) {
+  if (branchKey === wlActiveBranch) return;
+  wlActiveBranch = branchKey;
+  const st = wlCurState();
+  st.selected.clear();
+  const selInfo = document.getElementById('wl-sel-info');
+  if (selInfo) selInfo.textContent = 'パーツをタップ';
+  wlReselectIfAll();
+  updateWlBranchUI();
+  updateWlCountDisplay();
+  updateWlPriceDisplay();
+  buildWlStrapSVG();
+  updateWlSummary();
+}
+
+function updateWlBranchUI() {
+  const branch = wlBranch();
+  document.querySelectorAll('.wellington-simulator .branch-bt').forEach(b => {
+    b.classList.toggle('on', b.dataset.branch === wlActiveBranch);
+  });
+
+  const orderArea = document.getElementById('wl-order-area');
+  const comingSoon = document.getElementById('wl-coming-soon');
+  const priceBar = document.getElementById('wl-price-bar');
+  if (orderArea) orderArea.hidden = !branch.purchasable;
+  if (comingSoon) comingSoon.hidden = branch.purchasable;
+  if (priceBar) priceBar.hidden = !branch.purchasable;
+}
+
+// ============================================================================
+// 価格表示
+// ============================================================================
+
+function updateWlPriceDisplay() {
+  const el = document.getElementById('wl-price-display');
+  const branch = wlBranch();
+  if (!el || !branch.purchasable) return;
+  const n = wlCurState().n;
+  const kokuinAdd = wlKokuinEnabled ? WL_KOKUIN_PRICE_ADD : 0;
+  const price = wlPriceForCount(wlActiveBranch, n);
+  el.textContent = `¥${(price + kokuinAdd).toLocaleString()}（税込）`;
+}
+
+// ============================================================================
+// 履歴管理（ブランチ内のみ。ブランチ切り替えは履歴に積まない）
+// ============================================================================
+
+function wlSaveHistory() {
+  const st = wlCurState();
+  st.history.push({ colors: { ...st.colors }, n: st.n });
+  if (st.history.length > 30) st.history.shift();
+  const btn = document.getElementById('wl-btn-undo');
+  if (btn) btn.disabled = false;
+}
+
+function wlUndo() {
+  const st = wlCurState();
+  if (!st.history.length) return;
+  const prev = st.history.pop();
+  st.n = prev.n; st.colors = prev.colors;
+  st.selected.clear();
+  updateWlCountDisplay();
+  updateWlPriceDisplay();
+  const selInfo = document.getElementById('wl-sel-info');
+  if (selInfo) selInfo.textContent = 'パーツをタップ';
+  wlReselectIfAll();
+  buildWlStrapSVG();
+  updateWlSummary();
+  const btn = document.getElementById('wl-btn-undo');
+  if (!st.history.length && btn) btn.disabled = true;
+}
+
+// ============================================================================
+// ウロコの数（±ステッパー）
+// ============================================================================
+
+function updateWlCountDisplay() {
+  const branch = wlBranch();
+  const st = wlCurState();
+  const cntDisp = document.getElementById('wl-cnt-disp');
+  const cntSub  = document.getElementById('wl-cnt-sub');
+  if (!cntDisp || !cntSub) return;
+  cntDisp.textContent = st.n + '個';
+  const diff = st.n - branch.standard;
+  const lenCm = wlLengthCmForCount(wlActiveBranch, st.n);
+  const diffTxt = diff === 0 ? '標準' : diff > 0 ? `標準より${diff}個多い` : `標準より${Math.abs(diff)}個少ない`;
+  const lenTxt = lenCm != null ? `（全長 約${lenCm}cm）` : '（全長は近日公開）';
+  cntSub.textContent = `${diffTxt}${lenTxt}`;
+}
+
+function wlChangeCount(d) {
+  const branch = wlBranch();
+  const st = wlCurState();
+  const nx = st.n + d;
+  if (nx < branch.min || nx > branch.max) return;
+  wlSaveHistory();
+  // 色を保つ: 増やす=中央付近に隣と同色を1枚挿入 / 減らす=中央付近を1枚削除(両端と他のウロコの色は動かさない)
+  const arr = wlDisplayOrder(wlActiveBranch, st.n).map(id => st.colors[id]);
+  if (d > 0) { const mid = Math.floor(arr.length / 2); arr.splice(mid, 0, arr[mid]); }
+  else arr.splice(Math.floor((arr.length - 1) / 2), 1);
+  st.n = nx;
+  wlDisplayOrder(wlActiveBranch, st.n).forEach((id, i) => { st.colors[id] = arr[i]; });
+  st.selected.clear();
+  const selInfo = document.getElementById('wl-sel-info');
+  if (selInfo) selInfo.textContent = 'パーツをタップ';
+  wlReselectIfAll();
+  updateWlCountDisplay();
+  updateWlPriceDisplay();
+  buildWlStrapSVG();
+  updateWlSummary();
+}
+
+// ============================================================================
+// ストラップ描画
+// ============================================================================
+
+function buildWlStrapSVG() {
+  const scroll = document.getElementById('wl-strap-scroll');
+  const col = document.getElementById('wl-strap-col');
+  if (!scroll || !col) return;
+
+  const branch = wlBranch();
+  const st = wlCurState();
+  const n = st.n;
+  const order = wlDisplayOrder(wlActiveBranch, n);
+
+  const dispW = branch.nativeWidth * WL_PX_PER_UNIT; // ブランチ実寸に比例した表示幅（ギターの方が広く見える）
+  col.style.width = (dispW + 30) + 'px';
+
+  // 暫定viewBox（getBBoxの実測値で後から置き換える）
+  scroll.innerHTML = `<svg id="wl-strap-svg"
+    viewBox="0 0 158.42 1218.16"
+    style="display:block;margin:0 auto;cursor:pointer;touch-action:none;flex-shrink:0;"
+    xmlns="http://www.w3.org/2000/svg">${WL_SVG_INNER}</svg>`;
+
+  const svg = document.getElementById('wl-strap-svg');
+
+  // アクティブでないブランチのグループごと非表示にする（getBBoxからも除外される）
+  Object.entries(WL_BRANCHES).forEach(([key, b]) => {
+    const g = svg.querySelector('#' + CSS.escape(b.groupId));
+    if (g) g.style.display = (key === wlActiveBranch) ? '' : 'none';
+  });
+
+  const activeGroup = svg.querySelector('#' + CSS.escape(branch.groupId));
+  const middlesNeeded = n - 2;
+
+  // 物理パーツ(2〜17番)の表示/非表示。表示するものは元位置のまま（transformなし）
+  for (let id = 2; id <= 17; id++) {
+    const domId = branch.middleDomIds[id];
+    const el = svg.querySelector('#' + CSS.escape(domId));
+    if (!el) continue;
+    if (id <= middlesNeeded + 1) { el.style.display = ''; el.removeAttribute('transform'); }
+    else { el.style.display = 'none'; }
+  }
+
+  // 物理17番を超える分はクローン合成（2番パーツの形状を複製してtranslateで配置）
+  const cloneSource = svg.querySelector('#' + CSS.escape(branch.middleDomIds[2]));
+  const rearEl = svg.querySelector('#' + CSS.escape(branch.rearDomId));
+  const clonesById = {};
+  if (cloneSource && activeGroup) {
+    for (let id = 18; id <= middlesNeeded + 1; id++) {
+      const targetY = wlPieceY(branch, id, n);
+      const nativeY2 = wlPieceY(branch, 2, n); // = branch.frontY - branch.pitch（native位置と一致）
+      const ty = targetY - nativeY2;
+      const clone = cloneSource.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.setAttribute('data-wl-clone', id);
+      clone.setAttribute('transform', `translate(0, ${ty.toFixed(3)})`);
+      clonesById[id] = clone;
+    }
+  }
+
+  // rear(末端)は常にtranslateで現在のNに応じたスロット位置まで移動
+  if (rearEl) {
+    const targetY = wlPieceY(branch, 0, n);
+    const ty = targetY - branch.nativeRearY;
+    rearEl.setAttribute('transform', `translate(0, ${ty.toFixed(3)})`);
+    rearEl.style.display = '';
+  }
+
+  // 重なり順（DOM順=描画順）を、元のSVGの重なり順（末端rearが最背面、先端frontが最前面、
+  // 各パーツが手前のパーツにわずかに隠れる「ウロコ」の向き）に一致させる。
+  // クローンパーツを末端(rear)の直前に挿入すると、rearより手前（＝上のレイヤー）に
+  // 来てしまい「追加したパーツが前面に出る」不具合になるため、order配列の並び
+  // （rear→大きい番号のクローン→…→18→物理17→…→2→front）通りに全パーツを
+  // appendChildし直してDOM順を再構築する。
+  if (activeGroup) {
+    order.forEach(logicalId => {
+      let el;
+      if (logicalId === 0) el = rearEl;
+      else if (logicalId === 1) el = svg.querySelector('#' + CSS.escape(branch.frontDomId));
+      else if (logicalId <= 17) el = svg.querySelector('#' + CSS.escape(branch.middleDomIds[logicalId]));
+      else el = clonesById[logicalId];
+      if (el) activeGroup.appendChild(el);
+    });
+    // logoは元のSVGの重なり順（物理3番の直後・2番の直前）に戻す
+    const logoEl = svg.querySelector('#' + CSS.escape(branch.logoDomId));
+    const piece2El = svg.querySelector('#' + CSS.escape(branch.middleDomIds[2]));
+    if (logoEl && piece2El) activeGroup.insertBefore(logoEl, piece2El);
+  }
+
+  // 表示/非表示・translate確定後、getBBoxの実測値でviewBoxをタイトに合わせる
+  // （手計算の余白だと末端パーツの実形状を見誤って見切れることがあるため必ず実測する）
+  // スケールはブランチ間で共通のWL_PX_PER_UNIT固定値を使うこと。dispW/vbWのように
+  // 都度正規化すると、ギター/ウクレレの実サイズ差（幅・全長とも約1.29倍）が
+  // 表示上は常に同じ大きさに揃ってしまい、実物のサイズ差が伝わらなくなる。
+  const pad = 4;
+  const bbox = svg.getBBox();
+  const vbX = bbox.x - pad, vbY = bbox.y - pad, vbW = bbox.width + pad * 2, vbH = bbox.height + pad * 2;
+  const scale = WL_PX_PER_UNIT;
+  const dispWpx = Math.round(vbW * scale);
+  const dispH = Math.round(vbH * scale);
+  svg.setAttribute('viewBox', `${vbX.toFixed(1)} ${vbY.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}`);
+  svg.setAttribute('width', dispWpx);
+  svg.setAttribute('height', dispH);
+  col.style.width = (dispWpx + 30) + 'px';
+
+  // タップ/クリックイベント（表示順インデックスで扱う）
+  order.forEach((logicalId, idx) => {
+    const g = wlFindPieceEl(svg, branch, logicalId);
+    if (!g) return;
+    g.style.cursor = 'pointer';
+    g.addEventListener('click', () => wlHandleTap(idx));
+    g.addEventListener('touchend', e => { e.preventDefault(); wlHandleTap(idx); }, { passive: false });
+  });
+
+  wlRedrawSVG();
+  fkDrawArch(); fkPaint(); fkCaption();
+}
+
+function wlFindPieceEl(svg, branch, logicalId) {
+  if (logicalId === 0) return svg.querySelector('#' + CSS.escape(branch.rearDomId));
+  if (logicalId === 1) return svg.querySelector('#' + CSS.escape(branch.frontDomId));
+  if (logicalId <= 17) return svg.querySelector('#' + CSS.escape(branch.middleDomIds[logicalId]));
+  return svg.querySelector(`[data-wl-clone="${logicalId}"]`);
+}
+
+function wlRedrawSVG() {
+  const svg = document.getElementById('wl-strap-svg');
+  if (!svg) return;
+  const branch = wlBranch();
+  const st = wlCurState();
+  const order = wlDisplayOrder(wlActiveBranch, st.n);
+  order.forEach((logicalId, idx) => {
+    const g = wlFindPieceEl(svg, branch, logicalId);
+    if (!g) return;
+    const hex = st.colors[logicalId];
+    const isSel = st.selected.has(logicalId);
+    g.style.fill = hex;
+    g.style.stroke = isSel ? '#ffd700' : '#000';
+    g.style.strokeWidth = isSel ? '3.5' : '0.5';
+  });
+  // ロゴ刻印はfront(1番)ではなくpiece3番の上に乗る（実測bboxで確認済み）ため、
+  // 3番パーツの色に対してコントラストが出る色を自動計算する
+  const logo = svg.querySelector('#' + CSS.escape(branch.logoDomId));
+  if (logo) logo.style.fill = wlEngravingColor(st.colors[3]);
+
+  if (typeof applyWlKokuinColors === 'function') applyWlKokuinColors();
+  fkPaint();
+}
+
+function wlEngravingColor(hex) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+  const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+  if (lum > 0.45) return `rgb(${Math.floor(r * .5)},${Math.floor(g * .5)},${Math.floor(b * .5)})`;
+  return `rgb(${Math.min(255, r + Math.floor((255 - r) * .45))},${Math.min(255, g + Math.floor((255 - g) * .45))},${Math.min(255, b + Math.floor((255 - b) * .45))})`;
+}
+
+// ============================================================================
+// タップ処理（1枚ずつ／範囲／一括）
+// ============================================================================
+
+function wlHandleTap(displayIdx) {
+  const st = wlCurState();
+  const order = wlDisplayOrder(wlActiveBranch, st.n);
+  const logicalId = order[displayIdx];
+  if (st.mode === 'single') {
+    wlSaveHistory();
+    st.selected.clear(); st.selected.add(logicalId);
+    st.colors[logicalId] = wlActiveColor.hex;
+    updateWlSummary();
+    wlHasDownloadedImage = false;
+  } else if (st.mode === 'range') {
+    if (st.rangeStartIdx === null) {
+      st.rangeStartIdx = displayIdx;
+      st.selected.clear(); st.selected.add(logicalId);
+    } else {
+      wlSaveHistory();
+      const a = Math.min(st.rangeStartIdx, displayIdx), b = Math.max(st.rangeStartIdx, displayIdx);
+      st.selected.clear();
+      for (let j = a; j <= b; j++) st.selected.add(order[j]);
+      st.rangeStartIdx = null;
+    }
+  }
+  wlUpdateSelInfo();
+  wlRedrawSVG();
+}
+
+function wlUpdateSelInfo() {
+  const el = document.getElementById('wl-sel-info');
+  if (!el) return;
+  const st = wlCurState();
+  if (!st.selected.size) { el.textContent = 'パーツをタップ'; return; }
+  const order = wlDisplayOrder(wlActiveBranch, st.n);
+  const idxs = [...st.selected].map(p => order.indexOf(p)).sort((a, b) => a - b);
+  const frontNumOf = idx => st.n - idx; // idx=0(rear)→N, idx=N-1(front)→1
+  if (idxs.length === 1) {
+    el.innerHTML = `前から <b>#${frontNumOf(idxs[0])}</b>`;
+  } else {
+    el.innerHTML = `前から <b>#${frontNumOf(idxs[idxs.length - 1])}〜#${frontNumOf(idxs[0])}</b>（<b>${idxs.length}枚</b>）`;
+  }
+}
+
+// ============================================================================
+// モード切替
+// ============================================================================
+
+
+// 「一括」モード中は、枚数変更・元に戻す・リセット・ブランチ切替後も全選択を維持する(2026-10-16)
+function wlReselectIfAll() {
+  const st = wlCurState();
+  if (st.mode !== 'all') return;
+  st.selected.clear();
+  wlDisplayOrder(wlActiveBranch, st.n).forEach(p => st.selected.add(p));
+  const el = document.getElementById('wl-sel-info');
+  if (el) el.innerHTML = `全 <b>${st.n}枚</b>`;
+}
+
+function setWlMode(m) {
+  const st = wlCurState();
+  st.mode = m; st.rangeStartIdx = null;
+  document.querySelectorAll('.wellington-simulator .mbt').forEach(b => b.classList.remove('on'));
+  const btn = document.getElementById('wl-m-' + m);
+  if (btn) btn.classList.add('on');
+  if (m === 'all') {
+    st.selected.clear();
+    wlDisplayOrder(wlActiveBranch, st.n).forEach(p => st.selected.add(p));
+    const el = document.getElementById('wl-sel-info');
+    if (el) el.innerHTML = `全 <b>${st.n}枚</b>`;
+  } else {
+    st.selected.clear();
+    const el = document.getElementById('wl-sel-info');
+    if (el) el.textContent = 'パーツをタップ';
+  }
+  wlRedrawSVG();
+}
+
+// ============================================================================
+// カラーパレット
+// ============================================================================
+
+function buildWlPalette() {
+  const p = document.getElementById('wl-palette');
+  if (!p) return;
+  p.innerHTML = '';
+  fkUpdatePalLabel();
+  WL_COLORS.forEach(c => {
+    const wrap = document.createElement('div');
+    wrap.className = 'cb-wrap';
+    wrap.dataset.id = c.id;
+
+    const dot = document.createElement('div');
+    dot.className = 'cb' + (c.id === wlActiveColor.id ? ' on' : '');
+    dot.style.cssText = `background:${c.hex} !important;width:32px;height:32px;border-radius:50%;display:block;flex-shrink:0;border:3px solid ${c.id === wlActiveColor.id ? '#111' : 'transparent'};`;
+
+    const nm = document.createElement('div');
+    nm.className = 'color-name' + (c.id === wlActiveColor.id ? ' on' : '');
+    nm.textContent = c.name;
+
+    wrap.appendChild(dot); wrap.appendChild(nm);
+    wrap.onclick = () => {
+      wlActiveColor = c;
+      fkUpdatePalLabel();
+      document.querySelectorAll('.wellington-simulator .cb').forEach(b => {
+        const isActive = b.parentElement.dataset.id === c.id;
+        b.style.cssText = `background:${WL_COLORS.find(col => col.id === b.parentElement.dataset.id)?.hex} !important;width:32px;height:32px;border-radius:50%;display:block;flex-shrink:0;border:3px solid ${isActive ? '#111' : 'transparent'};`;
+      });
+      document.querySelectorAll('.wellington-simulator .color-name').forEach(b => b.classList.toggle('on', b.closest('.cb-wrap')?.dataset.id === c.id));
+      const st = wlCurState();
+      if (!st.selected.size) return;
+      wlSaveHistory();
+      [...st.selected].forEach(logicalId => { st.colors[logicalId] = c.hex; });
+      wlRedrawSVG();
+      updateWlSummary();
+    };
+    p.appendChild(wrap);
+  });
+}
+
+// ============================================================================
+// おすすめ配色プリセット
+// ============================================================================
+
+function buildWlGrads() {
+  const row = document.getElementById('wl-grad-row');
+  if (!row) return;
+  row.innerHTML = '';
+  const hexes = WL_COLORS.map(c => c.hex);
+  const rnd = n => Math.floor(Math.random() * n), pick = a => a[rnd(a.length)];
+  const pickN = k => { const a = hexes.slice(), o = []; while (o.length < k) o.push(a.splice(rnd(a.length), 1)[0]); return o; };
+  // 押すたびに別の型の配色を作る(全種類を一巡するまで同じ型は出さない)。iは後ろ(末端)から数えた位置
+  const GENS = [
+    ['2色ストライプ', n => { const [a, b] = pickN(2), p = 1 + rnd(2); return i => (Math.floor(i / p) % 2 ? b : a); }],
+    ['3色リピート', n => { const c = pickN(3); return i => c[i % 3]; }],
+    ['グラデーション', n => { const a = rnd(hexes.length), b = (a + 5 + rnd(hexes.length - 9)) % hexes.length;
+       return i => hexes[(Math.round(a + (b - a) * i / (n - 1)) + hexes.length) % hexes.length]; }],
+    ['おすすめセット', n => { const g = pick(WL_GRADS), c = [0, 1, 2, 3, 4, 5].map(g.fn), off = rnd(6); if (rnd(2)) c.reverse(); return i => c[(i + off) % 6]; }],
+    ['ランダム', n => { const set = pickN(5 + rnd(3)), out = []; for (let i = 0; i < n; i++) { let c; do { c = pick(set); } while (c === out[i - 1]); out.push(c); } return i => out[i]; }],
+    ['ワンポイント', n => { const [base, acc] = pickN(2), k = 3 + rnd(3), off = rnd(k); return i => ((i + off) % k === 0 ? acc : base); }]
+  ];
+  let bag = [];
+  const btn = document.createElement('button');
+  btn.className = 'gb gb-shuffle';
+  btn.textContent = 'おすすめ配色を試す';
+  const msg = document.createElement('div');
+  msg.className = 'grad-result';
+  msg.textContent = '押すと全体の色が変わります';
+  btn.onclick = () => {
+    if (!bag.length) bag = GENS.map((_, i) => i).sort(() => Math.random() - .5);
+    const st = wlCurState();
+    const [name, make] = GENS[bag.pop()], f = make(st.n);
+    wlSaveHistory();
+    wlDisplayOrder(wlActiveBranch, st.n).forEach((id, i) => { st.colors[id] = f(i); });
+    wlRedrawSVG();
+    updateWlSummary();
+    wlHasDownloadedImage = false;
+    msg.textContent = `今回: ${name}`;
+  };
+  row.appendChild(btn);
+  row.appendChild(msg);
+}
+
+// ============================================================================
+// サマリー・リセット
+// ============================================================================
+
+function updateWlSummary() {
+  const el = document.getElementById('wl-summary');
+  if (!el) return;
+  const st = wlCurState();
+  const counts = {};
+  wlDisplayOrder(wlActiveBranch, st.n).forEach(p => { const h = st.colors[p]; counts[h] = (counts[h] || 0) + 1; });
+  const nameOf = h => WL_COLORS.find(c => c.hex === h)?.name || h;
+  el.innerHTML = Object.entries(counts).map(([h, n]) =>
+    `<span class="si"><span class="sw" style="background:${h}"></span>${nameOf(h)} ×${n}</span>`
+  ).join('');
+}
+
+function wlResetAll() {
+  wlSaveHistory();
+  const branch = wlBranch();
+  const st = wlCurState();
+  for (let p = 0; p <= branch.max; p++) st.colors[p] = '#c46030';
+  st.selected.clear();
+  const selInfo = document.getElementById('wl-sel-info');
+  if (selInfo) selInfo.textContent = 'パーツをタップ';
+  wlReselectIfAll();
+  wlRedrawSVG();
+  updateWlSummary();
+}
+
+// ============================================================================
+// トースト・ローディング
+// ============================================================================
+
+function showWlToast(msg) {
+  const t = document.getElementById('wl-toast');
+  if (!t) return;
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function showWlLoading(text = '処理中...') {
+  const loadingText = document.getElementById('wl-loading-text');
+  const loadingOverlay = document.getElementById('wl-loading-overlay');
+  if (loadingText) loadingText.textContent = text;
+  if (loadingOverlay) loadingOverlay.classList.add('show');
+}
+function hideWlLoading() {
+  const el = document.getElementById('wl-loading-overlay');
+  if (el) el.classList.remove('show');
+}
+
+// ============================================================================
+// 画像保存
+// ============================================================================
+
+async function wlSaveImage() {
+  showWlLoading('画像を生成中...');
+  try {
+    const canvas = await buildWlSaveCanvas();
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const st = wlCurState();
+    a.href = url; a.download = `wellington-${wlActiveBranch}-${st.n}parts-${Date.now()}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    hideWlLoading();
+    wlHasDownloadedImage = true;
+    showWlToast('画像を保存しました');
+  } catch (e) {
+    console.error(e);
+    hideWlLoading();
+    showWlToast('保存に失敗しました');
+  }
+}
+
+// ---- 名入れ刻印フォント埋め込み ----
+// SVGをdata URIのImageとして再描画すると、ページ側で読み込んだWebフォント（Googleフォント／
+// カスタムフォント）は継承されず既定フォントにフォールバックする。保存画像・注文用画像で
+// 刻印文字のフォントが選択と異なって見える不具合の原因のため、選択中フォントを@font-faceとして
+// SVG自身に埋め込んでから書き出す。
+const KOKUIN_FONT_SOURCES = {
+  'Cabin Sketch': { google: true, param: 'Cabin+Sketch:wght@700' },
+  'Special Elite': { google: true, param: 'Special+Elite' },
+  'AG Stencil': { google: false, url: 'https://708works-lab.github.io/dev/fonts/AG-Stencil.ttf' },
+  'Lobster': { google: true, param: 'Lobster' },
+  'Playball': { google: true, param: 'Playball' },
+  'Great Vibes': { google: true, param: 'Great+Vibes' },
+  'Bebas Neue': { google: true, param: 'Bebas+Neue' },
+  'UnifrakturMaguntia': { google: true, param: 'UnifrakturMaguntia' }
+};
+const kokuinFontDataUriCache = {};
+function kokuinBufferToBase64(buf) {
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+async function kokuinFontDataUri(family) {
+  if (kokuinFontDataUriCache[family]) return kokuinFontDataUriCache[family];
+  const src = KOKUIN_FONT_SOURCES[family];
+  if (!src) return null;
+  const promise = (async () => {
+    try {
+      let fontUrl, mime;
+      if (src.google) {
+        const cssText = await (await fetch(`https://fonts.googleapis.com/css2?family=${src.param}&display=swap`)).text();
+        // GoogleフォントのCSSはUnicodeサブセットごとに複数の@font-faceブロックを含む。
+        // 先頭ブロックはcyrillic-ext等の場合が多く、それを使うと半角英数字のグリフを
+        // 持たないフォントファイルを埋め込んでしまい結局既定フォントにフォールバックする
+        // ため、必ず基本ラテン文字（U+0000-00FF）を含むブロックを選んで使用する。
+        const fontBlocks = cssText.split('}').filter(b => b.includes('@font-face'));
+        const latinBlock = fontBlocks.find(b => /unicode-range:[^;]*U\+0000-00FF/.test(b)) || fontBlocks[fontBlocks.length - 1] || cssText;
+        const m = latinBlock.match(/src:\s*url\(([^)]+)\)\s*format\('(woff2?|truetype)'\)/);
+        if (!m) return null;
+        fontUrl = m[1];
+        mime = m[2] === 'truetype' ? 'font/ttf' : 'font/woff2';
+      } else {
+        fontUrl = src.url;
+        mime = 'font/ttf';
+      }
+      const buf = await (await fetch(fontUrl)).arrayBuffer();
+      return `data:${mime};base64,${kokuinBufferToBase64(buf)}`;
+    } catch (e) {
+      return null;
+    }
+  })();
+  kokuinFontDataUriCache[family] = promise;
+  return promise;
+}
+async function embedKokuinFontIntoSvg(svgRoot, family, weight) {
+  const dataUri = await kokuinFontDataUri(family);
+  if (!dataUri) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const style = document.createElementNS(ns, 'style');
+  style.textContent = `@font-face{font-family:'${family}';font-weight:${weight || 400};src:url(${dataUri});}`;
+  svgRoot.insertBefore(style, svgRoot.firstChild);
+}
+
+async function buildWlSaveCanvas() {
+  const liveSvg = document.getElementById('wl-strap-svg');
+  const liveVb = liveSvg?.getAttribute('viewBox')?.split(' ').map(Number);
+  const vbW = liveVb ? liveVb[2] : 46;
+  const vbH = liveVb ? liveVb[3] : 1700;
+
+  const branch = wlBranch();
+  const st = wlCurState();
+  const order = wlDisplayOrder(wlActiveBranch, st.n);
+  const chips = order.map((logicalId, i) => {
+    const color = st.colors[logicalId];
+    const cname = WL_COLORS.find(c => c.hex === color)?.name || '';
+    return { hex: color, label: `P${String(st.n - i).padStart(2, '0')}：${cname}` };
+  });
+  const lenCm = wlLengthCmForCount(wlActiveBranch, st.n);
+  chips.push({ hex: null, label: `仕様：${branch.shortLabel}${lenCm != null ? '・全長約' + lenCm + 'cm' : ''}・パーツ数：${st.n}個` });
+
+  const kokuin = window.WL_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+
+  let extra;
+  if (kokuinEnabled) {
+    extra = {
+      height: 160,
+      draw: async (ctx, box) => {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.moveTo(box.x + 8, box.y);
+        ctx.arcTo(box.x + box.width, box.y, box.x + box.width, box.y + box.height, 8);
+        ctx.arcTo(box.x + box.width, box.y + box.height, box.x, box.y + box.height, 8);
+        ctx.arcTo(box.x, box.y + box.height, box.x, box.y, 8);
+        ctx.arcTo(box.x, box.y, box.x + box.width, box.y, 8);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#999';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('名入れ刻印', box.x + 14, box.y + 20);
+
+        const kokuinPreviewSvg = document.getElementById('wl-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
+        const contentW = box.width - 28;
+        if (kokuinPreviewSvg) {
+          const previewClone = kokuinPreviewSvg.cloneNode(true);
+          if (kokuin?.fontFamily) await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+          const vb = kokuinPreviewSvg.getAttribute('viewBox')?.split(' ').map(Number);
+          const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
+          let previewW = contentW, previewH = Math.round(contentW * aspect);
+          const maxH = box.height - 34;
+          if (previewH > maxH) { previewH = maxH; previewW = Math.round(maxH / aspect); }
+          previewClone.setAttribute('width', previewW);
+          previewClone.setAttribute('height', previewH);
+          const svgStr = new XMLSerializer().serializeToString(previewClone);
+          const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+          const previewX = box.x + 14 + (contentW - previewW) / 2;
+          await new Promise(resolve => {
+            const img = new Image();
+            img.onload  = () => { ctx.drawImage(img, previewX, box.y + 28, previewW, previewH); resolve(); };
+            img.onerror = resolve;
+            img.src = dataUri;
+          });
+        } else {
+          await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+          ctx.fillStyle = '#1a1a1a';
+          ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+          ctx.textAlign = 'left';
+          ctx.fillText(kokuin.text, box.x + 14, box.y + box.height - 20);
+        }
+      },
+    };
+  }
+
+  // 着用イメージ(前・後ろ)を右カラムに並べる。読み込めなかった場合は従来の構成のまま
+  const wornOk = await Promise.race([fkLoadWorn(), new Promise(r => setTimeout(() => r(false), 4000))]);
+  fkPaint();
+  const sideArtworks = wornOk ? [
+    { svgSelector: '#fk-front', svgW: 480, svgH: 570, label: '着用イメージ（前）先端から1〜8番目', prepareSvg: fkPrepareWornForSave },
+    { svgSelector: '#fk-back',  svgW: 480, svgH: 520, label: `着用イメージ（後ろ）末端から${Math.min(14, st.n)}番目〜末端`, prepareSvg: fkPrepareWornForSave },
+  ] : undefined;
+
+  return build708SaveCanvas({
+    title: wlActiveBranch === 'ukulele' ? 'Wellington for ukulele' : `Wellington for ukulele（${branch.shortLabel}）`,
+    svgSelector: '#wl-strap-svg',
+    svgW: vbW, svgH: vbH,
+    chips,
+    extra,
+    sideArtworks,
+    topCaption: '▲ 後ろ',
+    bottomCaption: '▼ 前',
+    prepareSvg: async (cloned) => {
+      cloned.querySelectorAll('[style*="stroke"]').forEach(el => { el.style.stroke = '#000'; el.style.strokeWidth = '0.5'; });
+      if (kokuinEnabled && kokuin?.fontFamily) {
+        await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
+      }
+    },
+  });
+}
+
+
+// ============================================================================
+// オーダー処理（購入可能なブランチのみ）
+// ============================================================================
+
+async function wlGoOrder() {
+  const branch = wlBranch();
+  if (!branch.purchasable) {
+    showWlToast('ギター用は近日公開予定です。現在ご注文いただけません。');
+    return;
+  }
+  if (window.WL_KOKUIN_STATE?.enabled && !window.WL_KOKUIN_STATE.valid) {
+    showWlToast('刻印する文字を正しく入力してください');
+    return;
+  }
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
+  showWlLoading('画像をアップロード中...');
+  try {
+    const canvas = await buildWlSaveCanvas();
+    let uploadResult = null;
+    try { uploadResult = await wlUploadOrderImage(canvas); } catch (e) { console.error(e); }
+    if (!uploadResult) {
+      if (window.sim708Track) sim708Track('upload_fail', 'wellington');
+      uploadResult = window.sim708FallbackUpload ? sim708FallbackUpload('WL') : { orderId: 'WL-' + Date.now(), imageUrl: '' };
+    }
+    wlLastUploadedImage = uploadResult;
+    hideWlLoading();
+    showWlConfirmModal(uploadResult);
+  } catch (error) {
+    console.error(error);
+    hideWlLoading();
+    showWlToast('エラーが発生しました: ' + error.message);
+  }
+}
+
+async function wlUploadOrderImage(canvas) {
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+  const orderId = `wellington-${Date.now()}`;
+  const formData = new FormData();
+  formData.append('image', blob, `${orderId}.png`);
+  formData.append('orderId', orderId);
+  try {
+    const res = await fetch(WL_WORKER_URL, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+    const data = await res.json();
+    if (!data.success && !data.url && !data.imageUrl) throw new Error(data.error || 'Upload failed');
+    return { imageUrl: data.imageUrl || data.url, orderId };
+  } catch (e) {
+    console.error('Upload error:', e);
+    return null;
+  }
+}
+
+function wlColorSummaryLines() {
+  const st = wlCurState();
+  const order = wlDisplayOrder(wlActiveBranch, st.n);
+  return order.map((logicalId, i) => {
+    const name = WL_COLORS.find(c => c.hex === st.colors[logicalId])?.name || st.colors[logicalId];
+    const pos = i === order.length - 1 ? ' [前]' : i === 0 ? ' [後ろ]' : '';
+    return `P${String(st.n - i).padStart(2, '0')}${pos}: ${name}`;
+  });
+}
+
+function showWlConfirmModal(uploadResult) {
+  const modal = document.getElementById('wl-confirm-modal');
+  const modalImage = document.getElementById('wl-modal-image');
+  const modalInfo = document.getElementById('wl-modal-info');
+  if (!modal || !modalImage || !modalInfo) return;
+  modalImage.src = uploadResult.imageUrl;
+
+  const branch = wlBranch();
+  const st = wlCurState();
+  const kokuinEnabled = !!(window.WL_KOKUIN_STATE?.enabled && window.WL_KOKUIN_STATE.valid && window.WL_KOKUIN_STATE.text);
+  const kokuinAdd = kokuinEnabled ? WL_KOKUIN_PRICE_ADD : 0;
+  const price = wlPriceForCount(wlActiveBranch, st.n) + kokuinAdd;
+  const lenCm = wlLengthCmForCount(wlActiveBranch, st.n);
+  const kokuin = window.WL_KOKUIN_STATE;
+  const kokuinLine = kokuinEnabled ? `<p><strong>名入れ刻印:</strong> ${kokuin.text}（${kokuin.fontLabel}）</p>` : '';
+
+  modalInfo.innerHTML = `
+    <p><strong>注文ID:</strong> ${uploadResult.orderId}</p>
+    <p><strong>仕様:</strong> ${branch.label}</p>
+    <p><strong>ウロコの数:</strong> ${st.n}個</p>
+    <p><strong>全長:</strong> ${lenCm != null ? '約' + lenCm + 'cm' : '未定'}</p>
+    <p><strong>価格:</strong> ¥${price.toLocaleString()}（税込）</p>
+    ${kokuinLine}
+    <p style="margin-top:12px;"><strong>カラー構成:</strong></p>
+    <div style="font-size:12px;line-height:1.6;color:#888;margin-top:4px;">${wlColorSummaryLines().join('<br>')}</div>
+  `;
+  modal.classList.add('show');
+}
+
+function closeWlModal() {
+  const modal = document.getElementById('wl-confirm-modal');
+  if (modal) modal.classList.remove('show');
+}
+
+async function wlProceedToCart() {
+  const branch = wlBranch();
+  if (!branch.purchasable) { showWlToast('ギター用はまだご注文いただけません。'); return; }
+  if (!wlLastUploadedImage) { showWlToast('画像情報が見つかりません'); return; }
+  closeWlModal();
+  showWlLoading('カートに追加中...');
+  try {
+    const st = wlCurState();
+    const order = wlDisplayOrder(wlActiveBranch, st.n);
+    const colorDataEN = order.map((logicalId, i) => {
+      const name = WL_COLORS.find(c => c.hex === st.colors[logicalId])?.name || st.colors[logicalId];
+      let pos = '';
+      if (i === order.length - 1) pos = '[Front]';
+      else if (i === 0) pos = '[Back]';
+      return `P${String(st.n - i).padStart(2, '0')}${pos}:${name}`;
+    }).join(', ');
+
+    const kokuin = window.WL_KOKUIN_STATE;
+    const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+    const variantId = WL_VARIANT_MAP[st.n]?.[kokuinEnabled ? 'eng' : 'noeng'];
+    if (!variantId) throw new Error('該当するバリエーションが見つかりません（商品未作成の可能性があります）');
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `https://${WL_SHOPIFY_DOMAIN}/cart/add`;
+    form.style.display = 'none';
+
+    [['id', variantId], ['quantity', '1']].forEach(([k, v]) => {
+      const i = document.createElement('input');
+      i.type = 'hidden'; i.name = k; i.value = v; form.appendChild(i);
+    });
+    const lenCm = wlLengthCmForCount(wlActiveBranch, st.n);
+    const props = {
+      'Order ID': wlLastUploadedImage.orderId,
+      'Type': branch.shortLabel,
+      'Parts': `${st.n}pcs`,
+      'Length': lenCm != null ? `${lenCm}cm` : 'TBD',
+      'Colors': colorDataEN,
+      'Image URL': wlLastUploadedImage.imageUrl,
+    };
+    if (kokuinEnabled) {
+      props['刻印文字'] = kokuin.text;
+      props['刻印フォント'] = kokuin.fontLabel;
+    }
+    Object.entries(props).forEach(([k, v]) => {
+      const i = document.createElement('input');
+      i.type = 'hidden'; i.name = `properties[${k}]`; i.value = v; form.appendChild(i);
+    });
+
+    document.body.appendChild(form);
+    hideWlLoading();
+    showWlToast('カートに追加します...');
+    setTimeout(() => form.submit(), 500);
+  } catch (error) {
+    console.error(error);
+    hideWlLoading();
+    showWlToast('カート追加に失敗しました: ' + error.message);
+  }
+}
+
+// ============================================================================
+// 表示ビュー: 商品イメージ(逆U字) / 着用イメージ(前) / 着用イメージ(後ろ)  (2026-10-18)
+//  - 色や選択は従来どおり wlCurState() の colors / selected(論理ID)を唯一の状態として持つ
+//  - 表示順 i(0=末端 … N-1=先端)は wlDisplayOrder() の添字。着用イメージは配色の位置の目安:
+//    前=先端から1〜8番目、後ろ=末端から14番目〜末端
+// ============================================================================
+const FK_BASE = (document.currentScript && document.currentScript.src || '').replace(/[^\/]*$/, '');
+const FK_NS = 'http://www.w3.org/2000/svg';
+const FK_ARCH_W = 430, FK_ARCH_K = 0.93;   // アーチの幅 / 曲がる部分の間隔(1=詰めない)
+let fkView = 'prod', fkShape = null, fkWornState = 'idle'; // idle | loading | ready | error
+
+function fkEl(id) { return document.getElementById(id); }
+function fkOrder() { return wlDisplayOrder(wlActiveBranch, wlCurState().n); }
+// パレットの見出しに、いま選んでいる色の名前を出す(スマホでは色名を丸の横に出さないため)
+function fkUpdatePalLabel() {
+  const lab = document.querySelector('.wellington-simulator .pal-box .box-label');
+  if (lab) lab.innerHTML = 'カラー<span class="fk-colname">' + wlActiveColor.name + '</span>';
+}
+
+// 商品イメージ用: 元の縦長SVGからウロコの形(末端・中間・3番(ロゴ)・先端)と中心を取り出す
+function fkEnsureShapes() {
+  if (fkShape) return fkShape;
+  const b = WL_BRANCHES.ukulele;
+  const src = document.createElementNS(FK_NS, 'svg');
+  src.setAttribute('width', '0'); src.setAttribute('height', '0');
+  src.setAttribute('viewBox', '0 0 158.42 1218.16');
+  src.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none';
+  src.innerHTML = WL_SVG_INNER;
+  document.body.appendChild(src);
+  const q = id => src.querySelector('#' + CSS.escape(id));
+  const clean = el => el.outerHTML.replace(/ (id|class|style)="[^"]*"/g, '');
+  fkShape = {};
+  [['rear', b.rearDomId], ['mid', b.middleDomIds[2]], ['logo', b.middleDomIds[3]], ['front', b.frontDomId]].forEach(([k, id]) => {
+    const p = q(id), bb = p.getBBox();
+    let html = clean(p);
+    if (k === 'logo') html += clean(q(b.logoDomId)).replace('<path', '<path data-logo="1"');
+    fkShape[k] = { html, cx: bb.x + bb.width / 2, cy: bb.y + bb.height / 2, h: bb.height, w: bb.width };
+  });
+  src.remove();
+  return fkShape;
+}
+
+// 逆U字: 脚(直線)→半円→脚。曲がる部分だけ間隔を詰めて、実物のような重なりにする
+function fkParams() {
+  const n = wlCurState().n, pitch = WL_BRANCHES.ukulele.pitch, L = n * pitch;
+  let R = (FK_ARCH_W - fkEnsureShapes().mid.w - 14) / 2, Lg = (L - Math.PI * R / FK_ARCH_K) / 2;
+  if (Lg < 0) { R = FK_ARCH_K * L / Math.PI; Lg = 0; }
+  return { R, Lg, pitch };
+}
+function fkSOf(u, P) {
+  const a = Math.PI * P.R / FK_ARCH_K;
+  return u <= P.Lg ? u : u <= P.Lg + a ? P.Lg + (u - P.Lg) * FK_ARCH_K : P.Lg + Math.PI * P.R + (u - P.Lg - a);
+}
+function fkPointAt(s, P) {
+  const { R, Lg } = P; let x, y, a;
+  if (s <= Lg) { x = -R; y = Lg - s; a = -90; }
+  else if (s <= Lg + Math.PI * R) { const t = (s - Lg) / R; x = -R * Math.cos(t); y = -R * Math.sin(t); a = t * 180 / Math.PI - 90; }
+  else { x = R; y = s - Lg - Math.PI * R; a = 90; }
+  return { x, y, a: a - 90 };
+}
+
+function fkDrawArch() {
+  const svg = fkEl('fk-arch'); if (!svg) return;
+  const SH = fkEnsureShapes(), n = wlCurState().n;
+  svg.innerHTML = '';
+  const P = fkParams(), g = document.createElementNS(FK_NS, 'g');
+  svg.appendChild(g);
+  svg._p = [];
+  let minY = 1e9, maxY = -1e9;
+  for (let i = 0; i < n; i++) {
+    const sh = SH[i === 0 ? 'rear' : i === n - 1 ? 'front' : i === n - 3 ? 'logo' : 'mid'];
+    const pt = fkPointAt(fkSOf(sh.h / 2 + i * P.pitch, P), P);
+    minY = Math.min(minY, pt.y); maxY = Math.max(maxY, pt.y);
+    const pg = document.createElementNS(FK_NS, 'g');
+    pg.setAttribute('transform', `translate(${pt.x.toFixed(2)},${pt.y.toFixed(2)}) rotate(${pt.a.toFixed(2)}) translate(${-sh.cx.toFixed(2)},${-sh.cy.toFixed(2)})`);
+    pg.innerHTML = sh.html;
+    pg.style.cursor = 'pointer';
+    pg.addEventListener('click', () => wlHandleTap(i));
+    g.appendChild(pg);
+    svg._p.push(pg);
+  }
+  // 表示範囲は位置から計算する(非表示中でも正しく求まるよう getBBox は使わない)
+  const top = minY - 56, h = Math.max(maxY + SH.rear.h / 2 + 24 + 46 - top, 300);   // +46: 下端の「後ろ/前」ラベル行の分
+  svg.setAttribute('viewBox', `-240 ${top.toFixed(1)} 480 ${h.toFixed(1)}`);
+}
+
+// 着用イメージ用SVG(別ファイルを初回に読み込む)
+function fkDecode(id, inFront) {
+  if (inFront && id === '_x37_1') return 7;
+  if (inFront && id === '_x38_1') return 8;
+  return +id.replace(/_x(\d\d)_/g, (m, c) => String.fromCharCode(+('0x' + c)));
+}
+function fkInitWorn(svgId) {
+  const svg = fkEl(svgId), front = svgId === 'fk-front';
+  svg.innerHTML = window.WELLINGTON_WORN_INNER;
+  svg._p = [];
+  svg.querySelector(front ? '#back' : '#front').style.display = 'none';
+  svg.querySelectorAll(front ? '#strap1 > g' : '#strap > g').forEach(g => {
+    g.dataset.num = fkDecode(g.id, front);
+    g.style.cursor = 'pointer';
+    g.addEventListener('click', () => { const i = fkWornIdx(g, front); if (i >= 0 && i < wlCurState().n) wlHandleTap(i); });
+    svg._p.push(g);
+  });
+}
+// 前: 先端から数えた番号f → index N-f / 後ろ: 元SVGの番号n(20〜7) → 末端から数えて 20-n 番目
+function fkWornIdx(g, front) { const num = +g.dataset.num; return front ? wlCurState().n - num : 20 - num; }
+
+let fkWornPromise = null;
+function fkLoadWorn() {
+  if (fkWornPromise) return fkWornPromise;
+  fkWornState = 'loading'; fkCaption();
+  fkWornPromise = new Promise(resolve => {
+    const sc = document.createElement('script');
+    sc.src = FK_BASE + 'wellington-worn-svg.js?v=1';
+    sc.onload = () => { fkInitWorn('fk-front'); fkInitWorn('fk-back'); fkWornState = 'ready'; fkPaint(); fkCaption(); resolve(true); };
+    sc.onerror = () => { fkWornState = 'error'; fkWornPromise = null; fkCaption(); resolve(false); };
+    document.head.appendChild(sc);
+  });
+  return fkWornPromise;
+}
+// 保存画像用: 着用イメージのクローンを、単体のSVG画像として正しく描ける形に整える
+function fkPrepareWornForSave(c) {
+  c.removeAttribute('hidden');
+  c.querySelectorAll('g').forEach(g => { g.style.filter = ''; });          // 選択中の光彩は保存画像に入れない
+}
+
+function fkPaintArch() {
+  const svg = fkEl('fk-arch'); if (!svg || !svg._p) return;
+  const st = wlCurState(), order = fkOrder();
+  const allSel = st.selected.size === st.n;   // 「一括」で全選択の時は縁取りを出さない(見づらいため)
+  svg._p.forEach((pg, i) => {
+    const id = order[i], col = st.colors[id], sel = st.selected.has(id) && !allSel;
+    pg.querySelectorAll('path').forEach(p => {
+      if (p.dataset.logo) { p.style.fill = wlEngravingColor(st.colors[3]); return; }
+      p.style.fill = col;
+      p.style.stroke = sel ? '#ffd700' : '#000';
+      p.style.strokeWidth = sel ? '3.5' : '0.5';
+      p.style.strokeMiterlimit = '10';
+    });
+  });
+}
+function fkPaintWorn(svgId) {
+  const svg = fkEl(svgId); if (!svg || !svg._p) return;
+  const st = wlCurState(), order = fkOrder(), front = svgId === 'fk-front', allSel = st.selected.size === st.n;
+  svg._p.forEach(g => {
+    const i = fkWornIdx(g, front), ok = i >= 0 && i < st.n;
+    g.style.display = ok ? '' : 'none';   // ウロコが少ない時、存在しない分は表示しない
+    if (!ok) return;
+    const id = order[i], sel = st.selected.has(id) && !allSel;
+    g.style.filter = sel ? 'drop-shadow(0 0 1.5px #ffd700) drop-shadow(0 0 1.5px #ffd700)' : '';
+    g.querySelectorAll('.ws').forEach(e => { e.style.fill = st.colors[id]; });
+    const logo = g.querySelector('.wlg'); if (logo) logo.style.fill = wlEngravingColor(st.colors[id]);
+  });
+}
+function fkPaint() {
+  fkPaintArch();
+  if (fkWornState === 'ready') { fkPaintWorn('fk-front'); fkPaintWorn('fk-back'); }
+}
+
+function fkCaption() {
+  const el = fkEl('fk-cap'); if (!el) return;
+  const n = wlCurState().n, len = wlLengthCmForCount(wlActiveBranch, n);
+  const base = `<b>${n}個・全長 約${len}cm</b>`;
+  const note = '<br><span class="fk-note">着用イメージは配色の位置の目安です。正確な配色は「商品イメージ」で確認してください。</span>';
+  let t;
+  if (fkView === 'prod') t = `${base}　全体の並びと正確な配色を確認できます。`;
+  else if (fkWornState === 'loading') t = '読み込み中…';
+  else if (fkWornState === 'error') t = '着用イメージを読み込めませんでした。ページを再読み込みしてください。';
+  else if (fkView === 'front') t = `${base}　先端から1〜8番目の色を表示しています。${note}`;
+  else t = `${base}　末端から${Math.min(14, n)}番目〜末端の色を表示しています。${n < 14 ? '（ウロコが少ないため一部は表示されません）' : ''}${note}`;
+  el.innerHTML = t;
+}
+
+function fkSetView(v) {
+  fkView = v;
+  [['prod', 'fk-arch'], ['front', 'fk-front'], ['back', 'fk-back']].forEach(([k, id]) => {
+    const el = fkEl(id); if (el) el.toggleAttribute('hidden', k !== v);
+  });
+  document.querySelectorAll('.wellington-simulator .fk-tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v ? 'true' : 'false'));
+  document.querySelectorAll('.wellington-simulator .fk-tag').forEach(t => t.hidden = v !== 'prod');
+  if (v !== 'prod') fkLoadWorn();
+  fkCaption();
+}
+
+function fkInitViews() {
+  const tabs = document.querySelector('.wellington-simulator .fk-tabs');
+  if (!tabs || tabs.dataset.ready) return;
+  tabs.dataset.ready = '1';
+  tabs.addEventListener('click', e => { const b = e.target.closest('button'); if (b) fkSetView(b.dataset.v); });
+  fkCaption();
+  // 着用イメージは重いので、操作の邪魔にならないタイミングで先読みする
+  (window.requestIdleCallback || (f => setTimeout(f, 1500)))(() => fkLoadWorn());
+}
+
+// Auto-generated from wellington_color_order.svg
+const WL_SVG_INNER = `<defs><style>.st0 {fill: #c6a06a;}.st1 {fill: #995200;stroke: #000;stroke-miterlimit: 10;}</style></defs><g id="wellington-guitar"><path id="rear" class="st1" d="M.7,68.53h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72,0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0C6.66,20.27,3.02,39.95,1.74,48.93c-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3ZM29.5,12.6c2.49,0,4.5,2.02,4.5,4.5s-2.01,4.5-4.5,4.5-4.5-2.01-4.5-4.5,2.02-4.5,4.5-4.5ZM14.33,65.29c1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56Z"/><path id="_x31_7" class="st1" d="M58.5,130.65c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0C6.66,86.77,3.02,106.45,1.74,115.43c-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,133.44c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x31_6" class="st1" d="M58.5,197.15c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,199.94c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x31_5" class="st1" d="M58.5,263.64c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,266.44c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x31_4" class="st1" d="M58.5,330.14c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,332.94c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x31_3" class="st1" d="M58.5,396.64c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,399.44c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x31_2" class="st1" d="M58.5,463.14c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,465.94c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x31_1" class="st1" d="M58.5,529.64c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,532.44c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x31_0" class="st1" d="M58.5,596.14c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,598.93c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x39_" class="st1" d="M58.5,662.64c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,665.43c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x38_" class="st1" d="M58.5,729.14c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,731.93c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x37_" class="st1" d="M58.5,795.64c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,798.43c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x36_" class="st1" d="M58.5,862.14c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,864.93c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x35_" class="st1" d="M58.5,928.64c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,931.43c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x34_" class="st1" d="M58.5,995.14c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,997.93c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="_x33_" class="st1" d="M58.5,1061.63c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,1064.43c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="logo" class="st0" d="M34.29,1032.83c1.46-1.49,3.93-3.98,7.41-7.49-.15-.03-.3-.06-.44-.12-.02,0-.04-.01-.06-.02-.09-.04-.17-.08-.24-.12-.05-.03-.09-.06-.13-.09-.03-.02-.06-.04-.08-.06-.05-.04-.11-.09-.16-.13-.01-.01-.03-.02-.04-.03-.05-.05-.1-.1-.15-.15-.27-.31-.46-.68-.53-1.08-.63.7-1.5,1.65-2.63,2.87-.6.64-.96,1.04-1.1,1.18l.13.11c.85-.89,1.37-1.42,1.56-1.58.2-.16.35-.19.46-.1l.93.78-2.52,2.34c-1.24,1.15-2.37,2.21-3.41,3.18,0,0,0,0,0,0-1.63-.69-3.19-.85-4.67-.47-1.48.38-2.47,1.15-2.97,2.33-.49,1.16-.36,2.54.39,4.15-2.5.14-4.14.31-4.9.5-.98.24-1.77.58-2.37,1.02-.6.44-1.02.94-1.26,1.5-.36.84-.27,1.8.28,2.88.54,1.07,1.63,1.95,3.26,2.64,1.99.84,3.91,1.03,5.74.55,1.84-.47,3.03-1.37,3.59-2.69.58-1.36.23-3.23-1.03-5.59,2.01.01,3.65-.24,4.95-.77.98-.4,1.62-.96,1.93-1.68.31-.72.19-1.5-.34-2.35-.37-.59-.91-1.1-1.6-1.52h0ZM27.76,1037.28c.17-.41.44-.79.82-1.16.37-.37.7-.59.99-.67.17-.04.33-.06.47-.04-.94.9-1.74,1.68-2.4,2.33,0-.14.05-.29.12-.46h0ZM33,1033.33c-.81.8-1.55,1.54-2.23,2.21-.08-.04-.16-.08-.24-.12.68-.67,1.44-1.42,2.27-2.22.07.04.14.09.2.13h0ZM27.78,1038.26s-.01-.03-.02-.04c.7-.73,1.59-1.63,2.66-2.68.08.04.15.1.21.16-1.09,1.08-1.99,1.99-2.7,2.73-.05-.05-.1-.1-.15-.16ZM28.07,1038.79s-.03,0-.04,0c0,0,0-.02-.01-.03.02,0,.04.01.06.02h0ZM29.83,1038c-.4.35-.76.56-1.09.61-.02,0-.04,0-.06,0,.6-.63,1.31-1.38,2.14-2.24-.02.13-.05.27-.11.41-.19.45-.48.85-.88,1.21h0ZM28.4,1038.62c-.09-.01-.18-.03-.27-.07,0,0,0,0,0,0,.7-.73,1.57-1.63,2.62-2.69,0,.02.02.03.03.05.03.07.05.15.05.23-.96.97-1.77,1.8-2.43,2.49ZM30.95,1035.65c.66-.67,1.4-1.41,2.2-2.22.07.05.13.1.2.16-.79.8-1.52,1.54-2.18,2.21-.06-.05-.13-.1-.21-.15h0ZM37.3,1029.6c-1.13,1.14-2.18,2.19-3.14,3.15-.07-.04-.15-.08-.22-.12,1.19-1.19,3.07-3.05,5.63-5.58l.14.13-2.41,2.42h0ZM39.42,1026.93l.04.04-2.44,2.4c-1.17,1.15-2.25,2.21-3.23,3.18-.07-.03-.14-.07-.21-.1,1.22-1.17,3.17-3.01,5.84-5.52h0ZM27.36,1034.27c.34-.8.99-1.34,1.95-1.61.95-.27,1.94-.18,2.95.25.09.04.18.08.27.13-.86.82-1.65,1.56-2.36,2.24-.27-.07-.56-.1-.87-.08-.44.03-.9.19-1.37.5-.3.2-.54.43-.73.68-.15-.82-.09-1.53.16-2.12h0ZM28.3,1044.85c-.2.63-.61,1.19-1.25,1.67-.63.49-1.36.79-2.19.9-.83.11-1.62.05-2.39-.2-1.06-.33-1.86-.9-2.39-1.7-.54-.8-.67-1.62-.41-2.45.28-.87.89-1.62,1.84-2.23.91-.59,2.46-1.12,4.66-1.6-.84.87-1.57,1.68-2.18,2.42-.35.41-.62.77-.82,1.09-.2.31-.27.49-.22.53.06.05.24-.07.54-.35.3-.28.94-.98,1.92-2.1.46-.53.88-.99,1.25-1.41.04.07.08.13.12.2-.84.88-1.59,1.69-2.24,2.42-.36.4-.65.75-.87,1.04-.22.29-.32.45-.29.48.03.03.19-.1.49-.39.29-.29.94-.98,1.93-2.08.41-.45.78-.86,1.12-1.23.04.07.08.14.12.21-.79.84-1.49,1.61-2.11,2.3-.36.4-.65.75-.87,1.04-.23.29-.33.45-.3.47.03.02.18-.11.47-.4.29-.29.93-.99,1.93-2.09.36-.4.7-.77,1-1.1.59,1.05.96,1.89,1.12,2.5.21.81.22,1.5.04,2.08h0ZM34.26,1036.49c-.23.54-.76,1-1.58,1.38-.46.21-1.14.4-2.04.56.43-.28.73-.64.92-1.07.18-.43.17-.81-.03-1.14-.07-.11-.15-.21-.25-.3.66-.68,1.38-1.42,2.17-2.23.26.24.48.52.65.83.38.69.43,1.35.16,1.98h0Z"/><path id="_x32_" class="st1" d="M58.5,1128.13c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93H14.05l.07.17h0c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.35,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM44.87,1130.93c-.37.91-1.33,1.85-2.59,2.46-.75.36-1.71.67-2.64.86-3.19.68-6.92.89-10.32.88-2.4,0-4.77-.23-7.14-.43-3.62-.3-7.56-1.72-8.13-3.87.05-.52.15-1.04.29-1.56,1.41-5.72,6.98-12.14,14.6-12.32.17,0,.34,0,.51,0h.09c.17,0,.34,0,.51,0,7.63.14,13.22,6.53,14.66,12.25.13.46.22.92.28,1.38-.03.12-.06.23-.11.35Z"/><path id="front" class="st1" d="M58.5,1194.81c0-1.54-.06-2.99-.12-4.3-.03-.72-.08-1.46-.14-2.22h0c-.08-1.04-.18-2.1-.31-3.19h.04s-2.86-27.2-13.02-53.93c-.02-.06-.04-.12-.07-.17l-30.77.35c-7.45,19.6-11.1,39.28-12.38,48.26-.57,3.51-.93,6.71-1.1,9.68-.02.44-.05.88-.06,1.31-.05,1.32-.08,2.77-.08,4.3,0,1.37.07,2.81.2,4.3h0c.11.88.26,1.71.45,2.47l.21.73c1.12,3.92,3.25,7.19,6.36,9.72h.01s.06.09.06.09c0,0,.63.58,2.03,1.35,0,0,.76.39.76.39,2.01.99,7.86,3.33,18.79,3.7.01,0,.21.01.21.01h.14s.2-.01.2-.01c10.92-.56,16.75-3.01,18.75-4.04,0,0,.75-.4.75-.4,1.4-.79,2.01-1.38,2.02-1.39h0s.06-.09.06-.09c3.07-2.59,5.17-5.9,6.24-9.84,0,0,.2-.75.2-.75.25-1.07.43-2.29.53-3.6h0c.03-.93.04-1.84.04-2.72ZM29.5,1199.67c-2.49,0-4.5-2.02-4.5-4.5s2-4.49,4.48-4.5c0,0,.01,0,.02,0,2.48,0,4.5,2.01,4.5,4.5s-2.02,4.5-4.5,4.5Z"/></g><g id="wellington-ukulele"><path id="rear1" data-name="rear" class="st1" d="M113.08,189.68h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11,0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34ZM135.42,145.28c2.49,0,4.5,2.02,4.5,4.5s-2.01,4.5-4.5,4.5-4.5-2.01-4.5-4.5,2.02-4.5,4.5-4.5ZM123.65,187.17c1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21Z"/><path id="_x31_71" data-name="_x31_7" class="st1" d="M157.92,237.88c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,240.05c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x31_61" data-name="_x31_6" class="st1" d="M157.92,289.48c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,291.64c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x31_51" data-name="_x31_5" class="st1" d="M157.92,341.07c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,343.24c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x31_41" data-name="_x31_4" class="st1" d="M157.92,392.66c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,394.83c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x31_31" data-name="_x31_3" class="st1" d="M157.92,444.26c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,446.43c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x31_21" data-name="_x31_2" class="st1" d="M157.92,495.85c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,498.02c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x31_11" data-name="_x31_1" class="st1" d="M157.92,547.45c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,549.61c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x31_01" data-name="_x31_0" class="st1" d="M157.92,599.04c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,601.21c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x39_1" data-name="_x39_" class="st1" d="M157.92,650.63c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,652.8c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x38_1" data-name="_x38_" class="st1" d="M157.92,702.23c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,704.4c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x37_1" data-name="_x37_" class="st1" d="M157.92,753.82c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,755.99c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x36_1" data-name="_x36_" class="st1" d="M157.92,805.42c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,807.58c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x35_1" data-name="_x35_" class="st1" d="M157.92,857.01c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,859.18c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x34_1" data-name="_x34_" class="st1" d="M157.92,908.61c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,910.77c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="_x33_1" data-name="_x33_" class="st1" d="M157.92,960.2c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,962.37c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="logo1" data-name="logo" class="st0" d="M139.13,937.85c1.13-1.15,3.05-3.09,5.75-5.81-.12-.02-.23-.05-.34-.09-.02,0-.03-.01-.04-.02-.07-.03-.13-.06-.19-.09-.04-.02-.07-.04-.1-.07-.02-.01-.04-.03-.07-.04-.04-.03-.08-.07-.12-.1-.01,0-.02-.02-.03-.03-.04-.04-.08-.08-.11-.12-.21-.24-.35-.53-.41-.84-.49.54-1.17,1.28-2.04,2.23-.46.5-.75.8-.85.92l.1.08c.66-.69,1.06-1.1,1.21-1.23.15-.12.27-.15.36-.08l.72.61-1.95,1.82c-.96.89-1.84,1.71-2.64,2.47,0,0,0,0,0,0-1.27-.54-2.47-.66-3.62-.36-1.15.29-1.92.89-2.3,1.8-.38.9-.28,1.97.3,3.22-1.94.11-3.21.24-3.8.39-.76.19-1.38.45-1.84.79-.47.34-.79.73-.98,1.17-.28.65-.21,1.4.21,2.23.42.83,1.26,1.51,2.53,2.05,1.55.65,3.03.8,4.46.43,1.42-.37,2.35-1.06,2.79-2.09.45-1.06.18-2.5-.8-4.33,1.56.01,2.84-.19,3.84-.6.76-.31,1.26-.74,1.5-1.3.24-.56.15-1.16-.26-1.82-.29-.46-.7-.85-1.24-1.18h0ZM134.07,941.31c.13-.31.34-.61.63-.9.29-.29.54-.46.77-.52.13-.03.25-.04.36-.03-.73.7-1.35,1.3-1.86,1.81,0-.11.04-.23.09-.36h0ZM138.14,938.24c-.63.62-1.21,1.19-1.73,1.72-.06-.03-.12-.06-.19-.09.53-.52,1.12-1.1,1.76-1.72.05.03.11.07.16.1h0ZM134.09,942.06s0-.02-.01-.03c.55-.57,1.23-1.26,2.06-2.08.06.03.12.08.16.12-.84.84-1.54,1.55-2.1,2.11-.04-.04-.08-.08-.11-.12ZM134.31,942.47s-.02,0-.03,0c0,0,0-.01,0-.02.01,0,.03.01.04.02h0ZM135.67,941.86c-.31.28-.59.43-.85.47-.02,0-.03,0-.04,0,.46-.49,1.02-1.07,1.66-1.74-.01.1-.04.21-.09.32-.15.35-.38.66-.68.94h0ZM134.57,942.34c-.07,0-.14-.03-.21-.05,0,0,0,0,0,0,.54-.57,1.22-1.26,2.03-2.09,0,.01.02.02.02.04.02.06.04.12.04.18-.74.76-1.37,1.4-1.88,1.93ZM136.54,940.04c.52-.52,1.08-1.1,1.7-1.72.05.04.1.08.15.12-.62.62-1.18,1.2-1.7,1.72-.05-.04-.1-.08-.16-.12h0ZM141.47,935.34c-.88.88-1.69,1.7-2.43,2.45-.06-.03-.12-.06-.17-.09.92-.92,2.38-2.37,4.37-4.33l.11.1-1.87,1.88h0ZM143.12,933.28l.03.03-1.89,1.86c-.91.89-1.74,1.71-2.51,2.47-.05-.03-.11-.05-.16-.08.95-.91,2.46-2.33,4.53-4.28h0ZM133.76,938.97c.27-.62.77-1.04,1.51-1.25.74-.21,1.5-.14,2.29.19.07.03.14.07.21.1-.67.63-1.28,1.21-1.83,1.74-.21-.05-.43-.08-.67-.06-.34.02-.7.15-1.06.39-.24.15-.42.33-.57.53-.11-.64-.07-1.19.13-1.65h0ZM134.49,947.17c-.15.49-.48.92-.97,1.3-.49.38-1.06.61-1.7.7-.64.09-1.26.04-1.86-.15-.82-.26-1.44-.7-1.86-1.32-.42-.62-.52-1.26-.32-1.9.21-.68.69-1.26,1.43-1.73.7-.45,1.91-.87,3.62-1.24-.65.68-1.21,1.3-1.69,1.87-.27.32-.48.6-.63.85-.15.24-.21.38-.17.41.04.04.18-.05.42-.27.23-.22.73-.76,1.49-1.63.36-.41.68-.77.97-1.09.03.05.06.1.09.15-.65.69-1.23,1.31-1.73,1.88-.28.31-.5.58-.67.81-.17.23-.25.35-.23.37.02.02.15-.08.38-.3.23-.22.73-.76,1.5-1.62.32-.35.61-.67.87-.95.03.06.06.11.09.16-.61.65-1.16,1.25-1.63,1.78-.28.31-.5.58-.68.81-.18.22-.25.35-.24.36.02.02.14-.09.37-.31.22-.23.72-.77,1.5-1.62.28-.31.54-.6.78-.86.46.82.75,1.46.87,1.94.16.63.17,1.16.03,1.61h0ZM139.11,940.69c-.18.42-.59.77-1.23,1.07-.35.16-.88.31-1.58.44.33-.22.57-.49.71-.83.14-.33.13-.63-.03-.89-.05-.08-.12-.16-.19-.24.51-.53,1.07-1.1,1.68-1.73.2.19.37.4.5.64.29.54.34,1.05.13,1.53h0Z"/><path id="_x32_1" data-name="_x32_" class="st1" d="M157.92,1011.79c0-1.2-.04-2.32-.09-3.34-.02-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84h-23.98l.05.13h0c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.52,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM147.34,1013.96c-.28.7-1.03,1.43-2.01,1.91-.58.28-1.33.52-2.05.67-2.48.52-5.37.69-8.01.68-1.86,0-3.7-.18-5.54-.33-2.81-.24-5.87-1.33-6.31-3,.04-.4.11-.81.22-1.21,1.09-4.44,5.42-9.42,11.33-9.56.13,0,.26,0,.39,0h.07c.13,0,.26,0,.39,0,5.92.11,10.26,5.07,11.37,9.5.1.36.17.71.22,1.07-.02.09-.05.18-.09.27Z"/><path id="front1" data-name="front" class="st1" d="M157.92,1063.52c0-1.2-.04-2.32-.09-3.34-.03-.56-.06-1.14-.11-1.72h0c-.06-.8-.14-1.63-.24-2.48h.03s-2.22-21.11-10.1-41.84c-.02-.04-.03-.09-.05-.13l-23.88.27c-5.78,15.2-8.61,30.47-9.6,37.44-.44,2.72-.72,5.2-.85,7.51-.02.34-.04.68-.05,1.02-.04,1.02-.06,2.15-.06,3.34,0,1.06.05,2.18.16,3.34h0c.09.68.2,1.33.35,1.92l.16.57c.87,3.04,2.53,5.58,4.93,7.54h0s.04.07.04.07c0,0,.49.45,1.58,1.05,0,0,.59.3.59.3,1.56.77,6.1,2.59,14.57,2.87,0,0,.16,0,.16,0h.11s.15-.01.15-.01c8.47-.44,13-2.34,14.55-3.13,0,0,.58-.31.58-.31,1.09-.62,1.56-1.07,1.57-1.08h0s.04-.07.04-.07c2.38-2.01,4.01-4.58,4.84-7.64,0,0,.15-.58.15-.58.2-.83.33-1.78.41-2.8h0c.02-.72.03-1.43.03-2.11ZM135.42,1068.31c-2.49,0-4.5-2.02-4.5-4.5s2-4.49,4.48-4.5c0,0,.01,0,.02,0,2.48,0,4.5,2.01,4.5,4.5s-2.02,4.5-4.5,4.5Z"/></g>`;
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'wellington',
+    orderBtnSelector: '[onclick^="wlGoOrder("]',
+    goOrder: 'wlGoOrder', proceed: 'wlProceedToCart', saveOnly: 'wlSaveImage', buildCanvas: 'buildWlSaveCanvas',
+  });
+}

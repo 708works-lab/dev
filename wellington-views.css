@@ -1,0 +1,108 @@
+/* WELLINGTON(ウクレレ) プレビューのタブ切替(商品イメージ=逆U字 / 着用 前 / 着用 後ろ)  2026-10-18 */
+.wellington-simulator .top-area { flex-direction: column; gap: 10px; }
+.wellington-simulator .fk-preview { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.wellington-simulator .fk-tabs { display: flex; gap: 6px; }
+.wellington-simulator .fk-tabs button {
+  flex: 1 1 0; min-width: 0; white-space: nowrap; border: 1.5px solid #d9d3c8; background: #fff; color: #555;
+  border-radius: 999px; padding: 8px 2px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.wellington-simulator .fk-tabs button[aria-pressed="true"] { background: #222; border-color: #222; color: #fff; }
+.wellington-simulator .fk-stage {
+  position: relative; background: #fff; border-radius: 12px; overflow: hidden;
+  width: 100%; aspect-ratio: 480 / 540; max-height: 72svh;
+}
+.wellington-simulator .fk-stage svg { display: block; width: 100%; height: 100%; touch-action: manipulation; }
+.wellington-simulator .fk-stage svg[hidden] { display: none; }
+.wellington-simulator .fk-tag {
+  position: absolute; bottom: 8px; font-size: 10px; color: #666; background: #fff; border: 1px solid #ddd;
+  border-radius: 999px; padding: 1px 9px; pointer-events: none;
+}
+.wellington-simulator .fk-tag[hidden] { display: none; }
+.wellington-simulator .fk-tag-l { left: 8px; }
+.wellington-simulator .fk-tag-r { right: 8px; }
+.wellington-simulator .fk-cap { margin: 0; font-size: 12px; color: #666; line-height: 1.6; min-height: 3.2em; }
+.wellington-simulator .fk-cap b { color: #222; font-weight: 600; }
+.wellington-simulator .fk-note { font-size: 11px; color: #888; }
+/* 画像保存用の縦長SVG(画面外に置く。非表示にはしない) */
+.wellington-simulator .fk-model { position: absolute; left: -10000px; top: 0; width: 80px; pointer-events: none; }
+.wellington-simulator .grad-row .gb-shuffle { flex: 1 1 100%; }
+.wellington-simulator .grad-row .grad-result { flex: 1 1 100%; font-size: 11px; color: #777; margin-top: 2px; }
+
+
+/* 操作の並び(全幅共通): 一括/1枚ずつ → カラー → 選択中 → 枚数 → おすすめ配色 → サマリー */
+.wellington-simulator .ctrl-col > .mode-row { order: 1; }
+.wellington-simulator .ctrl-col > .pal-box { order: 2; }
+.wellington-simulator .ctrl-col > .sel-box { order: 3; }
+.wellington-simulator .ctrl-col > .count-row { order: 4; }
+.wellington-simulator .ctrl-col > .grad-box { order: 5; }
+.wellington-simulator .ctrl-col > .sum-box { order: 6; }
+
+
+/* おすすめ配色: 見出しと注意書きを外し、ボタン+一言の1行に(押すたびに別パターン・「戻る」で元に戻せる) */
+.wellington-simulator .grad-box { padding: 6px 8px; }
+.wellington-simulator .grad-box .box-label, .wellington-simulator .grad-note { display: none; }
+.wellington-simulator .grad-row { flex-wrap: nowrap; align-items: center; gap: 10px; }
+.wellington-simulator .grad-row .gb-shuffle { flex: 0 0 auto; padding: 8px 14px; }
+.wellington-simulator .grad-row .grad-result { flex: 1 1 auto; margin: 0; font-size: 11px; min-width: 0; }
+
+/* ===== スマホ(≤600px): 「プレビュー→色選択」を1画面に収める compact 配置 (2026-10-17) =====
+   並び: タブ → プレビュー → 一括/1枚ずつ → カラー(色名なしの小さな丸・2段) → 選択中 → 枚数 → おすすめ配色 → サマリー
+   Triadと同様にプレビューは固定しない(名入れ刻印を足したときに邪魔になるため) */
+@media (max-width: 600px) {
+  .wellington-simulator .top-area { padding: 8px 10px 0; gap: 6px; }
+  .wellington-simulator .fk-preview { gap: 6px; }
+  .wellington-simulator .fk-tabs button { padding: 6px 2px; font-size: 11.5px; }
+  .wellington-simulator .fk-stage { aspect-ratio: auto; height: min(34svh, 300px); }
+  .wellington-simulator .fk-tag { bottom: 6px; font-size: 9.5px; padding: 0 7px; }
+  .wellington-simulator .fk-cap { font-size: 11px; line-height: 1.5; min-height: 0; }
+  .wellington-simulator .fk-note { font-size: 10px; }
+
+  .wellington-simulator .ctrl-col { gap: 6px; }
+
+  .wellington-simulator .mbt { padding: 7px 2px; font-size: 11px; }
+
+  /* パレット: 色名なしの丸を10列(20色=2段)。丸は30px、押しやすい余白を確保 */
+  .wellington-simulator .pal-box { padding: 6px 8px 8px; }
+  .wellington-simulator .pal-box .box-label { margin-bottom: 4px; }
+  .wellington-simulator .pal-box .box-label .fk-colname { color: #222; font-weight: 600; letter-spacing: 0; text-transform: none; margin-left: 4px; }
+  .wellington-simulator .palette { grid-template-columns: repeat(10, 1fr); gap: 4px 0; }
+  .wellington-simulator .cb-wrap { justify-content: center !important; gap: 0 !important; padding: 3px 0 !important; }
+  .wellington-simulator .cb { width: 30px !important; height: 30px !important; }
+  .wellington-simulator .color-name { display: none !important; }
+
+  /* 選択中: 1行の細い帯 */
+  .wellington-simulator .sel-box { padding: 4px 10px; display: flex; align-items: center; gap: 8px; }
+  .wellington-simulator .sel-box .box-label { display: none; }
+  .wellington-simulator .sel-info { font-size: 11.5px; }
+
+  /* 枚数: 小さく1行 */
+  .wellington-simulator .count-row { padding: 3px 8px; border-radius: 10px; }
+  .wellington-simulator .cnt-btn { width: 28px; height: 28px; font-size: 17px; }
+  .wellington-simulator .cnt-num { font-size: 13px; line-height: 1.2; }
+  .wellington-simulator .cnt-sub { font-size: 10px; margin-top: 0; line-height: 1.2; }
+
+  .wellington-simulator .sum-box { padding: 8px 10px; }
+}
+
+/* ===== PC(≥900px): 2カラム。左=プレビュー(スクロールしても見える位置に固定)、右=操作〜価格〜カート  (2026-10-17) =====
+   スマホと違い、PCでは名入れ刻印の入力欄も右カラムに収まるため、プレビューを固定しても邪魔にならない */
+@media (min-width: 900px) {
+  .wellington-simulator .app {
+    max-width: 1040px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+    column-gap: 28px; align-items: start;
+  }
+  .wellington-simulator .top-area { display: contents; }
+  .wellington-simulator .fk-preview { grid-column: 1; grid-row: 1 / span 8; position: sticky; top: 16px; margin: 10px 0 0 10px; }
+  .wellington-simulator .top-area > .ctrl-col { grid-column: 2; margin: 10px 10px 0 0; }
+  .wellington-simulator .app > :not(.top-area) { grid-column: 2; margin-left: 0 !important; margin-right: 10px !important; width: auto !important; max-width: none !important; }
+  .wellington-simulator .kokuin-toggle-area, .wellington-simulator .kokuin-section { padding-left: 0; padding-right: 0; }
+  .wellington-simulator .fk-stage { aspect-ratio: auto; max-height: none; height: min(calc(100svh - 190px), 640px); min-height: 420px; }
+  .wellington-simulator .fk-cap { min-height: 3.4em; }
+}
+
+@media (min-width: 900px) {
+  /* PCのパレット: 4列(色名つき)で縦に長くならないように */
+  .wellington-simulator .palette { grid-template-columns: repeat(4, 1fr); gap: 2px; }
+  .wellington-simulator .cb-wrap { padding: 4px !important; gap: 6px !important; }
+  .wellington-simulator .color-name { font-size: 11px !important; }
+}
