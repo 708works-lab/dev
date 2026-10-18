@@ -965,7 +965,7 @@ async function wcProceedToCart() {
 const FK_BASE = (document.currentScript && document.currentScript.src || '').replace(/[^\/]*$/, '');
 const FK_NS = 'http://www.w3.org/2000/svg';
 const FK_ARCH_W = 430, FK_ARCH_K = 0.93;   // アーチの幅 / 曲がる部分の間隔(1=詰めない)
-let fkView = 'prod', fkShape = null, fkWornState = 'idle', fkWornLogoMove = null, fkWornPromise = null;
+let fkView = 'prod', fkShape = null, fkWornState = 'idle', fkWornPromise = null;
 function fkEl(id) { return document.getElementById(id); }
 
 // 商品イメージ用: 元の縦長SVGからウロコの形(末端・中間・先端)と中心を取り出す。ロゴは3枚目→先端の本革へ移す
@@ -1059,31 +1059,14 @@ function fkDecode(id, inFront) {
   if (inFront && id === '_x38_1') return 8;
   return +id.replace(/_x(\d\d)_/g, (m, c) => String.fromCharCode(+('0x' + c)));
 }
-// 着用(前)のロゴを3枚目→1枚目の位置へ移すための平行移動量を、描画して測る
-function fkMeasureWornLogo() {
-  if (fkWornLogoMove) return fkWornLogoMove;
-  const t = document.createElementNS(FK_NS, 'svg');
-  t.setAttribute('width', '0'); t.setAttribute('height', '0'); t.setAttribute('viewBox', '0 0 480 1600');
-  t.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none';
-  t.innerHTML = window.WELLINGTON_WORN_INNER;
-  document.body.appendChild(t);
-  const g1 = t.querySelector('#strap1 > g[id="_x31_"]'), g3 = t.querySelector('#strap1 > g[id="_x33_"]');
-  const b1 = g1.getBBox(), b3 = g3.getBBox();
-  fkWornLogoMove = { dx: (b1.x + b1.width / 2) - (b3.x + b3.width / 2), dy: (b1.y + b1.height / 2) - (b3.y + b3.height / 2) };
-  t.remove();
-  return fkWornLogoMove;
-}
 function fkInitWorn(svgId) {
   const svg = fkEl(svgId), front = svgId === 'fk-front';
   svg.innerHTML = window.WELLINGTON_WORN_INNER;
   fkEnsureDefs(svg, fkGradPrefix(svgId));
   svg._p = [];
   svg.querySelector(front ? '#back' : '#front').style.display = 'none';
-  if (front) {
-    // PVC版のロゴは先端(1枚目・本革)に載る
-    const g1 = svg.querySelector('#strap1 > g[id="_x31_"]'), logo = svg.querySelector('#strap1 .wlg');
-    if (g1 && logo) { const m = fkMeasureWornLogo(); logo.setAttribute('transform', `translate(${m.dx.toFixed(3)},${m.dy.toFixed(3)})`); g1.appendChild(logo); }
-  }
+  // 着用(前)では先端(1番)がほとんど見えないため、ロゴは載せない(3番目の位置のままだとPVC部分に載ってしまうので取り除く)
+  if (front) { const logo = svg.querySelector('#strap1 .wlg'); if (logo) logo.remove(); }
   svg.querySelectorAll(front ? '#strap1 > g' : '#strap > g').forEach(g => {
     g.dataset.num = fkDecode(g.id, front);
     g.style.cursor = 'pointer';
@@ -1139,9 +1122,6 @@ function fkPaintWorn(svgId) {
     if (!ok) return;
     fkFillPiece([...g.querySelectorAll('.ws')], i, prefix);
   });
-  // ロゴは先端(1枚目)に移してあるので、その色だけ別に更新する
-  const logo = svg.querySelector('.wlg');
-  if (logo) logo.style.fill = wcGetLogoColor(wcFrontColor.hex);
 }
 function fkPaint() {
   fkPaintArch();
