@@ -733,6 +733,17 @@ async function buildDuetSaveCanvas() {
     topCaption: '▲ 後端（エンドピン側）',
     bottomCaption: '▼ 先端（ストラップピン側）',
     prepareSvg: async (cloned) => {
+      // 選択中ゾーンのハイライト枠（太線）は保存画像には不要。通常の細い枠線に戻す
+      [...DUET_LEATHER_ZONES, 'belt'].forEach(zone => {
+        const s = zone === 'belt' ? 'rgba(0,0,0,0.2)' : leatherStroke(duetColors[zone]);
+        cloned.querySelectorAll(`[data-zone="${zone}"]`).forEach(el => {
+          el.setAttribute('stroke', s);
+          el.setAttribute('stroke-width', '1.5');
+          el.setAttribute('stroke-opacity', '1');
+          el.removeAttribute('stroke-linejoin');
+          el.removeAttribute('stroke-linecap');
+        });
+      });
       if (kokuinEnabled && kokuin?.fontFamily) {
         await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
       }

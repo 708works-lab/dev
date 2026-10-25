@@ -657,6 +657,17 @@ async function buildCourierSaveCanvas() {
     topCaption: '▲ 後ろ（エンドピン側）',
     bottomCaption: '▼ 前（ボディ上部側）',
     prepareSvg: async (cloned) => {
+      // 選択中ゾーンのハイライト枠（太線）は保存画像には不要。通常の細い枠線に戻す
+      ['front','belt','rear'].forEach(zone => {
+        const s = zone === 'belt' ? 'rgba(0,0,0,0.2)'
+                : zone === 'front' ? leatherStroke(courierColors.front)
+                : leatherStroke(courierColors.rear);
+        cloned.querySelectorAll(`[data-zone="${zone}"]`).forEach(el => {
+          el.setAttribute('stroke', s);
+          el.setAttribute('stroke-width', '1.5');
+          el.setAttribute('stroke-opacity', '1');
+        });
+      });
       if (kokuinEnabled && kokuin?.fontFamily) {
         await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
       }
