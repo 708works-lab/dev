@@ -293,3 +293,6 @@
   80%      { transform: translateX(4px); }
 }
 .duet-simulator .d-shake { animation: d-shake .45s ease; }
+
+/* プレビューのパーツを直接タップして選べる（duet-simulator.js bindDuetStrapTap） */
+#duet-strap-wrap [data-zone] { cursor: pointer; }

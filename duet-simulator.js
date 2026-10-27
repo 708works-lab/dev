@@ -105,6 +105,7 @@ function initDuetSimulator() {
   if (!palette || !wrap) { setTimeout(initDuetSimulator, 100); return; }
   window.duetSimulatorInitialized = true;
 
+  bindDuetStrapTap();
   buildDuetZoneButtons();
   buildDuetPalette();
   updateDuetSummary();
@@ -119,6 +120,21 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initDuetSimulator);
 } else {
   initDuetSimulator();
+}
+
+// プレビューのストラップを直接タップしてパーツを選べるようにする
+// （ベルト＝ベルト、革パーツ＝一括時は「革パーツ（全体）」、個別時はそのパーツ）
+function bindDuetStrapTap() {
+  const wrap = document.getElementById('duet-strap-wrap');
+  if (!wrap || wrap.dataset.tapBound) return;
+  wrap.dataset.tapBound = '1';
+  wrap.addEventListener('click', e => {
+    const el = e.target.closest && e.target.closest('[data-zone]');
+    if (!el || !wrap.contains(el)) return;
+    const zone = el.getAttribute('data-zone');
+    if (zone !== 'belt' && !DUET_LEATHER_ZONES.includes(zone)) return;
+    selectDuetZone(zone === 'belt' ? 'belt' : (duetLinked ? 'leather' : zone));
+  });
 }
 
 // ============================================================================
