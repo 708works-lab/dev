@@ -1,0 +1,1197 @@
+// ============================================================================
+// 設定
+// ============================================================================
+
+const DUET_WORKER_URL     = 'https://folklore-image-upload.708works.workers.dev';
+const DUET_SHOPIFY_DOMAIN = '708works.jp';
+
+// 先端パーツ（ウロコ形状の向き）
+// CW73 = 通常（Wellingtonと同じ向き） / CW73R = R（上下逆さま）
+const DUET_FRONT_STYLES = [
+  { id:'standard', label:'通常（CW73）',   desc:'ウロコ形状が正位置（Wellingtonと同じ向き）', svgGroup:'part-front-CW73'  },
+  { id:'reverse',  label:'R（CW73R）', desc:'ウロコ形状を上下逆さまにした仕様',           svgGroup:'part-front-CW73R' },
+];
+
+// 長さバリアント（Courierと同じ寸法・アップチャージ額）
+const DUET_LENGTHS = [
+  { id:'short',    label:'短め',  desc:'最短約85cm〜最長約130cm',  price: 13860, priceAdj:    0 },
+  { id:'standard', label:'標準',  desc:'最短約95cm〜最長約145cm',  price: 13860, priceAdj:    0 },
+  { id:'long',     label:'長め',  desc:'最短約95cm〜最長約160cm',  price: 14410, priceAdj: +550 },
+];
+
+// 先端パーツ × 長さ × 刻印有無 → Shopifyバリアント ID
+const DUET_VARIANT_MAP = {
+  standard: {
+    short:    { noeng:'47393960558842', eng:'50230456582394' },
+    standard: { noeng:'50230456615162', eng:'50230456647930' },
+    long:     { noeng:'50230456680698', eng:'50230456713466' }
+  },
+  reverse: {
+    short:    { noeng:'50230456746234', eng:'50230456779002' },
+    standard: { noeng:'50230456811770', eng:'50230456844538' },
+    long:     { noeng:'50230456877306', eng:'50230456910074' }
+  }
+};
+
+// 革パーツ用カラー（20色）
+const DUET_LEATHER_COLORS = [
+  {id:'white',   name:'White',     hex:'#f2f0ec'},
+  {id:'yellow',  name:'Yellow',    hex:'#e8c84a'},
+  {id:'lgrn',    name:'Light GRN', hex:'#a8c43a'},
+  {id:'lbl',     name:'Light BL',  hex:'#7baed0'},
+  {id:'orange',  name:'Orange',    hex:'#e04e1a'},
+  {id:'sakura',  name:'Sakura',    hex:'#f0a0a8'},
+  {id:'pink',    name:'Pink',      hex:'#d96090'},
+  {id:'red',     name:'Red',       hex:'#b82828'},
+  {id:'winered', name:'Wine Red',  hex:'#7a2035'},
+  {id:'navy',    name:'Navy',      hex:'#1e2540'},
+  {id:'natural', name:'Natural',   hex:'#e8c4a0'},
+  {id:'tan',     name:'Tan',       hex:'#d4742a'},
+  {id:'camel',   name:'Camel',     hex:'#c46030'},
+  {id:'brown',   name:'Brown',     hex:'#9e3820'},
+  {id:'choco',   name:'Choco',     hex:'#4a2018'},
+  {id:'grey',    name:'Grey',      hex:'#9090a0'},
+  {id:'olive',   name:'Olive',     hex:'#7a7848'},
+  {id:'green',   name:'Green',     hex:'#3a5030'},
+  {id:'greenbl', name:'Green BL',  hex:'#2a5060'},
+  {id:'black',   name:'Black',     hex:'#1a1a1a'},
+];
+
+// ナイロンベルト専用カラー（6色）
+const DUET_BELT_COLORS = [
+  {id:'black',     name:'Black',      hex:'#1a1a1a'},
+  {id:'brown',     name:'Brown',      hex:'#b07840'},
+  {id:'ivory',     name:'Ivory',      hex:'#f0ece0'},
+  {id:'mossgreen', name:'Moss Green', hex:'#5c6b3a'},
+  {id:'cobalt',    name:'Cobalt',     hex:'#2a5a8c'},
+  {id:'cream',     name:'Cream',      hex:'#e8dfc8'},
+];
+
+// 革パーツのゾーン一覧（先端①＝ストラップピン側の1枚目 〜 先端④＝ベルト側の1枚目、後端）
+const DUET_LEATHER_ZONES = ['front1','front2','front3','front4','rear'];
+
+// ゾーン定義
+const DUET_ZONE_LABEL = {
+  leather: '革パーツ（全体）',
+  front1:  '先端①（ピン側）',
+  front2:  '先端②',
+  front3:  '先端③',
+  front4:  '先端④（ベルト側）',
+  belt:    'ベルト（ナイロン）',
+  rear:    '後端',
+};
+
+// ============================================================================
+// 状態
+// ============================================================================
+
+let duetColors = { front1:'#1a1a1a', front2:'#1a1a1a', front3:'#1a1a1a', front4:'#1a1a1a', rear:'#1a1a1a', belt:'#b07840' };
+let duetLinked      = true;
+let duetActiveZone  = 'leather';
+let duetSelectedStyle = 'standard';
+let duetSelectedLength = 'standard';
+let duetImageSaved  = false;
+let duetHistory     = [];
+let duetLastUploadedImage = null;
+let duetView = 'product';   // 'product'(商品イメージ) / 'front'(着用・前) / 'back'(着用・後ろ)
+
+// ============================================================================
+// 初期化
+// ============================================================================
+
+function initDuetSimulator() {
+  if (window.duetSimulatorInitialized) return;
+  const palette = document.getElementById('duet-palette');
+  const wrap    = document.getElementById('duet-strap-wrap');
+  if (!palette || !wrap) { setTimeout(initDuetSimulator, 100); return; }
+  window.duetSimulatorInitialized = true;
+
+  bindDuetStrapTap();
+  buildDuetViewTabs();
+  buildDuetZoneButtons();
+  buildDuetPalette();
+  updateDuetSummary();
+  buildFrontStyleSelector();
+  buildLengthSelector();
+  updateDuetPriceDisplay();
+  updateDuetCartButtonState();
+  loadDuetSVG();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDuetSimulator);
+} else {
+  initDuetSimulator();
+}
+
+// プレビューのストラップを直接タップしてパーツを選べるようにする
+// （ベルト＝ベルト、革パーツ＝一括時は「革パーツ（全体）」、個別時はそのパーツ）
+function bindDuetStrapTap() {
+  const wrap = document.getElementById('duet-strap-wrap');
+  if (!wrap || wrap.dataset.tapBound) return;
+  wrap.dataset.tapBound = '1';
+  wrap.addEventListener('click', e => {
+    const el = e.target.closest && e.target.closest('[data-zone]');
+    if (!el || !wrap.contains(el)) return;
+    const zone = el.getAttribute('data-zone');
+    if (zone !== 'belt' && !DUET_LEATHER_ZONES.includes(zone)) return;
+    selectDuetZone(zone === 'belt' ? 'belt' : (duetLinked ? 'leather' : zone));
+  });
+}
+
+// ============================================================================
+// SVG 読み込み・テクスチャ注入
+// ============================================================================
+
+function loadDuetSVG() {
+  const wrap = document.getElementById('duet-strap-wrap');
+  if (!wrap) return;
+  fetch('https://708works-lab.github.io/dev/duet_color_order.svg')
+    .then(r => r.text())
+    .then(text => {
+      wrap.innerHTML = text;
+      const svg = wrap.querySelector('svg');
+      if (svg) {
+        svg.style.width  = '100%';
+        svg.style.height = 'auto';
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        injectBeltTexture(svg);
+        buildDuetArch();
+      }
+      applyDuetFrontStyle();
+      applyDuetColors();
+    })
+    .catch(() => {
+      wrap.innerHTML = '<p style="padding:20px;font-size:11px;color:#aaa;text-align:center">読み込み中...</p>';
+    });
+}
+
+// ベルトのナイロン綾織テクスチャをSVGに注入
+function injectBeltTexture(svg) {
+  const ns   = 'http://www.w3.org/2000/svg';
+  let defs   = svg.querySelector('defs');
+  if (!defs) { defs = document.createElementNS(ns,'defs'); svg.insertBefore(defs, svg.firstChild); }
+
+  // 綾織（ダイアゴナルツイル）パターン
+  defs.insertAdjacentHTML('beforeend', `
+    <pattern id="d-twill" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="6" fill="none"/>
+      <line x1="0" y1="6" x2="6" y2="0" stroke="rgba(0,0,0,0.13)" stroke-width="2.5"/>
+      <line x1="-3" y1="3" x2="3" y2="-3" stroke="rgba(0,0,0,0.13)" stroke-width="2.5"/>
+      <line x1="3" y1="9" x2="9" y2="3" stroke="rgba(0,0,0,0.13)" stroke-width="2.5"/>
+      <line x1="0" y1="6" x2="6" y2="0" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="d-sheen" x1="0" y1="0" x2="1" y2="0"
+        gradientUnits="objectBoundingBox">
+      <stop offset="0%"   stop-color="rgba(0,0,0,.22)"/>
+      <stop offset="28%"  stop-color="rgba(255,255,255,.13)"/>
+      <stop offset="50%"  stop-color="rgba(255,255,255,.07)"/>
+      <stop offset="72%"  stop-color="rgba(255,255,255,.13)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,.22)"/>
+    </linearGradient>
+  `);
+
+  // ベルト要素の直後にオーバーレイを挿入（テクスチャ + 光沢）
+  const beltEls = [...svg.querySelectorAll('[data-zone="belt"]')];
+  beltEls.forEach(el => {
+    ['d-twill','d-sheen'].forEach(patId => {
+      const ov = el.cloneNode(false);
+      ov.removeAttribute('data-zone');
+      ov.removeAttribute('id');
+      ov.setAttribute('fill', `url(#${patId})`);
+      ov.setAttribute('stroke', 'none');
+      ov.style.pointerEvents = 'none';
+      el.parentNode.insertBefore(ov, el.nextSibling);
+    });
+  });
+}
+
+// ============================================================================
+// 先端パーツ（通常／R）の切り替え
+// ============================================================================
+
+function applyDuetFrontStyle() {
+  const wrap = document.getElementById('duet-strap-wrap');
+  if (!wrap) return;
+
+  DUET_FRONT_STYLES.forEach(s => {
+    duetQAll(`[id="${s.svgGroup}"]`).forEach(g => { g.style.display = (s.id === duetSelectedStyle) ? '' : 'none'; });
+  });
+  if (duetView === 'front') renderDuetWorn();
+}
+
+// ============================================================================
+// カラー適用
+// ============================================================================
+
+function applyDuetColors() {
+  const wrap = document.getElementById('duet-strap-wrap');
+  if (!wrap) return;
+
+  duetQAll('[data-zone="belt"]').forEach(el => {
+    el.setAttribute('fill', duetColors.belt);
+    el.setAttribute('stroke', 'rgba(0,0,0,0.2)');
+    el.setAttribute('stroke-width', '1.5');
+    el.setAttribute('stroke-opacity', '1');
+  });
+
+  DUET_LEATHER_ZONES.forEach(zone => {
+    duetQAll(`[data-zone="${zone}"]`).forEach(el => {
+      el.setAttribute('fill', duetColors[zone]);
+      el.setAttribute('stroke', leatherStroke(duetColors[zone]));
+      el.setAttribute('stroke-width', '1.5');
+      el.setAttribute('stroke-opacity', '1');
+    });
+  });
+
+  // ロゴ刻印は先端③のパーツ上にあるため、先端③の色に合わせて刻印色を決める
+  duetQAll('[data-role="logo"]').forEach(logo => {
+    logo.setAttribute('fill', engravingColor(duetColors.front3));
+  });
+
+  highlightActiveZone();
+  applyDuetWornColors();
+  if (typeof applyDuetKokuinColors === 'function') applyDuetKokuinColors();
+}
+
+function highlightActiveZone() {
+  const wrap = document.getElementById('duet-strap-wrap');
+  if (!wrap) return;
+
+  const highlightZones = duetActiveZone === 'leather'
+    ? DUET_LEATHER_ZONES
+    : [duetActiveZone];
+
+  [...DUET_LEATHER_ZONES, 'belt'].forEach(zone => {
+    const isActive = highlightZones.includes(zone);
+    duetQAll(`[data-zone="${zone}"]`).forEach(el => {
+      if (isActive) {
+        el.setAttribute('stroke', activeStroke(zone));
+        el.setAttribute('stroke-width', '3.5');
+        el.setAttribute('stroke-opacity', '0.7');
+        el.setAttribute('stroke-linejoin', 'round');
+        el.setAttribute('stroke-linecap', 'round');
+      } else {
+        const s = zone === 'belt' ? 'rgba(0,0,0,0.2)' : leatherStroke(duetColors[zone]);
+        el.setAttribute('stroke', s);
+        el.setAttribute('stroke-width', '1.5');
+        el.setAttribute('stroke-opacity', '1');
+        el.removeAttribute('stroke-linejoin');
+        el.removeAttribute('stroke-linecap');
+      }
+    });
+  });
+
+  // アーチ表示のベルトは複数パーツの継ぎ合わせなので、太い縁取りだと継ぎ目に段差が出る。
+  // 縁取りは通常の細線のままにし、選択中は外側へにじむ影で示す(継ぎ目が見えない)
+  const beltActive = duetActiveZone === 'belt';
+  document.querySelectorAll('#duet-arch-wrap [data-zone="belt"]').forEach(el => {
+    el.setAttribute('stroke', 'rgba(0,0,0,0.2)');
+    el.setAttribute('stroke-width', '1.5');
+    el.setAttribute('stroke-opacity', '1');
+    el.style.filter = beltActive ? 'drop-shadow(0 0 2.2px rgba(30,30,30,.95))' : '';
+  });
+}
+
+// ============================================================================
+// ゾーンボタン（革パーツ一括／個別切替）
+// ============================================================================
+
+function buildDuetZoneButtons() {
+  const container = document.getElementById('duet-zones');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const zones = duetLinked
+    ? ['leather', 'belt']
+    : ['rear', 'belt', 'front4', 'front3', 'front2', 'front1'];
+
+  zones.forEach(zone => {
+    const btn = document.createElement('button');
+    btn.className = 'duet-zone-btn' + (zone === duetActiveZone ? ' active' : '');
+    btn.onclick = () => selectDuetZone(zone);
+
+    const dot = document.createElement('span');
+    dot.className = 'zone-dot';
+    const hex = zone === 'leather' ? duetColors.front1
+              : zone === 'belt'    ? duetColors.belt
+              : duetColors[zone];
+    dot.style.background = hex;
+    if (zone === 'belt') {
+      dot.style.borderRadius = '3px';
+      dot.style.width  = '20px';
+      dot.style.height = '10px';
+    }
+    btn.appendChild(dot);
+    btn.appendChild(document.createTextNode(' ' + DUET_ZONE_LABEL[zone]));
+    container.appendChild(btn);
+  });
+
+  // 一括／個別切替トグル
+  const toggle = document.createElement('button');
+  toggle.className = 'duet-split-toggle' + (duetLinked ? '' : ' active');
+  toggle.onclick = toggleDuetLeatherSplit;
+  toggle.innerHTML = duetLinked
+    ? '<span class="toggle-icon">⊕</span> 先端・後端を1枚ずつ別の色にする'
+    : '<span class="toggle-icon">⊖</span> 革パーツをすべて同じ色に戻す';
+  container.appendChild(toggle);
+}
+
+function toggleDuetLeatherSplit() {
+  duetLinked = !duetLinked;
+  if (duetLinked) {
+    // リンク復帰時は先端①の色に全パーツを揃える
+    const base = duetColors.front1;
+    DUET_LEATHER_ZONES.forEach(z => { duetColors[z] = base; });
+    duetActiveZone = 'leather';
+  } else {
+    duetActiveZone = 'front1';
+  }
+  buildDuetZoneButtons();
+  buildDuetPalette();
+  updateDuetPaletteLabel();
+  updateDuetSummary();
+  applyDuetColors();
+}
+
+function selectDuetZone(zone) {
+  duetActiveZone = zone;
+  buildDuetZoneButtons();
+  buildDuetPalette();
+  updateDuetPaletteLabel();
+  highlightActiveZone();
+}
+
+function updateDuetPaletteLabel() {
+  const label = document.getElementById('duet-palette-label');
+  if (label) label.textContent = 'カラー（' + DUET_ZONE_LABEL[duetActiveZone] + '）';
+}
+
+// ============================================================================
+// カラーパレット
+// ============================================================================
+
+function buildDuetPalette() {
+  const palette = document.getElementById('duet-palette');
+  if (!palette) return;
+  palette.innerHTML = '';
+  palette.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px;';
+
+  const colors  = duetActiveZone === 'belt' ? DUET_BELT_COLORS : DUET_LEATHER_COLORS;
+  const current = duetActiveZone === 'leather' ? duetColors.front1
+                : duetActiveZone === 'belt'    ? duetColors.belt
+                : duetColors[duetActiveZone];
+
+  colors.forEach(c => {
+    const sw = document.createElement('div');
+    sw.className = 'duet-swatch' + (c.hex === current ? ' selected' : '');
+    const sel = c.hex === current;
+    sw.style.cssText = [
+      `background:${c.hex}`,
+      'width:22px',
+      'height:22px',
+      'border-radius:50%',
+      'cursor:pointer',
+      'display:block',
+      'flex-shrink:0',
+      'box-sizing:border-box',
+      sel ? 'border:2.5px solid #111;box-shadow:0 0 0 2px #fff,0 0 0 4px #111'
+          : 'border:1.5px solid rgba(0,0,0,.12)',
+    ].join(';');
+    sw.title = c.name;
+    sw.onclick = () => setDuetColor(c.hex);
+    palette.appendChild(sw);
+  });
+}
+
+function setDuetColor(hex) {
+  saveDuetHistory();
+  if (duetActiveZone === 'leather') {
+    DUET_LEATHER_ZONES.forEach(z => { duetColors[z] = hex; });
+  } else if (duetActiveZone === 'belt') {
+    duetColors.belt = hex;
+  } else {
+    duetColors[duetActiveZone] = hex;
+  }
+  duetImageSaved = false;
+  buildDuetZoneButtons();
+  buildDuetPalette();
+  updateDuetSummary();
+  updateDuetCartButtonState();
+  applyDuetColors();
+}
+
+// ============================================================================
+// 先端パーツセレクター（通常／R）
+// ============================================================================
+
+function buildFrontStyleSelector() {
+  const container = document.getElementById('duet-front-styles');
+  if (!container) return;
+  container.innerHTML = '';
+
+  DUET_FRONT_STYLES.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'style-btn' + (s.id === duetSelectedStyle ? ' active' : '');
+    btn.onclick   = () => selectDuetFrontStyle(s.id);
+    btn.innerHTML = `
+      <span class="style-label">${s.label}</span>
+      <span class="style-desc">${s.desc}</span>`;
+    container.appendChild(btn);
+  });
+}
+
+function selectDuetFrontStyle(id) {
+  duetSelectedStyle = id;
+  buildFrontStyleSelector();
+  updateDuetPriceDisplay();
+  applyDuetFrontStyle();
+  applyDuetColors();
+  if (typeof onDuetFrontStyleChangeForKokuin === 'function') onDuetFrontStyleChangeForKokuin(id);
+}
+
+// ============================================================================
+// 長さセレクター
+// ============================================================================
+
+function buildLengthSelector() {
+  const container = document.getElementById('duet-lengths');
+  if (!container) return;
+  container.innerHTML = '';
+
+  DUET_LENGTHS.forEach(len => {
+    const btn = document.createElement('button');
+    btn.className = 'style-btn' + (len.id === duetSelectedLength ? ' active' : '');
+    btn.onclick   = () => selectDuetLength(len.id);
+
+    const adj = len.priceAdj > 0 ? ` <span class="price-adj">+¥${len.priceAdj.toLocaleString()}</span>` : '';
+    btn.innerHTML = `
+      <span class="style-label">${len.label}</span>
+      <span class="style-desc">${len.desc}${adj}</span>`;
+    container.appendChild(btn);
+  });
+}
+
+function selectDuetLength(id) {
+  duetSelectedLength = id;
+  buildLengthSelector();
+  updateDuetPriceDisplay();
+}
+
+// ============================================================================
+// サマリー・価格
+// ============================================================================
+
+function updateDuetSummary() {
+  const el = document.getElementById('duet-summary');
+  if (!el) return;
+
+  const rows = duetLinked
+    ? [
+        { label: DUET_ZONE_LABEL.leather, zone:'front1', hex: duetColors.front1 },
+        { label: DUET_ZONE_LABEL.belt,    zone:'belt',   hex: duetColors.belt   },
+      ]
+    : [
+        { label: DUET_ZONE_LABEL.rear,   zone:'rear',   hex: duetColors.rear   },
+        { label: DUET_ZONE_LABEL.belt,   zone:'belt',   hex: duetColors.belt   },
+        { label: DUET_ZONE_LABEL.front4, zone:'front4', hex: duetColors.front4 },
+        { label: DUET_ZONE_LABEL.front3, zone:'front3', hex: duetColors.front3 },
+        { label: DUET_ZONE_LABEL.front2, zone:'front2', hex: duetColors.front2 },
+        { label: DUET_ZONE_LABEL.front1, zone:'front1', hex: duetColors.front1 },
+      ];
+
+  el.innerHTML = rows.map(r => `
+    <div class="summary-row">
+      <span class="summary-label">${r.label}</span>
+      <span class="summary-dot" style="background:${r.hex}"></span>
+      <span class="summary-name">${colorName(r.hex, r.zone)}</span>
+    </div>`).join('');
+}
+
+function updateDuetPriceDisplay() {
+  const el  = document.getElementById('duet-price-display');
+  const len = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
+  if (!el || !len) return;
+  const kokuinAdd = (window.DUET_KOKUIN_STATE?.enabled && window.DUET_KOKUIN_PRICE_ADD) || 0;
+  el.textContent = `¥${(len.price + kokuinAdd).toLocaleString()}（税込）`;
+}
+
+function colorName(hex, zone) {
+  const list = zone === 'belt' ? DUET_BELT_COLORS : DUET_LEATHER_COLORS;
+  return list.find(c => c.hex === hex)?.name || hex;
+}
+
+// ============================================================================
+// カラーユーティリティ
+// ============================================================================
+
+function leatherStroke(hex) {
+  const h = hex.replace('#','');
+  const lum = (parseInt(h.slice(0,2),16)*0.299 + parseInt(h.slice(2,4),16)*0.587 + parseInt(h.slice(4,6),16)*0.114) / 255;
+  return lum > 0.6 ? 'rgba(0,0,0,0.22)' : 'none';
+}
+
+function activeStroke(zone) {
+  const color = zone === 'belt' ? duetColors.belt : duetColors[zone];
+  const h = color.replace('#','');
+  const lum = (parseInt(h.slice(0,2),16)*0.299 + parseInt(h.slice(2,4),16)*0.587 + parseInt(h.slice(4,6),16)*0.114) / 255;
+  if (zone === 'belt') return '#888888';
+  return lum > 0.55 ? '#555555' : '#d8d8d8';
+}
+
+function engravingColor(hex) {
+  const h = hex.replace('#','');
+  const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+  const lum = (r*0.299 + g*0.587 + b*0.114) / 255;
+  if (lum > 0.45) {
+    return `rgb(${Math.floor(r*.5)},${Math.floor(g*.5)},${Math.floor(b*.5)})`;
+  } else {
+    return `rgb(${Math.min(255,r+Math.floor((255-r)*.45))},${Math.min(255,g+Math.floor((255-g)*.45))},${Math.min(255,b+Math.floor((255-b)*.45))})`;
+  }
+}
+
+// ============================================================================
+// 履歴管理
+// ============================================================================
+
+function saveDuetHistory() {
+  duetHistory.push({...duetColors, _linked: duetLinked});
+  if (duetHistory.length > 20) duetHistory.shift();
+  const btn = document.getElementById('duet-btn-undo');
+  if (btn) btn.disabled = false;
+}
+
+function duetUndo() {
+  if (!duetHistory.length) return;
+  const prev = duetHistory.pop();
+  const { _linked, ...colors } = prev;
+  duetColors = colors;
+  duetLinked = _linked;
+  if (duetLinked && duetActiveZone !== 'belt') duetActiveZone = 'leather';
+  duetImageSaved = false;
+  buildDuetZoneButtons();
+  buildDuetPalette();
+  updateDuetPaletteLabel();
+  updateDuetSummary();
+  updateDuetCartButtonState();
+  applyDuetColors();
+  const btn = document.getElementById('duet-btn-undo');
+  if (btn) btn.disabled = duetHistory.length === 0;
+}
+
+function duetReset() {
+  saveDuetHistory();
+  duetColors  = { front1:'#1a1a1a', front2:'#1a1a1a', front3:'#1a1a1a', front4:'#1a1a1a', rear:'#1a1a1a', belt:'#b07840' };
+  duetLinked  = true;
+  duetActiveZone = 'leather';
+  duetImageSaved = false;
+  buildDuetZoneButtons();
+  buildDuetPalette();
+  updateDuetPaletteLabel();
+  updateDuetSummary();
+  updateDuetCartButtonState();
+  applyDuetColors();
+}
+
+// ============================================================================
+// 画像保存・アップロード
+// ============================================================================
+
+async function duetSaveImage() {
+  const svg = document.querySelector('#duet-strap-wrap svg');
+  if (!svg) { showDuetToast('SVGが見つかりません'); return; }
+  const canvas = await buildDuetSaveCanvas();
+  // toDataURL + <a download> はモバイルSafari等で保存ダイアログが起動しないことがあるため、
+  // Blob URL方式（folkloreと同じ）に統一する
+  const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href     = url;
+  link.download = `duet-color-${Date.now()}.png`;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  // 即座にrevokeするとダウンロード開始前にURLが無効化される端末があるため少し待つ
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  duetImageSaved = true;
+  updateDuetCartButtonState();
+  showDuetToast('画像を保存しました ✓');
+}
+
+// ---- 名入れ刻印フォント埋め込み ----
+// SVGをdata URIのImageとして再描画すると、ページ側で読み込んだWebフォント（Googleフォント／
+// カスタムフォント）は継承されず既定フォントにフォールバックする。保存画像・注文用画像で
+// 刻印文字のフォントが選択と異なって見える不具合の原因のため、選択中フォントを@font-faceとして
+// SVG自身に埋め込んでから書き出す。
+const KOKUIN_FONT_SOURCES = {
+  'Cabin Sketch': { google: true, param: 'Cabin+Sketch:wght@700' },
+  'Special Elite': { google: true, param: 'Special+Elite' },
+  'AG Stencil': { google: false, url: 'https://708works-lab.github.io/dev/fonts/AG-Stencil.ttf' },
+  'Lobster': { google: true, param: 'Lobster' },
+  'Playball': { google: true, param: 'Playball' },
+  'Great Vibes': { google: true, param: 'Great+Vibes' },
+  'Bebas Neue': { google: true, param: 'Bebas+Neue' },
+  'UnifrakturMaguntia': { google: true, param: 'UnifrakturMaguntia' }
+};
+const kokuinFontDataUriCache = {};
+function kokuinBufferToBase64(buf) {
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+async function kokuinFontDataUri(family) {
+  if (kokuinFontDataUriCache[family]) return kokuinFontDataUriCache[family];
+  const src = KOKUIN_FONT_SOURCES[family];
+  if (!src) return null;
+  const promise = (async () => {
+    try {
+      let fontUrl, mime;
+      if (src.google) {
+        const cssText = await (await fetch(`https://fonts.googleapis.com/css2?family=${src.param}&display=swap`)).text();
+        // GoogleフォントのCSSはUnicodeサブセットごとに複数の@font-faceブロックを含む。
+        // 先頭ブロックはcyrillic-ext等の場合が多く、それを使うと半角英数字のグリフを
+        // 持たないフォントファイルを埋め込んでしまい結局既定フォントにフォールバックする
+        // ため、必ず基本ラテン文字（U+0000-00FF）を含むブロックを選んで使用する。
+        const fontBlocks = cssText.split('}').filter(b => b.includes('@font-face'));
+        const latinBlock = fontBlocks.find(b => /unicode-range:[^;]*U\+0000-00FF/.test(b)) || fontBlocks[fontBlocks.length - 1] || cssText;
+        const m = latinBlock.match(/src:\s*url\(([^)]+)\)\s*format\('(woff2?|truetype)'\)/);
+        if (!m) return null;
+        fontUrl = m[1];
+        mime = m[2] === 'truetype' ? 'font/ttf' : 'font/woff2';
+      } else {
+        fontUrl = src.url;
+        mime = 'font/ttf';
+      }
+      const buf = await (await fetch(fontUrl)).arrayBuffer();
+      return `data:${mime};base64,${kokuinBufferToBase64(buf)}`;
+    } catch (e) {
+      return null;
+    }
+  })();
+  kokuinFontDataUriCache[family] = promise;
+  return promise;
+}
+async function embedKokuinFontIntoSvg(svgRoot, family, weight) {
+  const dataUri = await kokuinFontDataUri(family);
+  if (!dataUri) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const style = document.createElementNS(ns, 'style');
+  style.textContent = `@font-face{font-family:'${family}';font-weight:${weight || 400};src:url(${dataUri});}`;
+  svgRoot.insertBefore(style, svgRoot.firstChild);
+}
+
+// 保存・注文アップロード用のキャンバスを生成する（共通ヘルパー build708SaveCanvas に委譲）。
+async function buildDuetSaveCanvas() {
+  const zoneDefs = [
+    { zone: 'rear',   label: '後端' },
+    { zone: 'belt',   label: 'ベルト' },
+    { zone: 'front4', label: '先端④' },
+    { zone: 'front3', label: '先端③' },
+    { zone: 'front2', label: '先端②' },
+    { zone: 'front1', label: '先端①' },
+  ];
+  const chips = zoneDefs.map(z => ({ hex: duetColors[z.zone], label: `${z.label}：${colorName(duetColors[z.zone], z.zone)}` }));
+  const selectedStyle = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
+  const selectedLen = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
+  if (selectedLen) chips.unshift({ hex: null, label: `長さ：${selectedLen.label}（${selectedLen.desc}）` });
+  if (selectedStyle) chips.unshift({ hex: null, label: `先端パーツ：${selectedStyle.label}` });
+
+  const kokuin = window.DUET_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+
+  let extra;
+  if (kokuinEnabled) {
+    extra = {
+      height: 160,
+      draw: async (ctx, box) => {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.moveTo(box.x + 8, box.y);
+        ctx.arcTo(box.x + box.width, box.y, box.x + box.width, box.y + box.height, 8);
+        ctx.arcTo(box.x + box.width, box.y + box.height, box.x, box.y + box.height, 8);
+        ctx.arcTo(box.x, box.y + box.height, box.x, box.y, 8);
+        ctx.arcTo(box.x, box.y, box.x + box.width, box.y, 8);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#999';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('名入れ刻印', box.x + 14, box.y + 20);
+
+        const kokuinPreviewSvg = document.getElementById('duet-kokuin-svg-wrap')?.shadowRoot?.querySelector('svg');
+        const contentW = box.width - 28;
+        if (kokuinPreviewSvg) {
+          const previewClone = kokuinPreviewSvg.cloneNode(true);
+          if (kokuin?.fontFamily) await embedKokuinFontIntoSvg(previewClone, kokuin.fontFamily, kokuin.fontWeight);
+          const vb = kokuinPreviewSvg.getAttribute('viewBox')?.split(' ').map(Number);
+          const aspect = (vb && vb[2]) ? vb[3] / vb[2] : 0.66;
+          let previewW = contentW, previewH = Math.round(contentW * aspect);
+          const maxH = box.height - 34;
+          if (previewH > maxH) { previewH = maxH; previewW = Math.round(maxH / aspect); }
+          previewClone.setAttribute('width', previewW);
+          previewClone.setAttribute('height', previewH);
+          const svgStr = new XMLSerializer().serializeToString(previewClone);
+          const dataUri = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+          const previewX = box.x + 14 + (contentW - previewW) / 2;
+          await new Promise(resolve => {
+            const img = new Image();
+            img.onload  = () => { ctx.drawImage(img, previewX, box.y + 28, previewW, previewH); resolve(); };
+            img.onerror = resolve;
+            img.src = dataUri;
+          });
+        } else {
+          await document.fonts.load(`${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`).catch(() => {});
+          ctx.fillStyle = '#1a1a1a';
+          ctx.font = `${kokuin.fontWeight} 26px "${kokuin.fontFamily}"`;
+          ctx.textAlign = 'left';
+          ctx.fillText(kokuin.text, box.x + 14, box.y + box.height - 20);
+        }
+      },
+    };
+  }
+
+  return build708SaveCanvas({
+    title: 'duet',
+    svgSelector: '#duet-strap-wrap svg',
+    svgW: 191.5, svgH: 1406.71,
+    chips,
+    extra,
+    topCaption: '▲ 後端（エンドピン側）',
+    bottomCaption: '▼ 先端（ストラップピン側）',
+    prepareSvg: async (cloned) => {
+      // 選択中ゾーンのハイライト枠（太線）は保存画像には不要。通常の細い枠線に戻す
+      [...DUET_LEATHER_ZONES, 'belt'].forEach(zone => {
+        const s = zone === 'belt' ? 'rgba(0,0,0,0.2)' : leatherStroke(duetColors[zone]);
+        cloned.querySelectorAll(`[data-zone="${zone}"]`).forEach(el => {
+          el.setAttribute('stroke', s);
+          el.setAttribute('stroke-width', '1.5');
+          el.setAttribute('stroke-opacity', '1');
+          el.removeAttribute('stroke-linejoin');
+          el.removeAttribute('stroke-linecap');
+        });
+      });
+      if (kokuinEnabled && kokuin?.fontFamily) {
+        await embedKokuinFontIntoSvg(cloned, kokuin.fontFamily, kokuin.fontWeight);
+      }
+    },
+  });
+}
+
+
+// ============================================================================
+// カート注文
+// ============================================================================
+
+function updateDuetCartButtonState() {
+  const cartLabel = document.getElementById('duet-cart-label');
+  if (cartLabel) cartLabel.textContent = 'カートに入れる →';
+}
+
+async function duetGoOrder() {
+  if (window.DUET_KOKUIN_STATE?.enabled && !window.DUET_KOKUIN_STATE.valid) {
+    showDuetToast('刻印する文字を正しく入力してください');
+    return;
+  }
+  // 保存は任意（「配色画像だけ保存」ボタンへ分離）。カート投入の前提にしない
+  const loadEl = document.getElementById('duet-loading-overlay');
+  if (loadEl) loadEl.classList.add('show');
+  try {
+    const svg    = document.querySelector('#duet-strap-wrap svg');
+    if (!svg) throw new Error('SVGが見つかりません');
+    const canvas = await buildDuetSaveCanvas();
+    let result = null;
+    try { result = await duetUploadImage(canvas); } catch (e) { console.error(e); }
+    if (!result) {
+      if (window.sim708Track) sim708Track('upload_fail', 'duet');
+      result = window.sim708FallbackUpload ? sim708FallbackUpload('DUE') : { orderId: 'DUE-' + Date.now(), imageUrl: '' };
+    }
+    duetLastUploadedImage = result;
+    if (loadEl) loadEl.classList.remove('show');
+    showDuetConfirmModal(result);
+  } catch(e) {
+    console.error(e);
+    showDuetToast(e.message);
+    if (loadEl) loadEl.classList.remove('show');
+  }
+}
+
+async function duetUploadImage(canvas) {
+  const blob    = await new Promise(r => canvas.toBlob(r, 'image/png'));
+  const orderId = 'DUE-' + Date.now() + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
+  const form    = new FormData();
+  form.append('image', blob, `duet-${orderId}.png`);
+  form.append('orderId', orderId);
+  const res  = await fetch(DUET_WORKER_URL, {method:'POST', body:form});
+  if (!res.ok) return null;
+  const data = await res.json();
+  return {orderId, imageUrl: data.url || data.imageUrl};
+}
+
+function duetOrderRows() {
+  return duetLinked
+    ? [{label: DUET_ZONE_LABEL.leather, zone:'front1', hex: duetColors.front1},
+       {label: DUET_ZONE_LABEL.belt,    zone:'belt',   hex: duetColors.belt  }]
+    : [{label: DUET_ZONE_LABEL.rear,   zone:'rear',   hex: duetColors.rear  },
+       {label: DUET_ZONE_LABEL.belt,   zone:'belt',   hex: duetColors.belt  },
+       {label: DUET_ZONE_LABEL.front4, zone:'front4', hex: duetColors.front4},
+       {label: DUET_ZONE_LABEL.front3, zone:'front3', hex: duetColors.front3},
+       {label: DUET_ZONE_LABEL.front2, zone:'front2', hex: duetColors.front2},
+       {label: DUET_ZONE_LABEL.front1, zone:'front1', hex: duetColors.front1}];
+}
+
+function showDuetConfirmModal(result) {
+  const modal = document.getElementById('duet-confirm-modal');
+  if (!modal) return;
+  const img = document.getElementById('duet-modal-image');
+  if (img) img.src = result.imageUrl;
+
+  const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
+  const len   = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
+  const rows = duetOrderRows();
+  const kokuin = window.DUET_KOKUIN_STATE;
+  const kokuinRow = (kokuin?.enabled && kokuin.valid && kokuin.text)
+    ? `<div class="modal-color-row">
+        <span class="modal-zone-label">名入れ刻印</span>
+        <span></span>
+        <span>${kokuin.text}（${kokuin.fontLabel}）</span>
+      </div>`
+    : '';
+
+  const info = document.getElementById('duet-modal-info');
+  if (info) info.innerHTML = `
+    <p><strong>注文ID:</strong> ${result.orderId}</p>
+    <div class="modal-color-list">
+      ${rows.map(r => `
+        <div class="modal-color-row">
+          <span class="modal-zone-label">${r.label}</span>
+          <span class="modal-color-dot" style="background:${r.hex}"></span>
+          <span>${colorName(r.hex, r.zone)}</span>
+        </div>`).join('')}
+      <div class="modal-color-row">
+        <span class="modal-zone-label">先端パーツ</span>
+        <span></span>
+        <span>${style?.label}（${style?.desc}）</span>
+      </div>
+      <div class="modal-color-row">
+        <span class="modal-zone-label">長さ</span>
+        <span></span>
+        <span>${len?.label}（${len?.desc}）</span>
+      </div>
+      ${kokuinRow}
+    </div>`;
+  modal.classList.add('show');
+}
+
+function closeDuetModal() {
+  const modal = document.getElementById('duet-confirm-modal');
+  if (modal) modal.classList.remove('show');
+}
+
+async function duetProceedToCart() {
+  if (!duetLastUploadedImage) { showDuetToast('画像情報が見つかりません'); return; }
+  closeDuetModal();
+
+  const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
+  const len   = DUET_LENGTHS.find(l => l.id === duetSelectedLength);
+  const kokuin = window.DUET_KOKUIN_STATE;
+  const kokuinEnabled = !!(kokuin?.enabled && kokuin.valid && kokuin.text);
+  const variantId = DUET_VARIANT_MAP[duetSelectedStyle]?.[duetSelectedLength]?.[kokuinEnabled ? 'eng' : 'noeng'];
+  if (!variantId) { showDuetToast('バリアントが見つかりません'); return; }
+  const rows  = duetOrderRows();
+  const colorDataEN = duetLinked
+    ? `Leather(All):${colorName(duetColors.front1,'front1')}, Belt[Nylon]:${colorName(duetColors.belt,'belt')}`
+    : rows.map(r => `${r.label}:${colorName(r.hex, r.zone)}`).join(', ');
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = `https://${DUET_SHOPIFY_DOMAIN}/cart/add`;
+  form.style.display = 'none';
+
+  [['id', variantId],['quantity','1']].forEach(([k,v]) => {
+    const i = document.createElement('input');
+    i.type='hidden'; i.name=k; i.value=v; form.appendChild(i);
+  });
+  const properties = {'Order ID': duetLastUploadedImage.orderId, 'Colors': colorDataEN, 'Front Part': style.label, 'Length': len.label, 'Image URL': duetLastUploadedImage.imageUrl};
+  if (kokuinEnabled) {
+    properties['刻印文字'] = kokuin.text;
+    properties['刻印フォント'] = kokuin.fontLabel;
+  }
+  Object.entries(properties)
+    .forEach(([k,v]) => {
+      const i = document.createElement('input');
+      i.type='hidden'; i.name=`properties[${k}]`; i.value=v; form.appendChild(i);
+    });
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
+// ============================================================================
+// Toast
+// ============================================================================
+
+function showDuetToast(msg) {
+  const el = document.getElementById('duet-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// 注文導線の共通処理（保存とカート投入の分離・計測）。定義は save-canvas-common.js
+if (typeof sim708SetupOrderUI === 'function') {
+  sim708SetupOrderUI({
+    product: 'duet',
+    orderBtnSelector: '[onclick^="duetGoOrder("]',
+    goOrder: 'duetGoOrder', proceed: 'duetProceedToCart', saveOnly: 'duetSaveImage', buildCanvas: 'buildDuetSaveCanvas',
+  });
+}
+
+
+// ============================================================================
+// 表示切替（商品イメージ／着用イメージ 前・後ろ）
+// 着用イメージSVGは初回に必要な分だけ遅延読込（duet-worn-cw73.js / -cw73r.js / -back.js）
+// ============================================================================
+
+const DUET_WORN_BASE = window.DUET_WORN_BASE || 'https://708works-lab.github.io/dev/';
+const DUET_VIEWS = [
+  { id: 'product', label: '商品イメージ' },
+  { id: 'front',   label: '着用イメージ（前）' },
+  { id: 'back',    label: '着用イメージ（後ろ）' },
+];
+
+function buildDuetViewTabs() {
+  const root = document.querySelector('.duet-simulator');
+  const app  = root && root.querySelector('.app');
+  const col  = root && root.querySelector('.preview-col');
+  if (!root || !app || !col || root.querySelector('.duet-view-tabs')) return;
+
+  const tabs = document.createElement('div');
+  tabs.className = 'duet-view-tabs';
+  tabs.setAttribute('role', 'tablist');
+  DUET_VIEWS.forEach(v => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'duet-view-tab' + (v.id === duetView ? ' active' : '');
+    b.dataset.view = v.id;
+    b.setAttribute('role', 'tab');
+    b.textContent = v.label;
+    b.onclick = () => setDuetView(v.id);
+    tabs.appendChild(b);
+  });
+  app.parentNode.insertBefore(tabs, app);
+
+  const worn = document.createElement('div');
+  worn.id = 'duet-worn-wrap';
+  worn.className = 'duet-worn-wrap';
+  const note = document.createElement('div');
+  note.id = 'duet-worn-note';
+  note.className = 'duet-worn-note';
+  const arch = document.createElement('div');
+  arch.id = 'duet-arch-wrap';
+  arch.className = 'duet-arch-wrap';
+  col.appendChild(arch);
+  col.appendChild(worn);
+  col.appendChild(note);
+
+  // 着用イメージのタップでもパーツを選べる（商品イメージと同じ挙動）
+  worn.addEventListener('click', e => {
+    const el = e.target.closest && e.target.closest('[data-zone]');
+    if (!el || !worn.contains(el)) return;
+    const zone = el.getAttribute('data-zone');
+    if (zone === 'logo') return;
+    if (zone === 'belt') { selectDuetZone('belt'); return; }
+    if (DUET_LEATHER_ZONES.includes(zone)) selectDuetZone(duetLinked ? 'leather' : zone);
+  });
+
+  // 操作の少ないアイドル時に先読みしておく（タブを開いた瞬間に出せるように）
+  const idle = window.requestIdleCallback || (f => setTimeout(f, 2500));
+  idle(() => { duetLoadWorn(duetWornKey('front')); });
+}
+
+function duetWornKey(view) {
+  if (view === 'back') return 'back';
+  return duetSelectedStyle === 'reverse' ? 'cw73r' : 'cw73';
+}
+
+function duetLoadWorn(key) {
+  window.DUET_WORN = window.DUET_WORN || {};
+  if (window.DUET_WORN[key]) return Promise.resolve(window.DUET_WORN[key]);
+  window.DUET_WORN_LOADING = window.DUET_WORN_LOADING || {};
+  if (window.DUET_WORN_LOADING[key]) return window.DUET_WORN_LOADING[key];
+  window.DUET_WORN_LOADING[key] = new Promise((resolve, reject) => {
+    const sc = document.createElement('script');
+    sc.src = DUET_WORN_BASE + 'duet-worn-' + key + '.js?v=1';
+    sc.onload  = () => resolve(window.DUET_WORN[key]);
+    sc.onerror = () => { delete window.DUET_WORN_LOADING[key]; reject(new Error('load')); };
+    document.head.appendChild(sc);
+  });
+  return window.DUET_WORN_LOADING[key];
+}
+
+function setDuetView(view) {
+  duetView = view;
+  const root = document.querySelector('.duet-simulator');
+  if (!root) return;
+  root.classList.toggle('duet-worn', view !== 'product');
+  root.querySelectorAll('.duet-view-tab').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  if (view !== 'product') renderDuetWorn(); else duetSetNote();
+  if (window.sim708Track) { try { sim708Track('view_' + view, 'duet'); } catch (e) {} }
+}
+
+async function renderDuetWorn() {
+  const wrap = document.getElementById('duet-worn-wrap');
+  const note = document.getElementById('duet-worn-note');
+  if (!wrap || duetView === 'product') return;
+  const view = duetView;
+  const key  = duetWornKey(view);
+  let data;
+  try { data = await duetLoadWorn(key); }
+  catch (e) { wrap.innerHTML = '<p class="duet-worn-err">着用イメージを読み込めませんでした。通信状況をご確認ください。</p>'; return; }
+  if (duetView !== view || duetWornKey(view) !== key) return;   // 読込中に切り替えられた
+  wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + data.vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="着用イメージ">' + data.inner + '</svg>';
+  const style = DUET_FRONT_STYLES.find(s => s.id === duetSelectedStyle);
+  if (note) note.textContent = (view === 'front'
+    ? '先端パーツ：' + (style ? style.label : '') + '　'
+    : '') + '着用イメージは配色の目安です。パーツをタップして色を選べます。';
+  applyDuetWornColors();
+}
+
+// 着用イメージに現在の配色を反映
+function applyDuetWornColors() {
+  const wrap = document.getElementById('duet-worn-wrap');
+  if (!wrap || !wrap.querySelector('svg')) return;
+  const shapes = el => el.tagName.toLowerCase() === 'g' ? el.querySelectorAll('path,polygon,rect,circle') : [el];
+  wrap.querySelectorAll('[data-zone]').forEach(el => {
+    const zone = el.getAttribute('data-zone');
+    let color;
+    if (zone === 'logo')      color = engravingColor(duetColors.front3);
+    else if (zone === 'belt') color = duetColors.belt;
+    else                      color = duetColors[zone];
+    if (!color) return;
+    shapes(el).forEach(n => { n.style.fill = color; });
+  });
+}
+
+
+// ============================================================================
+// 商品イメージ: 縦長のストレート部分だけを逆U字に曲げて表示（分岐部分はそのまま）
+// 元の縦長SVG(#duet-strap-wrap)は画像保存・注文画像用に画面外へ残し、表示用は #duet-arch-wrap に別SVGとして組む。
+// 色・先端パーツ切替・ハイライトは duetQAll() で両方のSVGに同じ処理をかける。
+// 並び: 左の脚=後端(逆さ)→ベルト→分岐・バックル→ベルト少し、アーチ=ベルト、右の脚=ベルト→先端パーツ(正位置)
+// ============================================================================
+
+// trimFrom〜trimLen: 後端側のまっすぐなベルトを描画上だけ短縮する区間(元座標y)。trimLenは織り目の周期6の倍数にする
+const DUET_ARCH = { D: 290, cut: 570, trimFrom: 92, trimLen: 96, halfW: 25, cx: 32, fullH: 1406.71, padL: 168 };
+
+function duetQAll(sel) {
+  const out = [];
+  ['duet-strap-wrap', 'duet-arch-wrap'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.querySelectorAll(sel).forEach(n => out.push(n));
+  });
+  return out;
+}
+
+function buildDuetArch() {
+  const wrap = document.getElementById('duet-strap-wrap');
+  const host = document.getElementById('duet-arch-wrap');
+  const root = document.querySelector('.duet-simulator');
+  const svg  = wrap && wrap.querySelector('svg');
+  if (!svg || !host || !root || host.querySelector('svg')) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); Object.keys(attrs || {}).forEach(k => e.setAttribute(k, attrs[k])); return e; };
+  const A = DUET_ARCH, R = A.D / 2;
+  // 綾織テクスチャ(6px周期の斜線)の位相を、左脚・アーチ・右脚でそろえて継ぎ目を消す。
+  // 斜線は x+y が6の倍数。各脚の座標変換後も 左脚: X+Y≡xL+cx+yA+cut、右脚: X+Y≡cx-xR-yA+yb2 (mod 6) が0になるよう、切断位置とアーチ高さを微調整する。
+  const mod6 = v => ((v % 6) + 6) % 6;
+  const n = Math.round((A.cut + A.cx - (A.D - Math.PI * R) / 2) / 3);
+  const cut = 3 * n - A.cx + (A.D - Math.PI * R) / 2;
+  const yb2 = cut + Math.PI * R;
+  const xL = A.padL, xR = A.padL + A.D;
+  let yA = 10 + R + A.halfW;
+  yA += mod6(-(xL + A.cx + yA + cut));
+  const g = A.trimLen, c1 = A.trimFrom, c2 = c1 + g;
+  const W = xR + A.cx + 8, H = yA + cut - g + 34;
+
+  const out = mk('svg', { xmlns: NS, viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'xMidYMid meet', role: 'img', 'aria-label': '商品イメージ' });
+  const defs = svg.querySelector('defs');
+  const od = mk('defs');
+  if (defs) [...defs.childNodes].forEach(n => od.appendChild(n.cloneNode(true)));
+  const cpL = mk('clipPath', { id: 'duet-arch-clipL' });
+  cpL.appendChild(mk('rect', { x: -20, y: -20, width: 260, height: c1 + 20 }));
+  const cpL2 = mk('clipPath', { id: 'duet-arch-clipL2' });
+  cpL2.appendChild(mk('rect', { x: -20, y: c2, width: 260, height: cut - c2 }));
+  od.appendChild(cpL2);
+  const cpR = mk('clipPath', { id: 'duet-arch-clipR' });
+  cpR.appendChild(mk('rect', { x: -20, y: yb2, width: 260, height: A.fullH - yb2 + 40 }));
+  od.appendChild(cpL); od.appendChild(cpR);
+  out.appendChild(od);
+
+  // アーチ部分のベルト。脚の上に重ねて描く。塗りと縁取りを分け、縁取りは円弧の外側・内側だけにして、
+  // 脚との境目に横線や段差(選択中の太い縁取りの端)が出ないようにする。
+  const hw = A.halfW, st = 1.5;
+  const ringD = `M${xL - hw},${yA + st} L${xL - hw},${yA} A${R + hw},${R + hw} 0 0 1 ${xR + hw},${yA} L${xR + hw},${yA + st} L${xR - hw},${yA + st} L${xR - hw},${yA} A${R - hw},${R - hw} 0 0 0 ${xL + hw},${yA} L${xL + hw},${yA + st} Z`;
+  const ring = mk('path', { 'data-zone': 'belt', d: ringD, fill: '#b07840', style: 'stroke:none' });
+  const edge = d => mk('path', { 'data-zone': 'belt', d, fill: 'none', style: 'fill:none;stroke-linecap:butt' });
+  const edgeOut = edge(`M${xL - hw},${yA} A${R + hw},${R + hw} 0 0 1 ${xR + hw},${yA}`);
+  const edgeIn  = edge(`M${xR - hw},${yA} A${R - hw},${R - hw} 0 0 0 ${xL + hw},${yA}`);
+  // 光沢は脚と同じ「縁が暗く中央が明るい」を、アーチでは円弧に沿った放射グラデーションで再現する
+  const rOut = R + hw, i0 = (R - hw) / rOut;
+  const rg = mk('radialGradient', { id: 'd-sheen-arch', gradientUnits: 'userSpaceOnUse', cx: (xL + xR) / 2, cy: yA, r: rOut });
+  [[0, 'rgba(0,0,0,.22)'], [.28, 'rgba(255,255,255,.13)'], [.5, 'rgba(255,255,255,.07)'], [.72, 'rgba(255,255,255,.13)'], [1, 'rgba(0,0,0,.22)']].forEach(([o, c]) => {
+    rg.appendChild(mk('stop', { offset: i0 + (1 - i0) * o, 'stop-color': c }));
+  });
+  od.appendChild(rg);
+  const cpRing = mk('clipPath', { id: 'duet-arch-clipRing' });
+  cpRing.appendChild(mk('rect', { x: 0, y: 0, width: 1000, height: yA }));
+  od.appendChild(cpRing);
+  const ringOverlays = ['d-twill', 'd-sheen-arch'].map(id => {
+    const ov = ring.cloneNode(false);
+    ov.removeAttribute('data-zone');
+    ov.setAttribute('fill', `url(#${id})`);
+    ov.style.pointerEvents = 'none';
+    ov.setAttribute('clip-path', 'url(#duet-arch-clipRing)');
+    return ov;
+  });
+
+  const body = () => {
+    const g = mk('g');
+    [...svg.children].filter(n => n.tagName.toLowerCase() !== 'defs').forEach(n => g.appendChild(n.cloneNode(true)));
+    return g;
+  };
+  // 左の脚: 後端が下になるよう180°回転（Folkloreと同じく片脚は上下逆）
+  const gl = mk('g', { transform: `translate(${xL},${yA + cut - g}) rotate(180) translate(${-A.cx},0)` });
+  const gl2 = body(); gl2.setAttribute('clip-path', 'url(#duet-arch-clipL)'); gl.appendChild(gl2);
+  const glb = mk('g', { transform: `translate(0,${-g})` });
+  const gl3 = body(); gl3.setAttribute('clip-path', 'url(#duet-arch-clipL2)'); glb.appendChild(gl3); gl.appendChild(glb);
+  // 右の脚: 先端パーツ側は正位置のまま
+  const gr = mk('g', { transform: `translate(${xR - A.cx},${yA - yb2})` });
+  const gr2 = body(); gr2.setAttribute('clip-path', 'url(#duet-arch-clipR)'); gr.appendChild(gr2);
+  out.appendChild(ring); ringOverlays.forEach(o => out.appendChild(o)); out.appendChild(edgeOut); out.appendChild(edgeIn);
+  out.appendChild(gl); out.appendChild(gr);
+
+  const label = (x, y, t) => { const e = mk('text', { x, y, 'text-anchor': 'middle', 'font-size': '14', fill: '#555', 'font-family': 'sans-serif', style: 'pointer-events:none' }); e.textContent = t; return e; };
+  out.appendChild(label(xL, yA + cut - g + 22, '後端'));
+  out.appendChild(label(xR, yA + (A.fullH - yb2) + 22, '先端'));
+
+  host.appendChild(out);
+  host.addEventListener('click', e => {
+    const el = e.target.closest && e.target.closest('[data-zone]');
+    if (!el || !host.contains(el)) return;
+    const zone = el.getAttribute('data-zone');
+    if (zone !== 'belt' && !DUET_LEATHER_ZONES.includes(zone)) return;
+    selectDuetZone(zone === 'belt' ? 'belt' : (duetLinked ? 'leather' : zone));
+  });
+  root.classList.add('duet-tabs-on');
+  duetSetNote();
+}
+
+function duetSetNote() {
+  const note = document.getElementById('duet-worn-note');
+  if (note && duetView === 'product') note.textContent = 'パーツをタップして色を選べます。実物は一本の長いストラップです（逆U字は見やすさのための表示）。';
+}

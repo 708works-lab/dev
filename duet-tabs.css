@@ -1,0 +1,36 @@
+/* Duet: 商品イメージ／着用イメージ(前・後ろ)の切替 (2026-10-29) */
+/* 3つの表示は同じ高さの枠に収める(タブ切替で下の要素がガタつかないように) */
+.duet-simulator { --duet-view-h: min(56svh, 480px); }
+.duet-simulator .duet-view-tabs { display: flex; gap: 6px; max-width: 520px; margin: 0 auto; padding: 8px 8px 0; }
+.duet-simulator .duet-view-tab {
+  flex: 1; min-width: 0; padding: 8px 4px; border: 1px solid #cfc9bf; border-radius: 8px;
+  background: #fff; color: #333; font-size: 12px; line-height: 1.25; cursor: pointer; font-family: inherit;
+}
+.duet-simulator .duet-view-tab.active { background: #222; border-color: #222; color: #fff; }
+.duet-simulator .duet-worn-wrap, .duet-simulator .duet-arch-wrap, .duet-simulator .duet-worn-note { display: none; }
+
+/* 着用イメージ表示中: 商品イメージ(縦長SVG)は保存用に画面外へ残す(display:noneにしない) */
+.duet-simulator.duet-worn .preview-col .strap-wrap, .duet-simulator.duet-tabs-on .preview-col .strap-wrap {
+  position: absolute !important; left: -9999px !important; top: 0 !important;
+  width: 200px !important; height: auto !important; max-height: none !important; overflow: visible !important; transform: none !important;
+}
+.duet-simulator.duet-worn .preview-col .dir-tag-v, .duet-simulator.duet-tabs-on .preview-col .dir-tag-v { display: none !important; }
+.duet-simulator.duet-worn .preview-col .duet-worn-wrap { display: block; width: 100%; }
+.duet-simulator.duet-worn .preview-col .duet-worn-wrap svg { display: block; width: 100%; height: var(--duet-view-h); margin: 0 auto; cursor: pointer; }
+.duet-simulator.duet-tabs-on:not(.duet-worn) .preview-col .duet-arch-wrap { display: block; width: 100%; }
+.duet-simulator .duet-arch-wrap svg { display: block; width: 100%; height: var(--duet-view-h); margin: 0 auto; cursor: pointer; }
+.duet-simulator.duet-tabs-on .preview-col .duet-worn-note, .duet-simulator.duet-worn .preview-col .duet-worn-note { display: block; font-size: 10px; color: #777; text-align: center; line-height: 1.5; padding: 2px 8px 0; }
+.duet-simulator .duet-worn-err { font-size: 11px; color: #a33; text-align: center; padding: 20px 8px; }
+
+/* 着用イメージは横幅いっぱいを使う(操作パネルはその下)。duetはスマホでも従来の2カラムなので全幅共通 */
+@media all {
+  .duet-simulator.duet-worn .app, .duet-simulator.duet-tabs-on .app { flex-wrap: wrap; }
+  .duet-simulator.duet-worn .app > .preview-col, .duet-simulator.duet-tabs-on .app > .preview-col { order: -1; flex: 0 0 100%; position: relative; }
+  .duet-simulator.duet-worn .app > .ctrl-left, .duet-simulator.duet-tabs-on .app > .ctrl-left { flex: 1 1 100%; }
+}
+/* スマホ: 既存のプレビュー枠(高さ固定)を着用イメージの高さに合わせる */
+@media (max-width: 480px) {
+  .duet-simulator.duet-worn .app > .preview-col, .duet-simulator.duet-tabs-on .app > .preview-col { height: auto !important; overflow: visible !important; position: static !important; }
+  .duet-simulator { --duet-view-h: min(46svh, 380px); }
+  .duet-simulator .duet-view-tab { font-size: 11px; }
+}
