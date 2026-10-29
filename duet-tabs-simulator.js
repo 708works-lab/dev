@@ -1195,7 +1195,7 @@ function buildDuetArch() {
 
 function duetSetNote() {
   const note = document.getElementById('duet-worn-note');
-  if (note && duetView === 'product') note.textContent = 'パーツをタップして色を選べます。実物は一本の長いストラップです（逆U字は見やすさのための表示）。';
+  if (note && duetView === 'product') note.textContent = 'パーツをタップして色を選べます。';
 }
 
 
