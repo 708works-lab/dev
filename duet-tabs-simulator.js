@@ -1008,6 +1008,8 @@ function buildDuetViewTabs() {
     if (DUET_LEATHER_ZONES.includes(zone)) selectDuetZone(duetLinked ? 'leather' : zone);
   });
 
+  restructureDuetControls(root);
+
   // 操作の少ないアイドル時に先読みしておく（タブを開いた瞬間に出せるように）
   const idle = window.requestIdleCallback || (f => setTimeout(f, 2500));
   idle(() => { duetLoadWorn(duetWornKey('front')); });
@@ -1194,4 +1196,98 @@ function buildDuetArch() {
 function duetSetNote() {
   const note = document.getElementById('duet-worn-note');
   if (note && duetView === 'product') note.textContent = 'パーツをタップして色を選べます。実物は一本の長いストラップです（逆U字は見やすさのための表示）。';
+}
+
+
+// ============================================================================
+// 操作の並び替え(プレビューの直下に「パーツ → カラー → おすすめ配色」を置き、色を触ると見た目がすぐ変わる距離にする)
+// 並び: プレビュー → パーツ → カラー → おすすめ配色 → 先端の向き → 長さ → サマリー
+// ============================================================================
+
+function restructureDuetControls(root) {
+  const left = root.querySelector('.ctrl-left');
+  if (!left || left.dataset.duetOrdered) return;
+  left.dataset.duetOrdered = '1';
+  const labels = [...left.querySelectorAll(':scope > .box-label')];   // [先端の向き, パーツ, カラー(#duet-palette-label), 長さ]
+  const byId = id => document.getElementById(id);
+  const palLabel = byId('duet-palette-label');
+  const frontLabel = labels[0], zonesLabel = labels.find(l => l !== frontLabel && l !== palLabel && /パーツ/.test(l.textContent));
+  const lenLabel = labels.find(l => l !== frontLabel && l !== zonesLabel && l !== palLabel);
+  const palBox = left.querySelector('.pal-box'), sum = left.querySelector('.sum-box');
+
+  const reco = document.createElement('div');
+  reco.className = 'duet-reco';
+  reco.innerHTML = '<button type="button" class="duet-reco-btn" id="duet-reco-btn">おすすめ配色を試す</button><span class="duet-reco-msg" id="duet-reco-msg">押すたびに別の配色になります</span>';
+  reco.querySelector('button').onclick = duetShuffle;
+
+  [zonesLabel, byId('duet-zones'), palLabel, palBox, reco, frontLabel, byId('duet-front-styles'), lenLabel, byId('duet-lengths'), sum]
+    .filter(Boolean).forEach(el => left.appendChild(el));
+  if (zonesLabel) zonesLabel.classList.add('duet-lbl-zones');
+  if (frontLabel) frontLabel.classList.add('duet-lbl-front');
+}
+
+// ============================================================================
+// おすすめ配色(他のシミュレーターと同様に、押すたびに別のパターン)
+// 6つの型(ストライプ/3色リピート/グラデーション/おすすめセット/ワンポイント/ワントーン)を袋方式で一巡
+// ============================================================================
+
+const DUET_RECO_GRADS = [
+  { n: 'ブラウン系グラデ', c: ['natural', 'tan', 'camel', 'brown'], b: ['brown', 'black', 'cream'] },
+  { n: 'ピンク系グラデ',   c: ['sakura', 'pink', 'red', 'winered'],  b: ['black', 'cream', 'brown'] },
+  { n: 'ブルー系グラデ',   c: ['lbl', 'greenbl', 'navy', 'black'],   b: ['cobalt', 'black', 'ivory'] },
+  { n: 'グリーン系グラデ', c: ['yellow', 'lgrn', 'green', 'olive'],  b: ['mossgreen', 'brown', 'black'] },
+  { n: 'サンセット系グラデ', c: ['yellow', 'orange', 'red', 'winered'], b: ['brown', 'black', 'cream'] },
+  { n: 'モノトーン系グラデ', c: ['white', 'grey', 'choco', 'black'], b: ['black', 'ivory', 'brown'] },
+];
+const DUET_RECO_SETS = [
+  { c: ['navy', 'white', 'red'],      b: 'ivory' },
+  { c: ['choco', 'natural', 'camel'], b: 'brown' },
+  { c: ['green', 'yellow', 'natural'], b: 'mossgreen' },
+  { c: ['black', 'orange', 'white'],  b: 'black' },
+  { c: ['sakura', 'lbl', 'white'],    b: 'cream' },
+  { c: ['winered', 'natural', 'navy'], b: 'brown' },
+  { c: ['olive', 'tan', 'yellow'],    b: 'mossgreen' },
+  { c: ['greenbl', 'lbl', 'white'],   b: 'cobalt' },
+  { c: ['grey', 'pink', 'black'],     b: 'black' },
+];
+let duetRecoBag = [], duetRecoPrev = '';
+
+function duetShuffle() {
+  const rnd = n => Math.floor(Math.random() * n), pick = a => a[rnd(a.length)];
+  const L = id => DUET_LEATHER_COLORS.find(c => c.id === id).hex;
+  const B = id => DUET_BELT_COLORS.find(c => c.id === id).hex;
+  const allL = DUET_LEATHER_COLORS.map(c => c.id), allB = DUET_BELT_COLORS.map(c => c.id);
+  const two = () => { const a = pick(allL); let b; do { b = pick(allL); } while (b === a); return [a, b]; };
+  const types = {
+    stripe:  () => { const [a, b] = two(); return { f: [a, b, a, b], r: a, b: pick(allB), n: '2色ストライプ' }; },
+    repeat3: () => { const s = DUET_RECO_SETS[rnd(DUET_RECO_SETS.length)].c, c = rnd(2) ? s : s.slice().reverse(); return { f: [c[0], c[1], c[2], c[0]], r: c[1], b: pick(allB), n: '3色リピート' }; },
+    grad:    () => { const g = pick(DUET_RECO_GRADS), c = rnd(2) ? g.c : g.c.slice().reverse(); return { f: c, r: c[3], b: pick(g.b), n: g.n }; },
+    set:     () => { const s = pick(DUET_RECO_SETS), c = s.c; return { f: [c[0], c[1], c[2], c[1]], r: c[0], b: s.b, n: 'おすすめセット' }; },
+    point:   () => { const [a, b] = two(); return { f: [a, a, b, a], r: a, b: pick(allB), n: 'ワンポイント' }; },
+    solid:   () => { const a = pick(allL); return { f: [a, a, a, a], r: a, b: pick(allB), n: 'ワントーン' }; },
+  };
+  let res, key, guard = 0;
+  do {
+    if (!duetRecoBag.length) duetRecoBag = Object.keys(types).sort(() => Math.random() - 0.5);
+    res = types[duetRecoBag.pop()]();
+    key = [res.f.join(), res.r, res.b].join('|');
+  } while (key === duetRecoPrev && ++guard < 20);
+  duetRecoPrev = key;
+
+  saveDuetHistory();
+  ['front1', 'front2', 'front3', 'front4'].forEach((z, i) => { duetColors[z] = L(res.f[i]); });
+  duetColors.rear = L(res.r);
+  duetColors.belt = B(res.b);
+  duetLinked = ['front1', 'front2', 'front3', 'front4', 'rear'].every(z => duetColors[z] === duetColors.front1);
+  duetActiveZone = duetLinked ? 'leather' : 'front1';
+  duetImageSaved = false;
+  buildDuetZoneButtons();
+  buildDuetPalette();
+  updateDuetPaletteLabel();
+  updateDuetSummary();
+  updateDuetCartButtonState();
+  applyDuetColors();
+  const msg = document.getElementById('duet-reco-msg');
+  if (msg) msg.textContent = '今回: ' + res.n;
+  if (window.sim708Track) { try { sim708Track('shuffle', 'duet'); } catch (e) {} }
 }

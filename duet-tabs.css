@@ -1,6 +1,6 @@
 /* Duet: 商品イメージ／着用イメージ(前・後ろ)の切替 (2026-10-29) */
 /* 3つの表示は同じ高さの枠に収める(タブ切替で下の要素がガタつかないように) */
-.duet-simulator { --duet-view-h: min(56svh, 480px); }
+.duet-simulator { --duet-view-h: min(40svh, 340px); }
 .duet-simulator .duet-view-tabs { display: flex; gap: 6px; max-width: 520px; margin: 0 auto; padding: 8px 8px 0; }
 .duet-simulator .duet-view-tab {
   flex: 1; min-width: 0; padding: 8px 4px; border: 1px solid #cfc9bf; border-radius: 8px;
@@ -31,6 +31,43 @@
 /* スマホ: 既存のプレビュー枠(高さ固定)を着用イメージの高さに合わせる */
 @media (max-width: 480px) {
   .duet-simulator.duet-worn .app > .preview-col, .duet-simulator.duet-tabs-on .app > .preview-col { height: auto !important; overflow: visible !important; position: static !important; }
-  .duet-simulator { --duet-view-h: min(46svh, 380px); }
-  .duet-simulator .duet-view-tab { font-size: 11px; }
+  .duet-simulator { --duet-view-h: min(34svh, 290px); }
+  .duet-simulator .duet-view-tab { font-size: 10.5px; padding: 8px 2px; white-space: nowrap; }
+}
+
+
+/* ===== 操作をプレビューの近くに集める(2026-10-29) =====
+   並び: プレビュー → パーツ(チップ) → カラー → おすすめ配色 → 先端の向き → 長さ → サマリー */
+.duet-simulator .ctrl-left { gap: 6px; }
+.duet-simulator .duet-worn-note { font-size: 10px; padding-top: 0; }
+.duet-simulator.duet-tabs-on .app { padding-top: 4px; }
+
+/* パーツ: 縦並びの大きなボタン → 横並びのチップ */
+.duet-simulator.duet-tabs-on .duet-zones { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+.duet-simulator.duet-tabs-on .duet-zone-btn { padding: 6px 10px; font-size: 11.5px; border-radius: 16px; }
+.duet-simulator.duet-tabs-on .duet-split-toggle { flex: 1 1 100%; margin-top: 0; padding: 6px 10px; font-size: 11px; }
+.duet-simulator.duet-tabs-on .duet-lbl-zones { display: none; }
+
+/* カラー: 丸を少し大きく(触って色が変わるのを楽しんでもらう) */
+.duet-simulator.duet-tabs-on .pal-box { padding: 8px 6px; }
+.duet-simulator.duet-tabs-on .palette { gap: 7px !important; justify-content: center; }
+.duet-simulator.duet-tabs-on .duet-swatch { width: 26px !important; height: 26px !important; }
+
+/* おすすめ配色: ボタン+一言の1行 */
+.duet-simulator .duet-reco { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 7px; padding: 6px 8px; }
+.duet-simulator .duet-reco-btn {
+  flex: 0 0 auto; padding: 8px 14px; border: 1.5px solid #222; border-radius: 16px;
+  background: #fff; color: #222; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.duet-simulator .duet-reco-btn:active { background: #222; color: #fff; }
+.duet-simulator .duet-reco-msg { flex: 1 1 auto; min-width: 0; font-size: 11px; color: #777; }
+
+/* 先端の向き・長さ: 説明文を畳んだ横並びのボタン */
+.duet-simulator.duet-tabs-on .duet-front-styles { flex-direction: row; gap: 6px; }
+.duet-simulator.duet-tabs-on .duet-front-styles .style-btn { flex: 1 1 0; min-width: 0; padding: 7px 8px; text-align: center; }
+.duet-simulator.duet-tabs-on .duet-front-styles .style-desc { font-size: 9.5px; line-height: 1.3; }
+.duet-simulator.duet-tabs-on .duet-lbl-front { margin-top: 6px; }
+@media (max-width: 480px) {
+  .duet-simulator.duet-tabs-on .duet-front-styles .style-desc { display: none; }
+  .duet-simulator.duet-tabs-on #duet-lengths .style-desc { display: block; }
 }
