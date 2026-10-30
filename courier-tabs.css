@@ -1,0 +1,68 @@
+/* Courier: 商品イメージ／着用イメージ(前・後ろ)の切替 (2026-10-29) */
+/* 3つの表示は同じ高さの枠に収める(タブ切替で下の要素がガタつかないように) */
+.courier-simulator { --courier-view-h: min(40svh, 340px); }
+.courier-simulator .courier-view-tabs { display: flex; gap: 6px; max-width: 520px; margin: 0 auto; padding: 8px 8px 0; }
+.courier-simulator .courier-view-tab {
+  flex: 1; min-width: 0; padding: 8px 4px; border: 1px solid #cfc9bf; border-radius: 8px;
+  background: #fff; color: #333; font-size: 12px; line-height: 1.25; cursor: pointer; font-family: inherit;
+}
+.courier-simulator .courier-view-tab.active { background: #222; border-color: #222; color: #fff; }
+.courier-simulator .courier-worn-wrap, .courier-simulator .courier-arch-wrap, .courier-simulator .courier-worn-note { display: none; }
+
+/* 着用イメージ表示中: 商品イメージ(縦長SVG)は保存用に画面外へ残す(display:noneにしない) */
+.courier-simulator.courier-worn .preview-col .strap-wrap, .courier-simulator.courier-tabs-on .preview-col .strap-wrap {
+  position: absolute !important; left: -9999px !important; top: 0 !important;
+  width: 200px !important; height: auto !important; max-height: none !important; overflow: visible !important; transform: none !important;
+}
+.courier-simulator.courier-worn .preview-col .dir-tag-v, .courier-simulator.courier-tabs-on .preview-col .dir-tag-v { display: none !important; }
+.courier-simulator.courier-worn .preview-col .courier-worn-wrap { display: block; width: 100%; }
+.courier-simulator.courier-worn .preview-col .courier-worn-wrap svg { display: block; width: 100%; height: var(--courier-view-h); margin: 0 auto; cursor: pointer; }
+.courier-simulator.courier-tabs-on:not(.courier-worn) .preview-col .courier-arch-wrap { display: block; width: 100%; }
+.courier-simulator .courier-arch-wrap svg { display: block; width: 100%; height: var(--courier-view-h); margin: 0 auto; cursor: pointer; }
+.courier-simulator.courier-tabs-on .preview-col .courier-worn-note, .courier-simulator.courier-worn .preview-col .courier-worn-note { display: block; font-size: 10px; color: #777; text-align: center; line-height: 1.5; padding: 2px 8px 0; }
+.courier-simulator .courier-worn-err { font-size: 11px; color: #a33; text-align: center; padding: 20px 8px; }
+
+/* 着用イメージは横幅いっぱいを使う(操作パネルはその下)。courierはスマホでも従来の2カラムなので全幅共通 */
+@media all {
+  .courier-simulator.courier-worn .app, .courier-simulator.courier-tabs-on .app { flex-wrap: wrap; }
+  .courier-simulator.courier-worn .app > .preview-col, .courier-simulator.courier-tabs-on .app > .preview-col { order: -1; flex: 0 0 100%; position: relative; }
+  .courier-simulator.courier-worn .app > .ctrl-left, .courier-simulator.courier-tabs-on .app > .ctrl-left { flex: 1 1 100%; }
+}
+/* スマホ: 既存のプレビュー枠(高さ固定)を着用イメージの高さに合わせる */
+@media (max-width: 480px) {
+  .courier-simulator.courier-worn .app > .preview-col, .courier-simulator.courier-tabs-on .app > .preview-col { height: auto !important; overflow: visible !important; position: static !important; }
+  .courier-simulator { --courier-view-h: min(34svh, 290px); }
+  .courier-simulator .courier-view-tab { font-size: 10.5px; padding: 8px 2px; white-space: nowrap; }
+}
+
+
+/* ===== 操作をプレビューの近くに集める(2026-10-29) =====
+   並び: プレビュー → パーツ(チップ) → カラー → おすすめ配色 → 先端の向き → 長さ → サマリー */
+.courier-simulator .ctrl-left { gap: 6px; }
+.courier-simulator .courier-worn-note { font-size: 10px; padding-top: 0; }
+.courier-simulator.courier-tabs-on .app { padding-top: 4px; }
+
+/* パーツ: 縦並びの大きなボタン → 横並びのチップ */
+.courier-simulator.courier-tabs-on .courier-zones { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+.courier-simulator.courier-tabs-on .courier-zone-btn { padding: 6px 10px; font-size: 11.5px; border-radius: 16px; }
+.courier-simulator.courier-tabs-on .courier-split-toggle { flex: 1 1 100%; margin-top: 0; padding: 6px 10px; font-size: 11px; }
+.courier-simulator.courier-tabs-on .courier-lbl-zones { display: none; }
+
+/* カラー: 丸を少し大きく(触って色が変わるのを楽しんでもらう) */
+.courier-simulator.courier-tabs-on .pal-box { padding: 8px 6px; }
+.courier-simulator.courier-tabs-on .palette { gap: 7px !important; justify-content: center; }
+.courier-simulator.courier-tabs-on .courier-swatch { width: 26px !important; height: 26px !important; }
+
+/* おすすめ配色: ボタン+一言の1行 */
+.courier-simulator .courier-reco { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 7px; padding: 6px 8px; }
+.courier-simulator .courier-reco-btn {
+  flex: 0 0 auto; padding: 8px 14px; border: 1.5px solid #222; border-radius: 16px;
+  background: #fff; color: #222; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.courier-simulator .courier-reco-btn:active { background: #222; color: #fff; }
+.courier-simulator .courier-reco-msg { flex: 1 1 auto; min-width: 0; font-size: 11px; color: #777; }
+
+/* 長さ: 3つを横並びのボタンに */
+.courier-simulator.courier-tabs-on .courier-lengths { display: flex; flex-direction: row; gap: 6px; }
+.courier-simulator.courier-tabs-on .courier-lengths .length-btn { flex: 1 1 0; min-width: 0; padding: 7px 8px; text-align: center; align-items: center; }
+.courier-simulator.courier-tabs-on .courier-lengths .len-desc { font-size: 9.5px; line-height: 1.3; }
