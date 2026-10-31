@@ -850,7 +850,7 @@ if (typeof sim708SetupOrderUI === 'function') {
 // courier-worn-front.js / courier-worn-back.js を生成し、この値を true にしてバージョンを上げる。
 // ============================================================================
 
-const COURIER_WORN_READY = false;
+const COURIER_WORN_READY = true;
 const COURIER_WORN_BASE = window.COURIER_WORN_BASE || 'https://708works-lab.github.io/dev/';
 const COURIER_VIEWS = [
   { id: 'product', label: '商品イメージ' },
@@ -959,7 +959,8 @@ async function renderCourierWorn() {
 function applyCourierWornColors() {
   const wrap = document.getElementById('courier-worn-wrap');
   if (!wrap || !wrap.querySelector('svg')) return;
-  const shapes = el => el.tagName.toLowerCase() === 'g' ? el.querySelectorAll('path,polygon,rect,circle') : [el];
+  // グループのゾーンは中の図形を塗る。ただし入れ子の別ゾーン(革パーツ内のロゴ)は除く
+  const shapes = el => el.tagName.toLowerCase() === 'g' ? [...el.querySelectorAll('path,polygon,rect,circle')].filter(n => n.closest('[data-zone]') === el) : [el];
   wrap.querySelectorAll('[data-zone]').forEach(el => {
     const zone = el.getAttribute('data-zone');
     const color = zone === 'logo' ? engravingColor(courierColors.front) : courierColors[zone];
