@@ -844,6 +844,27 @@ if (typeof sim708SetupOrderUI === 'function') {
 }
 
 // ============================================================================
+// 新規追加分の文言(zh-TW / en)。既存部分の文言は日本語のみ
+const COURIERT_DICT = {
+  '商品イメージ': ['商品圖', 'Product'],
+  '着用イメージ（前）': ['佩戴圖（正面）', 'Worn (front)'],
+  '着用イメージ（後ろ）': ['佩戴圖（背面）', 'Worn (back)'],
+  '着用イメージ': ['佩戴圖', 'Worn view'],
+  '着用イメージを読み込めませんでした。通信状況をご確認ください。': ['無法載入佩戴圖，請確認網路連線。', 'Couldn\'t load the worn view. Please check your connection.'],
+  '着用イメージは配色の目安です。パーツをタップして色を選べます。': ['佩戴圖僅供配色參考。點選部位即可選色。', 'The worn view is a guide to your color scheme. Tap a part to choose its color.'],
+  'パーツをタップして色を選べます。': ['點選部位即可選色。', 'Tap a part to choose its color.'],
+  'おすすめ配色を試す': ['試試推薦配色', 'Try a suggested palette'],
+  '押すたびに別の配色になります': ['每按一次就會換一組配色', 'A new combination each time'],
+  '今回: ': ['這次：', 'This time: '],
+  '後ろ': ['後側', 'Back'],
+  '前': ['前側', 'Front'],
+  '前後は同じ色': ['前後同色', 'Same color front and back'],
+  '前後は別の色': ['前後異色', 'Different colors front and back'],
+};
+function courierT(s) {
+  const l = (document.documentElement.lang || 'ja').toLowerCase(), e = COURIERT_DICT[s];
+  return e ? (l.startsWith('zh') ? e[0] : l.startsWith('en') ? e[1] : s) : s;
+}
 // 表示切替(商品イメージ／着用イメージ 前・後ろ)と、商品イメージの逆U字表示(Duetと同じ構成)
 // 元の縦長SVG(#courier-strap-wrap)は画像保存・注文画像用に画面外へ残し、表示用は #courier-arch-wrap に別SVGとして組む。
 // 着用イメージSVGは未作成のあいだ COURIER_WORN_READY=false(タブを出さない)。作成後は make-courier-worn.py で
@@ -853,9 +874,9 @@ if (typeof sim708SetupOrderUI === 'function') {
 const COURIER_WORN_READY = true;
 const COURIER_WORN_BASE = window.COURIER_WORN_BASE || 'https://708works-lab.github.io/dev/';
 const COURIER_VIEWS = [
-  { id: 'product', label: '商品イメージ' },
-  { id: 'front',   label: '着用イメージ（前）' },
-  { id: 'back',    label: '着用イメージ（後ろ）' },
+  { id: 'product', label: courierT('商品イメージ') },
+  { id: 'front',   label: courierT('着用イメージ（前）') },
+  { id: 'back',    label: courierT('着用イメージ（後ろ）') },
 ];
 let courierView = 'product';   // 'product' / 'front' / 'back'
 
@@ -948,10 +969,10 @@ async function renderCourierWorn() {
   const view = courierView;
   let data;
   try { data = await courierLoadWorn(view); }
-  catch (e) { wrap.innerHTML = '<p class="courier-worn-err">着用イメージを読み込めませんでした。通信状況をご確認ください。</p>'; return; }
+  catch (e) { wrap.innerHTML = '<p class="courier-worn-err">' + courierT('着用イメージを読み込めませんでした。通信状況をご確認ください。') + '</p>'; return; }
   if (courierView !== view) return;   // 読込中に切り替えられた
-  wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + data.vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="着用イメージ">' + data.inner + '</svg>';
-  if (note) note.textContent = '着用イメージは配色の目安です。パーツをタップして色を選べます。';
+  wrap.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + data.vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + courierT('着用イメージ') + '">' + data.inner + '</svg>';
+  if (note) note.textContent = courierT('着用イメージは配色の目安です。パーツをタップして色を選べます。');
   applyCourierWornColors();
 }
 
@@ -971,7 +992,7 @@ function applyCourierWornColors() {
 
 function courierSetNote() {
   const note = document.getElementById('courier-worn-note');
-  if (note && courierView === 'product') note.textContent = 'パーツをタップして色を選べます。';
+  if (note && courierView === 'product') note.textContent = courierT('パーツをタップして色を選べます。');
 }
 
 function buildCourierArch() {
@@ -994,7 +1015,7 @@ function buildCourierArch() {
   const g = A.trimLen, c1 = A.trimFrom, c2 = c1 + g;
   const W = xR + 35 + 8, H = yA + cut - g - A.yTop + 34;
 
-  const out = mk('svg', { xmlns: NS, viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'xMidYMid meet', role: 'img', 'aria-label': '商品イメージ' });
+  const out = mk('svg', { xmlns: NS, viewBox: `0 0 ${W} ${H}`, preserveAspectRatio: 'xMidYMid meet', role: 'img', 'aria-label': courierT('商品イメージ') });
   const defs = svg.querySelector('defs');
   const od = mk('defs');
   if (defs) [...defs.childNodes].forEach(nd => od.appendChild(nd.cloneNode(true)));
@@ -1046,8 +1067,8 @@ function buildCourierArch() {
   out.appendChild(gl); out.appendChild(gr);
 
   const label = (x, y, t) => { const e = mk('text', { x, y, 'text-anchor': 'middle', 'font-size': '14', fill: '#555', 'font-family': 'sans-serif', style: 'pointer-events:none' }); e.textContent = t; return e; };
-  out.appendChild(label(xL, yA + cut - g - A.yTop + 22, '後ろ'));
-  out.appendChild(label(xR, yA + (A.yEnd - yb2) + 22, '前'));
+  out.appendChild(label(xL, yA + cut - g - A.yTop + 22, courierT('後ろ')));
+  out.appendChild(label(xR, yA + (A.yEnd - yb2) + 22, courierT('前')));
 
   host.appendChild(out);
   root.classList.add('courier-tabs-on');
@@ -1071,7 +1092,7 @@ function restructureCourierControls(root) {
 
   const reco = document.createElement('div');
   reco.className = 'courier-reco';
-  reco.innerHTML = '<button type="button" class="courier-reco-btn" id="courier-reco-btn">おすすめ配色を試す</button><span class="courier-reco-msg" id="courier-reco-msg">押すたびに別の配色になります</span>';
+  reco.innerHTML = '<button type="button" class="courier-reco-btn" id="courier-reco-btn">' + courierT('おすすめ配色を試す') + '</button><span class="courier-reco-msg" id="courier-reco-msg">' + courierT('押すたびに別の配色になります') + '</span>';
   reco.querySelector('button').onclick = courierShuffle;
 
   [zonesLabel, byId('courier-zones'), palLabel, palBox, reco, lenLabel, byId('courier-lengths'), sum]
@@ -1129,6 +1150,6 @@ function courierShuffle() {
   updateCartButtonState();
   applyCourierColors();
   const msg = document.getElementById('courier-reco-msg');
-  if (msg) msg.textContent = '今回: ' + (courierLinked ? '前後は同じ色' : '前後は別の色');
+  if (msg) msg.textContent = courierT('今回: ') + (courierLinked ? courierT('前後は同じ色') : courierT('前後は別の色'));
   if (window.sim708Track) { try { sim708Track('shuffle', 'courier'); } catch (e) {} }
 }
