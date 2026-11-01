@@ -175,6 +175,21 @@ function wlCurState() { return wlState[wlActiveBranch]; }
 // 初期化
 // ============================================================================
 
+// URL ?wellington=色id-色id-…(ウクレレ標準の20個。先頭=末端、最後=先端)で初期配色を指定できる。
+// 配色アイデアページからの遷移用。数や色idが不正な場合は無視する。
+function applyWellingtonColorsFromUrl() {
+  try {
+    const q = new URLSearchParams(location.search).get('wellington');
+    if (!q) return;
+    const ids = q.split('-'), st = wlState.ukulele;
+    if (wlActiveBranch !== 'ukulele' || ids.length !== st.n) return;
+    const picked = ids.map(id => WL_COLORS.find(c => c.id === id));
+    if (picked.some(c => !c)) return;
+    const order = wlDisplayOrder('ukulele', st.n);
+    picked.forEach((c, i) => { st.colors[order[i]] = c.hex; });
+  } catch (e) {}
+}
+
 function initWellingtonSimulator() {
   if (window.wellingtonSimulatorInitialized) return;
   const paletteEl = document.getElementById('wl-palette');
@@ -183,6 +198,7 @@ function initWellingtonSimulator() {
   if (!paletteEl || !gradRowEl || !strapScrollEl) { setTimeout(initWellingtonSimulator, 100); return; }
   window.wellingtonSimulatorInitialized = true;
 
+  applyWellingtonColorsFromUrl();
   buildWlPalette();
   buildWlGrads();
   fkInitViews();
