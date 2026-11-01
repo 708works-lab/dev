@@ -70,6 +70,22 @@ let courierLastUploadedImage = null;
 // 初期化
 // ============================================================================
 
+// URL ?courier=前端の革id-後端の革id-ベルトid で初期配色を指定できる。配色アイデアページからの遷移用。不正値は無視する。
+// 前端と後端が同じ色なら「前後共通」、違えば別色として扱う。
+function applyCourierColorsFromUrl() {
+  try {
+    const q = new URLSearchParams(location.search).get('courier');
+    if (!q) return;
+    const ids = q.split('-');
+    if (ids.length !== 3) return;
+    const f = COURIER_LEATHER_COLORS.find(c => c.id === ids[0]), r = COURIER_LEATHER_COLORS.find(c => c.id === ids[1]), b = COURIER_BELT_COLORS.find(c => c.id === ids[2]);
+    if (!f || !r || !b) return;
+    courierColors = { front: f.hex, belt: b.hex, rear: r.hex };
+    courierLinked = (f.id === r.id);
+    courierActiveZone = courierLinked ? 'leather' : 'front';
+  } catch (e) {}
+}
+
 function initCourierSimulator() {
   if (window.courierSimulatorInitialized) return;
   const palette = document.getElementById('courier-palette');
@@ -77,6 +93,7 @@ function initCourierSimulator() {
   if (!palette || !wrap) { setTimeout(initCourierSimulator, 100); return; }
   window.courierSimulatorInitialized = true;
 
+  applyCourierColorsFromUrl();
   setupCourierPreview();
   buildCourierZoneButtons();
   buildCourierPalette();

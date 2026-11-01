@@ -123,6 +123,21 @@ let kHasDownloadedImage = false;
 // 初期化
 // ============================================================================
 
+// URL ?kolmio=色id-色id-…(標準の14個。先頭=末端、最後=先端)で初期配色を指定できる。
+// 配色アイデアページからの遷移用。数や色idが不正な場合は無視する。
+function applyKolmioColorsFromUrl() {
+  try {
+    const q = new URLSearchParams(location.search).get('kolmio');
+    if (!q) return;
+    const ids = q.split('-');
+    if (ids.length !== kN) return;
+    const picked = ids.map(id => KOLMIO_COLORS.find(c => c.id === id));
+    if (picked.some(c => !c)) return;
+    const order = kolmioDisplayOrder(kN);
+    picked.forEach((c, i) => { kPieceColors[order[i]] = c.hex; });
+  } catch (e) {}
+}
+
 function initKolmioSimulator() {
   if (window.kolmioSimulatorInitialized) return;
   const paletteEl = document.getElementById('kolmio-palette');
@@ -131,6 +146,7 @@ function initKolmioSimulator() {
   if (!paletteEl || !gradRowEl || !strapScrollEl) { setTimeout(initKolmioSimulator, 100); return; }
   window.kolmioSimulatorInitialized = true;
 
+  applyKolmioColorsFromUrl();
   buildKolmioPalette();
   buildKolmioGrads();
   fkInitViews();

@@ -115,12 +115,28 @@ const WC_ZONE_LABEL = {
 // 初期化
 // ============================================================================
 
+// URL ?clear=PVC色id-後端革id-前端革id で初期配色を指定できる。配色アイデアページからの遷移用。不正値は無視する。
+// 後端と前端が同じ色なら「前後は同じ色」、違えば別色として扱う。
+function applyWellingtonClearColorsFromUrl(){
+  try{
+    const q=new URLSearchParams(location.search).get('clear');
+    if(!q) return;
+    const ids=q.split('-');
+    if(ids.length!==3) return;
+    const pvc=WC_PVC_COLORS.find(c=>c.id===ids[0]), rear=WC_LEATHER_COLORS.find(c=>c.id===ids[1]), front=WC_LEATHER_COLORS.find(c=>c.id===ids[2]);
+    if(!pvc||!rear||!front) return;
+    wcPvcColor=pvc; wcRearColor=rear; wcFrontColor=front; wcLinked=(rear.id===front.id);
+    wcActiveZone='pvc';
+  }catch(e){}
+}
+
 function initializeWCSimulator() {
   if (window.wcSimulatorInitialized) return;
   const zonesEl = document.getElementById('wc-zones');
   const strapScrollEl = document.getElementById('wc-strap-scroll');
   if (!zonesEl || !strapScrollEl) { setTimeout(initializeWCSimulator, 100); return; }
   window.wcSimulatorInitialized = true;
+  applyWellingtonClearColorsFromUrl();
   wcBuildZoneButtons();
   wcBuildPalette();
   wcUpdatePaletteLabel();

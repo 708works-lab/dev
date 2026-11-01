@@ -132,6 +132,21 @@ function fcRebuildPartColors(){
 // 初期化
 // ============================================================================
 
+// URL ?clear=PVC色id-後端革id-前端革id で初期配色を指定できる。配色アイデアページからの遷移用。不正値は無視する。
+// 後端と前端が同じ色なら「前後は同じ色」、違えば別色として扱う。
+function applyFolkloreClearColorsFromUrl(){
+  try{
+    const q=new URLSearchParams(location.search).get('clear');
+    if(!q) return;
+    const ids=q.split('-');
+    if(ids.length!==3) return;
+    const pvc=FC_PVC_COLORS.find(c=>c.id===ids[0]), rear=FC_LEATHER_COLORS.find(c=>c.id===ids[1]), front=FC_LEATHER_COLORS.find(c=>c.id===ids[2]);
+    if(!pvc||!rear||!front) return;
+    fcPvcColor=pvc; fcRearColor=rear; fcFrontColor=front; fcLinked=(rear.id===front.id);
+    fcActiveZone='pvc';
+  }catch(e){}
+}
+
 function initializeFCSimulator(){
   if (window.fcSimulatorInitialized) return;
   const zonesEl=document.getElementById('fc-zones');
@@ -141,6 +156,7 @@ function initializeFCSimulator(){
     return;
   }
   window.fcSimulatorInitialized=true;
+  applyFolkloreClearColorsFromUrl();
   fcRebuildPartColors();
   fcBuildZoneButtons();
   fcBuildPalette();

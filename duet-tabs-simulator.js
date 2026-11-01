@@ -99,6 +99,23 @@ let duetView = 'product';   // 'product'(商品イメージ) / 'front'(着用・
 // 初期化
 // ============================================================================
 
+// URL ?duet=先端①-先端②-先端③-先端④-後端-ベルト(革5つ+ベルト1つのid)で初期配色を指定できる。
+// 配色アイデアページからの遷移用。不正値は無視する。革5つが全て同じ色なら「全体共通」として扱う。
+function applyDuetColorsFromUrl() {
+  try {
+    const q = new URLSearchParams(location.search).get('duet');
+    if (!q) return;
+    const ids = q.split('-');
+    if (ids.length !== 6) return;
+    const L = id => DUET_LEATHER_COLORS.find(c => c.id === id), B = DUET_BELT_COLORS.find(c => c.id === ids[5]);
+    const ls = ids.slice(0, 5).map(L);
+    if (ls.some(c => !c) || !B) return;
+    duetColors = { front1: ls[0].hex, front2: ls[1].hex, front3: ls[2].hex, front4: ls[3].hex, rear: ls[4].hex, belt: B.hex };
+    duetLinked = ls.every(c => c.id === ls[0].id);
+    duetActiveZone = duetLinked ? 'leather' : 'front1';
+  } catch (e) {}
+}
+
 function initDuetSimulator() {
   if (window.duetSimulatorInitialized) return;
   const palette = document.getElementById('duet-palette');
@@ -106,6 +123,7 @@ function initDuetSimulator() {
   if (!palette || !wrap) { setTimeout(initDuetSimulator, 100); return; }
   window.duetSimulatorInitialized = true;
 
+  applyDuetColorsFromUrl();
   bindDuetStrapTap();
   buildDuetViewTabs();
   buildDuetZoneButtons();
