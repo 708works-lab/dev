@@ -116,6 +116,20 @@ function getDisplayOrder(n){
 // 初期化
 // ============================================================================
 
+// URL ?folklore=色id-色id-…(20個。先頭=末端、最後=先端)で初期配色を指定できる。
+// 配色アイデアページからの遷移用。数や色idが不正な場合は無視する。
+function applyFolkloreColorsFromUrl(){
+  try{
+    const q=new URLSearchParams(location.search).get('folklore');
+    if(!q) return;
+    const ids=q.split('-');
+    if(ids.length!==N) return;
+    const picked=ids.map(id=>COLORS.find(c=>c.id===id));
+    if(picked.some(c=>!c)) return;
+    partColors=picked.map(c=>c.hex);
+  }catch(e){}
+}
+
 function initializeSimulator() {
   // 既に初期化済みの場合はスキップ（windowオブジェクトで管理）
   if (window.folkloreSimulatorInitialized) {
@@ -140,6 +154,7 @@ function initializeSimulator() {
   window.folkloreSimulatorInitialized = true;
   
   // 各要素を初期化
+  applyFolkloreColorsFromUrl();
   buildPalette();
   fkUpdatePalLabel();
   buildGrads();
