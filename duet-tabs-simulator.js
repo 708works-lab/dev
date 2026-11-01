@@ -101,9 +101,12 @@ let duetView = 'product';   // 'product'(商品イメージ) / 'front'(着用・
 
 // URL ?duet=先端①-先端②-先端③-先端④-後端-ベルト(革5つ+ベルト1つのid)で初期配色を指定できる。
 // 配色アイデアページからの遷移用。不正値は無視する。革5つが全て同じ色なら「全体共通」として扱う。
+// 追加で ?duetstyle=reverse を付けると先端パーツをR(CW73R)にして開く(省略時は通常CW73)。
 function applyDuetColorsFromUrl() {
   try {
-    const q = new URLSearchParams(location.search).get('duet');
+    const params = new URLSearchParams(location.search);
+    if (params.get('duetstyle') === 'reverse') duetSelectedStyle = 'reverse';
+    const q = params.get('duet');
     if (!q) return;
     const ids = q.split('-');
     if (ids.length !== 6) return;
@@ -116,6 +119,15 @@ function applyDuetColorsFromUrl() {
   } catch (e) {}
 }
 
+// 商品ページ上部の「配色アイデア」リンクを、いま選んでいるスタイル(CW73/CW73R)のタブに向ける
+function duetSyncIdeasLink() {
+  try {
+    document.querySelectorAll('a[href*="color-ideas?model=duet"]').forEach(a => {
+      a.href = a.href.replace(/model=duet(-r)?/, duetSelectedStyle === 'reverse' ? 'model=duet-r' : 'model=duet');
+    });
+  } catch (e) {}
+}
+
 function initDuetSimulator() {
   if (window.duetSimulatorInitialized) return;
   const palette = document.getElementById('duet-palette');
@@ -124,6 +136,7 @@ function initDuetSimulator() {
   window.duetSimulatorInitialized = true;
 
   applyDuetColorsFromUrl();
+  duetSyncIdeasLink();
   bindDuetStrapTap();
   buildDuetViewTabs();
   buildDuetZoneButtons();
@@ -462,6 +475,7 @@ function buildFrontStyleSelector() {
 
 function selectDuetFrontStyle(id) {
   duetSelectedStyle = id;
+  duetSyncIdeasLink();
   buildFrontStyleSelector();
   updateDuetPriceDisplay();
   applyDuetFrontStyle();
