@@ -124,10 +124,18 @@ let kHasDownloadedImage = false;
 // ============================================================================
 
 // URL ?kolmio=色id-色id-…(標準の14個。先頭=末端、最後=先端)で初期配色を指定できる。
+// 追加で ?kthick=1 を付けると厚革仕様(ギター向け)をオンにして開く。
 // 配色アイデアページからの遷移用。数や色idが不正な場合は無視する。
 function applyKolmioColorsFromUrl() {
   try {
-    const q = new URLSearchParams(location.search).get('kolmio');
+    const params = new URLSearchParams(location.search);
+    // ?kthick=1 でギター向け厚革仕様をオンにして開く(ストラップ診断からの遷移用)
+    if (params.get('kthick') === '1') {
+      kThick = true;
+      const tg = document.getElementById('kolmio-thick-toggle');
+      if (tg) tg.checked = true;
+    }
+    const q = params.get('kolmio');
     if (!q) return;
     const ids = q.split('-');
     if (ids.length !== kN) return;
