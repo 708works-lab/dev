@@ -221,6 +221,7 @@ window.STRAP_FINDER_CONFIG = {
       line: '金具を使わないので楽器を傷つけにくく、ウロコパーツの付け外しで長さを調整できます。'
     },
     folklore_clear: {
+      wornNote: 'ギターに着けた例です。',
       handoff: { kind: 'clear', param: 'clear' },
       patterns: ['mono', 'duo', 'trio'],
       name: 'folklore Clear', ja: 'フォークロア クリア', price: '¥6,688〜', url: 'https://708works.jp/products/folklole-clear', scaly: true,
@@ -285,7 +286,7 @@ window.STRAP_FINDER_CONFIG = {
 
   // ---- 着用イラスト（結果画面でおすすめ配色を塗る）。素材は ../*-worn-svg.js（各シミュレーターと共通） ----
   // 前=先端から1〜、後ろ=〜末端。パーツ番号は先端が1番。配色は3色を番号順にくり返す
-  wornMap: { folklore: 'folklore', wellington: 'wellington', kolmio: 'kolmio', kolmio_thick: 'kolmio', duet_cw73: 'duet_cw73', duet_cw73r: 'duet_cw73r', courier: 'courier', triad: 'triad', triad_uke: 'triad_uke' },  // ここに無いモデルは着用イラストなし
+  wornMap: { folklore: 'folklore', wellington: 'wellington', kolmio: 'kolmio', kolmio_thick: 'kolmio', duet_cw73: 'duet_cw73', duet_cw73r: 'duet_cw73r', folklore_clear: 'folklore_clear', courier: 'courier', triad: 'triad', triad_uke: 'triad_uke' },  // ここに無いモデルは着用イラストなし
   worn: {
     // 商品イメージのSVGファイルを塗るタイプ(Triad系。着用の絵はなく、前後の切り替えもなし)。cls=部位→SVG内のCSSクラス
     triad: {
@@ -308,6 +309,12 @@ window.STRAP_FINDER_CONFIG = {
       front: { src: '../courier-worn-front.js?v=1', key: 'front' }, back: { src: '../courier-worn-back.js?v=1', key: 'back' }
     },
     folklore: {
+      src: '../folklore-worn-svg.js?v=1', global: 'FOLKLORE_WORN_INNER', fill: '.st1', logo: '#logo', greyClass: '.st0',
+      front: { pieces: '#front g[id^="_x3"]', hide: '#back',  vb: '27 180 427 551' },
+      back:  { pieces: '#back g[id^="_x3"]',  hide: '#front', vb: '22 888 436 505' }
+    },
+    folklore_clear: {  // folkloreの着用SVGを使い、PVC部分は透け感のグラデーションで塗る
+      clear: true,
       src: '../folklore-worn-svg.js?v=1', global: 'FOLKLORE_WORN_INNER', fill: '.st1', logo: '#logo', greyClass: '.st0',
       front: { pieces: '#front g[id^="_x3"]', hide: '#back',  vb: '27 180 427 551' },
       back:  { pieces: '#back g[id^="_x3"]',  hide: '#front', vb: '22 888 436 505' }
@@ -346,6 +353,8 @@ window.STRAP_FINDER_CONFIG = {
   // Triadのベルト12色(診断の色は、いちばん近い色に置き換える)
   triadBelts: { natural: '#e1c5ba', camel: '#e4ad90', brown: '#b96358', red: '#da5050', navy: '#3f506b', black: '#2b3240', lightgrn: '#a3be81', green: '#52ae98', sora: '#4d9bb6', deepred: '#b94d5d', grey: '#6c90ac', darkbrown: '#483940' },
 
+  // Clear版で選べるPVCの色(シミュレーターと同じ)
+  pvcColors: { cwhite: '#f0f1f3', cbrown: '#924e3a', cblack: '#4a5363', cred: '#f66b80', cgreen: '#4cbf94', cblue: '#59b2be', cyellow: '#fbd173' },
   triadParts: { brown: '#49020d', black: '#1c1614' },
   triadMetals: { gold: '#e5b415', silver: '#c7c9cd' },
 

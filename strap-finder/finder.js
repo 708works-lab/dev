@@ -365,9 +365,45 @@
         if (def.greyClass) svg.querySelectorAll(def.greyClass).forEach(function (e) { if (e.id !== 'logo') e.setAttribute('fill', '#7c7c7c'); });
         svg.style.display = v === inst.view ? '' : 'none';
         stage.appendChild(svg);
+        if (def.clear && v === 'front') {   // PVC版のロゴは先端(1枚目・本革)に載る。3枚目から1枚目へ平行移動する
+          try {
+            var g1 = svg.querySelector('#front #_x31_'), g3 = svg.querySelector('#front #_x33_'), lg = g3 && g3.querySelector('#logo');
+            if (g1 && lg) { var b1 = g1.getBBox(), b3 = g3.getBBox(); lg.setAttribute('transform', 'translate(' + ((b1.x + b1.width / 2) - (b3.x + b3.width / 2)).toFixed(3) + ',' + ((b1.y + b1.height / 2) - (b3.y + b3.height / 2)).toFixed(3) + ')'); g1.appendChild(lg); }
+          } catch (e) {}
+        }
       });
       inst.ready = true; paintInst(inst);
     }).catch(function () { inst.started = false; var s2 = stageOf(inst); if (s2) s2.innerHTML = '<span class="sf-worn-load">着用イメージを読み込めませんでした。</span>'; });
+  }
+  // folklore Clear: 先端(前)と末端(後ろ)だけ本革、間はPVC(透け感のグラデーション)。シミュレーターと同じ塗り方
+  function paintClear(inst, svg, def, seq) {
+    var NS = 'http://www.w3.org/2000/svg', front = svg.getAttribute('data-v') === 'front', fm = worn.fams[worn.famIdx];
+    var pvc = pickOf(fm, 'pvc', 'cwhite'), pre = 'sfc' + inst.i + (front ? 'f' : 'b');
+    if (!svg._pvcDefs) {
+      var d = document.createElementNS(NS, 'defs');
+      Object.keys(cfg.pvcColors).forEach(function (id) {
+        var hx = cfg.pvcColors[id], g = document.createElementNS(NS, 'linearGradient');
+        g.setAttribute('id', pre + '-' + id); g.setAttribute('x1', '15%'); g.setAttribute('y1', '0%'); g.setAttribute('x2', '85%'); g.setAttribute('y2', '100%');
+        var hl = hexToHsl(hx), shade = function (dl) { return hslToHex(hl[0], hl[1], Math.max(0.04, Math.min(0.96, hl[2] + dl))); };
+        [[0, shade(0.32)], [38, shade(0.10)], [60, hx], [100, shade(-0.10)]].forEach(function (st) {
+          var sp = document.createElementNS(NS, 'stop'); sp.setAttribute('offset', st[0] + '%'); sp.setAttribute('stop-color', st[1]); g.appendChild(sp);
+        });
+        d.appendChild(g);
+      });
+      svg.insertBefore(d, svg.firstChild); svg._pvcDefs = true;
+    }
+    var tip = hex(seq[0]), end = hex(seq[1 % seq.length]);
+    (svg._p || []).forEach(function (g) {
+      var n = +g.dataset.num, isEnd = front ? n === 1 : n === 20, col = isEnd ? (front ? tip : end) : null;
+      g.querySelectorAll(def.fill).forEach(function (e) {
+        if (e.id === 'logo') return;
+        var f = col || 'url(#' + pre + '-' + pvc + ')';
+        e.setAttribute('fill', f); e.style.fill = f;
+        if (col) { e.removeAttribute('fill-opacity'); e.style.fillOpacity = ''; } else { e.setAttribute('fill-opacity', '0.9'); e.style.fillOpacity = '0.9'; }
+      });
+    });
+    var lg = svg.querySelector('#logo');
+    if (lg) { var lc = logoColor(tip); lg.setAttribute('fill', lc); lg.style.fill = lc; lg.setAttribute('fill-opacity', front ? '1' : '0'); lg.style.fillOpacity = front ? '1' : '0'; }
   }
   function paintInst(inst) {
     var def = cfg.worn[inst.key], stage = stageOf(inst), seq = curSeq(inst.id);
@@ -393,6 +429,7 @@
         });
         return;
       }
+      if (def.clear) { paintClear(inst, svg, def, seq); return; }
       (svg._p || []).forEach(function (g) {
         var col = hex(seq[(+g.dataset.num - 1) % seq.length]);
         g.querySelectorAll(def.fill).forEach(function (e) { e.setAttribute('fill', col); e.style.fill = col; });
