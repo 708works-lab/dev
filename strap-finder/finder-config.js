@@ -12,6 +12,7 @@ window.STRAP_FINDER_CONFIG = {
     kicker: 'STRAP FINDER',
     title: 'あなたにぴったりの\nストラップ診断',
     lead: 'いくつかの質問に答えるだけで、楽器に合うモデルと配色をご提案します。',
+    steps: ['楽器を選ぶ', '好みを答える', '見つかる'],
     time: '所要時間 約1分',
     start: '診断をはじめる'
   },

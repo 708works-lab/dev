@@ -102,11 +102,48 @@
     el.scrollIntoView ? window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.pageYOffset - 8), behavior: 'auto' }) : 0;
   }
 
+  var introTimer = null;
   function renderIntro() {
     var t = cfg.intro;
+    if (introTimer) { clearInterval(introTimer); introTimer = null; }
+    var steps = (t.steps || []).map(function (x, i) { return '<li><b>' + (i + 1) + '</b><span>' + esc(x) + '</span></li>'; }).join('');
     shell('<div class="sf-intro"><div class="sf-kicker">' + esc(t.kicker) + '</div><h1 class="sf-h1">' + br(t.title) + '</h1>' +
-      '<p class="sf-lead">' + esc(t.lead) + '</p><p class="sf-time">' + esc(t.time) + '</p>' +
-      '<button type="button" class="sf-main" data-act="start">' + esc(t.start) + '</button></div>');
+      '<div class="sf-intro-art" id="sf-intro-art"><span class="sf-worn-load">&nbsp;</span></div><p class="sf-intro-cap" id="sf-intro-cap"></p>' +
+      '<p class="sf-lead">' + esc(t.lead) + '</p>' + (steps ? '<ol class="sf-steps">' + steps + '</ol>' : '') +
+      '<button type="button" class="sf-main" data-act="start">' + esc(t.start) + '</button><p class="sf-time">' + esc(t.time) + '</p></div>');
+    initIntroArt();
+  }
+  // 診断の入口に、着用イラストの配色が次々に変わる絵を出す(「やってみたい」と思ってもらうための飾り)
+  function initIntroArt() {
+    var def = cfg.worn.folklore;
+    loadScript(assetUrl(def.src)).then(function () {
+      var box = el.querySelector('#sf-intro-art'); if (!box) return;
+      var NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('viewBox', def.front.vb); svg.setAttribute('class', 'sf-worn-svg'); svg.setAttribute('aria-hidden', 'true');
+      svg.innerHTML = root[def.global];
+      var hide = svg.querySelector(def.front.hide); if (hide) hide.remove();
+      var ps = []; svg.querySelectorAll(def.front.pieces).forEach(function (g) { g.dataset.num = decodeId(g.id, def, true); ps.push(g); });
+      if (def.greyClass) svg.querySelectorAll(def.greyClass).forEach(function (e) { if (e.id !== 'logo') e.setAttribute('fill', '#7c7c7c'); });
+      box.innerHTML = ''; box.appendChild(svg);
+      var seen = {}, list = cfg.recipes.filter(function (r) { if (seen[r.name]) return false; seen[r.name] = 1; return true; });
+      for (var i = list.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), tmp = list[i]; list[i] = list[j]; list[j] = tmp; }
+      var k = 0;
+      function paint() {
+        var r = list[k % list.length]; k++;
+        ps.forEach(function (g) {
+          var col = hex(r.c[(+g.dataset.num - 1) % r.c.length]);
+          g.querySelectorAll(def.fill).forEach(function (e) { e.setAttribute('fill', col); e.style.fill = col; });
+          if (def.logo) g.querySelectorAll(def.logo).forEach(function (e) { var lc = logoColor(col); e.setAttribute('fill', lc); e.style.fill = lc; });
+        });
+        var cap = el.querySelector('#sf-intro-cap'); if (cap) cap.textContent = '配色の例：' + r.name;
+      }
+      paint();
+      var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!still) introTimer = setInterval(function () {
+        if (!el.querySelector('#sf-intro-art svg')) { clearInterval(introTimer); introTimer = null; return; }
+        paint();
+      }, 2800);
+    }).catch(function () { var b = el.querySelector('#sf-intro-art'); if (b) b.style.display = 'none'; });
   }
 
   function renderStep() {
