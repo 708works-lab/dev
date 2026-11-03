@@ -156,7 +156,7 @@
     if (mm.how && (big || m.surprise)) html += '<p class="sf-how">' + esc(mm.how) + '</p>';
     if (extraHtml) html += extraHtml;
     html += '<div class="sf-mfoot"><span class="sf-price">' + esc(mm.price) + '</span>' +
-      '<a class="' + (big ? 'sf-main' : 'sf-sec') + '" href="' + esc(mm.url + (recipe ? linkQuery(m.id) : '?diag=1' + styleQ(mm)) + (m.id === 'onstage' ? '' : SIM_HASH)) + '" data-act="go" data-model="' + esc(m.id) + '">' +
+      '<a class="' + (big ? 'sf-main' : 'sf-sec') + '" href="' + esc(mm.url + (recipe ? linkQuery(m.id) : '?diag=1' + styleQ(mm) + (m.id === 'onstage' ? '' : SIM_HASH))) + '" data-act="go" data-model="' + esc(m.id) + '">' +
       esc(big && recipe && mm.handoff ? cfg.buttons.simulator : cfg.buttons.open)  /* 配色を引き継げるモデルだけ「この配色で〜」 */ + '</a></div></div>';
     return html;
   }
