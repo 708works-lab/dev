@@ -123,3 +123,15 @@
 .sf-stack .sf-mask { position:absolute; inset:0; }
 .sf-shuffle { appearance:none; display:block; margin:2px auto 6px; background:none; border:0; font:inherit; font-size:12px; color:var(--sf-sub); text-decoration:underline; text-underline-offset:3px; cursor:pointer; padding:4px 8px; }
 .sf-shuffle:active { color:var(--sf-gold-d); }
+
+/* 配色の系統・色の入れ方を小さく(2026-11-03) */
+.sf-h4 { margin:12px 0 6px; font-size:12px; }
+.sf-rpick { gap:6px; }
+.sf-rpick .sf-recipe { padding:6px; border-radius:10px; }
+.sf-rpick .sf-swatches { height:14px; border-radius:5px; }
+.sf-rpick .sf-rname { font-size:11.5px; margin-top:4px; line-height:1.35; }
+.sf-rpick .sf-rcols { display:none; }
+.sf-pats { gap:6px; }
+.sf-pat { padding:5px 6px; gap:3px; border-radius:9px; min-width:calc((100% - 12px) / 3); flex:1 1 calc((100% - 12px) / 3); }
+.sf-pbar { height:9px; border-radius:3px; }
+.sf-pat span:last-child { font-size:11.5px; font-weight:600; line-height:1.3; }

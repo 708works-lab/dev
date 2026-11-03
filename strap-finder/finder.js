@@ -46,7 +46,7 @@
     var top = models[0].model;
     var notes = [];
     if (heavy) notes.push(cfg.notes.heavy);
-    else if (top.scaly) notes.push(cfg.notes.scaly);
+    // 「少し伸びることがある」の注意書きは、重い楽器(エレキの重め・ベース)を選んだ人にだけ出す
     var pin = (a.pin === 'pin1' || a.pin === 'pin0');
     // 配色: 選んだ組み合わせ + 同じ雰囲気の他の配色（重複する名前は除く）
     var main = null, others = [];
@@ -156,7 +156,7 @@
     if (mm.how && (big || m.surprise)) html += '<p class="sf-how">' + esc(mm.how) + '</p>';
     if (extraHtml) html += extraHtml;
     html += '<div class="sf-mfoot"><span class="sf-price">' + esc(mm.price) + '</span>' +
-      '<a class="' + (big ? 'sf-main' : 'sf-sec') + '" href="' + esc(mm.url + (recipe ? linkQuery(m.id) : '?diag=1' + styleQ(mm))) + '" data-act="go" data-model="' + esc(m.id) + '">' +
+      '<a class="' + (big ? 'sf-main' : 'sf-sec') + '" href="' + esc(mm.url + (recipe ? linkQuery(m.id) : '?diag=1' + styleQ(mm)) + (m.id === 'onstage' ? '' : SIM_HASH)) + '" data-act="go" data-model="' + esc(m.id) + '">' +
       esc(big && recipe && mm.handoff ? cfg.buttons.simulator : cfg.buttons.open)  /* 配色を引き継げるモデルだけ「この配色で〜」 */ + '</a></div></div>';
     return html;
   }
@@ -256,11 +256,12 @@
     if (h.belt) ids.push(pickOf(f, 'belt', 'brown'));
     return '&' + h.param + '=' + ids.join('-');
   }
+  var SIM_HASH = '#color-simulator';   // 商品ページのシミュレーター位置までスクロールして開く
   function linkQuery(modelId) {
     var mm = cfg.models[modelId], f = worn.fams[worn.famIdx];
-    if (!f) return '?diag=1' + styleQ(mm);
+    if (!f) return '?diag=1' + styleQ(mm) + SIM_HASH;
     var seq = curSeq(modelId);
-    return '?diag=1&diag_pattern=' + effPat(modelId) + '&diag_colors=' + seq.join(',') + handoffQ(modelId, seq) + styleQ(mm);
+    return '?diag=1&diag_pattern=' + effPat(modelId) + '&diag_colors=' + seq.join(',') + handoffQ(modelId, seq) + styleQ(mm) + SIM_HASH;
   }
   function curQuery() {
     var f = worn.fams[worn.famIdx]; if (!f) return '?diag=1';
