@@ -191,8 +191,8 @@ window.STRAP_FINDER_CONFIG = {
   // ---- Duetの2タイプ(診断のたびにランダムで片方を提案)。url は同じ商品ページ、?diag_style= でタイプを伝える ----
   variants: {
     duet: [
-      { id: 'duet_cw73',  model: { name: 'Duet CW73',  ja: 'デュエット（ウロコ正位置）',  line: 'ウロコ状の見た目はそのままに、無段階で長さを合わせられます。片手でも調整できます。ウロコの向きが正位置の「CW73」です。', extraQuery: '' } },
-      { id: 'duet_cw73r', model: { name: 'Duet CW73R', ja: 'デュエット（ウロコ逆向き）', line: 'ウロコ状の見た目はそのままに、無段階で長さを合わせられます。片手でも調整できます。ウロコの向きを上下逆にした「CW73R」です。', extraQuery: 'duetstyle=reverse' } }
+      { id: 'duet_cw73',  model: { name: 'duet CW73',  ja: 'デュエット（ウロコ正位置）',  line: 'ウロコ状の見た目はそのままに、無段階で長さを合わせられます。片手でも調整できます。ウロコの向きが正位置の「CW73」です。', extraQuery: '' } },
+      { id: 'duet_cw73r', model: { name: 'duet CW73R', ja: 'デュエット（ウロコ逆向き）', line: 'ウロコ状の見た目はそのままに、無段階で長さを合わせられます。片手でも調整できます。ウロコの向きを上下逆にした「CW73R」です。', extraQuery: 'duetstyle=reverse' } }
     ]
   },
 
@@ -203,27 +203,27 @@ window.STRAP_FINDER_CONFIG = {
       handoff: { param: 'courier', n: 2, belt: true },
       wornNote: 'ギターに着けた例です。ベルトの色もあわせてご提案しています。',
       patterns: ['mono', 'duo'],
-      name: 'Courier', ja: 'クーリエ', price: '¥9,130〜', url: 'https://708works.jp/products/courier',
+      name: 'courier', ja: 'クーリエ', price: '¥9,130〜', url: 'https://708works.jp/products/courier',
       line: '背面の引き手を片手で引くだけで、演奏中でも長さを変えられます。曲ごとに構えを変えたい方に。'
     },
     duet: {
       handoff: { param: 'duet', n: 5, belt: true },
       wornNote: 'ギターに着けた例です。ベルトの色もあわせてご提案しています。',
       patterns: ['mono', 'duo', 'trio'],
-      name: 'Duet', ja: 'デュエット', price: '¥13,860〜', url: 'https://708works.jp/products/duet-cw73r', scaly: true,
+      name: 'duet', ja: 'デュエット', price: '¥13,860〜', url: 'https://708works.jp/products/duet-cw73r', scaly: true,
       line: 'ウロコ状の見た目はそのままに、無段階で長さを合わせられます。片手でも調整できます。'
     },
     folklore: {
       handoff: { param: 'folklore', n: 20, reverse: true },
       wornNote: 'ギターに着けた例です。',
       patterns: ['mono', 'duo', 'trio', 'quad', 'accent', 'ladder'],
-      name: 'Folklore', ja: 'フォークロア', price: '¥13,640〜', url: 'https://708works.jp/products/folklore', scaly: true,
+      name: 'folklore', ja: 'フォークロア', price: '¥13,640〜', url: 'https://708works.jp/products/folklore', scaly: true,
       line: '金具を使わないので楽器を傷つけにくく、ウロコパーツの付け外しで長さを調整できます。'
     },
     folklore_clear: {
       handoff: { kind: 'clear', param: 'clear' },
       patterns: ['mono', 'duo', 'trio'],
-      name: 'Folklore Clear', ja: 'フォークロア クリア', price: '¥6,688〜', url: 'https://708works.jp/products/folklole-clear', scaly: true,
+      name: 'folklore Clear', ja: 'フォークロア クリア', price: '¥6,688〜', url: 'https://708works.jp/products/folklole-clear', scaly: true,
       line: '透け感のあるPVCと革の組み合わせ。金具を使わず、楽器に優しい作りです。'
     },
     triad: {
@@ -249,14 +249,14 @@ window.STRAP_FINDER_CONFIG = {
       handoff: { param: 'kolmio', n: 14, reverse: true },
       wornNote: 'ウクレレに着けた例です。',
       patterns: ['mono', 'duo', 'trio', 'quad', 'accent', 'ladder'],
-      name: 'Kolmio', ja: 'コルミオ', price: '¥15,400〜', url: 'https://708works.jp/products/kolmio-ukulele', scaly: true,
+      name: 'kolmio', ja: 'コルミオ', price: '¥15,400〜', url: 'https://708works.jp/products/kolmio-ukulele', scaly: true,
       line: '三角のパーツが鎖のようにつながる形。ウロコの数で長さを選べます。'
     },
     kolmio_thick: {
       handoff: { param: 'kolmio', n: 14, reverse: true },
       wornNote: 'ウクレレに着けた例です。',
       patterns: ['mono', 'duo', 'trio', 'quad', 'accent', 'ladder'],
-      name: 'Kolmio（厚革）', ja: 'コルミオ ギター仕様', price: '¥15,400〜', url: 'https://708works.jp/products/kolmio-ukulele', scaly: true, extraQuery: 'kthick=1',
+      name: 'kolmio（厚革）', ja: 'コルミオ ギター仕様', price: '¥15,400〜', url: 'https://708works.jp/products/kolmio-ukulele', scaly: true, extraQuery: 'kthick=1',
       line: '革を厚くしたギターストラップ仕様。アコースティックギターでの実績が多く、エレキでもお使いいただいています。',
       how: '商品ページの「仕様」で「ギターストラップ仕様（厚革）」を選んでください。'
     },
@@ -277,7 +277,7 @@ window.STRAP_FINDER_CONFIG = {
 
   // ---- 注記 ----
   notes: {
-    heavy: 'ベースなど重い楽器には、ウロコ状のパーツを連ねるタイプ（長く使うと少し伸びることがあります）よりも、CourierかTriadをおすすめしています。',
+    heavy: 'ベースなど重い楽器には、ウロコ状のパーツを連ねるタイプ（長く使うと少し伸びることがあります）よりも、courierかTriadをおすすめしています。',
     scaly: 'ウロコ状のパーツを連ねる構造は、長く使うと少し伸びることがあります。味わいの変化としてお楽しみいただけます。',
     pinTag: 'ストラップピンが1つ・無い楽器に'
   },
