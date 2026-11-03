@@ -203,7 +203,7 @@ window.STRAP_FINDER_CONFIG = {
       handoff: { param: 'courier', n: 2, belt: true },
       wornNote: 'ギターに着けた例です。ベルトの色もあわせてご提案しています。',
       patterns: ['mono', 'duo'],
-      name: 'courier', ja: 'クーリエ', price: '¥9,130〜', url: 'https://708works.jp/products/courier',
+      name: 'Courier', ja: 'クーリエ', price: '¥9,130〜', url: 'https://708works.jp/products/courier',
       line: '背面の引き手を片手で引くだけで、演奏中でも長さを変えられます。曲ごとに構えを変えたい方に。'
     },
     duet: {
@@ -277,7 +277,7 @@ window.STRAP_FINDER_CONFIG = {
 
   // ---- 注記 ----
   notes: {
-    heavy: 'ベースなど重い楽器には、ウロコ状のパーツを連ねるタイプ（長く使うと少し伸びることがあります）よりも、courierかTriadをおすすめしています。',
+    heavy: 'ベースなど重い楽器には、ウロコ状のパーツを連ねるタイプ（長く使うと少し伸びることがあります）よりも、CourierかTriadをおすすめしています。',
     scaly: 'ウロコ状のパーツを連ねる構造は、長く使うと少し伸びることがあります。味わいの変化としてお楽しみいただけます。',
     pinTag: 'ストラップピンが1つ・無い楽器に'
   },
