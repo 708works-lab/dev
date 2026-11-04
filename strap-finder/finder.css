@@ -147,3 +147,17 @@
 .sf-steps b { width:24px; height:24px; border-radius:50%; background:#f6efd9; color:var(--sf-gold-d); font-size:13px; display:flex; align-items:center; justify-content:center; }
 .sf-intro .sf-time { margin:10px 0 0; }
 .sf-intro .sf-lead { margin-top:12px; }
+
+/* 結果: 1位の着用イメージをファーストビューに収める(コンパクト表示) */
+.sf-q-res { font-size:15px; margin:0 0 6px; }
+.sf-model-main { padding:12px 12px 14px; margin:6px 0 12px; }
+.sf-model-main .sf-mname { font-size:18px; line-height:1.3; }
+.sf-model-main .sf-mline { font-size:12.5px; margin:3px 0 0; line-height:1.55; }
+.sf-model-main .sf-worn { margin:6px 0 2px; padding:0; border:0; background:none; }
+.sf-model-main .sf-worn-tabs { margin-bottom:2px; }
+.sf-model-main .sf-worn-tabs button { font-size:12px; padding:2px 14px; }
+.sf-model-main .sf-worn-stage { min-height:0; }
+.sf-model-main .sf-worn-svg { max-width:300px; max-height:calc(100vh - 290px); min-height:200px; }
+.sf-model-main .sf-worn-note { font-size:10.5px; margin:2px 0 0; }
+.sf-model-main .sf-mfoot { margin-top:8px; }
+.sf-model-main .sf-mfoot .sf-main { width:100%; padding:11px 16px; }

@@ -187,7 +187,7 @@
     if (m.surprise) html += '<p class="sf-mline sf-sub">' + esc(mm.line) + '</p>';
     if (mm.how && (big || m.surprise)) html += '<p class="sf-how">' + esc(mm.how) + '</p>';
     if (extraHtml) html += extraHtml;
-    html += '<div class="sf-mfoot"><span class="sf-price">' + esc(mm.price) + '</span>' +
+    html += '<div class="sf-mfoot">' +
       '<a class="' + (big ? 'sf-main' : 'sf-sec') + '" href="' + esc(mm.url + (recipe ? linkQuery(m.id) : '?diag=1' + styleQ(mm) + (m.id === 'onstage' ? '' : SIM_HASH))) + '" data-act="go" data-model="' + esc(m.id) + '">' +
       esc(big && recipe && mm.handoff ? cfg.buttons.simulator : cfg.buttons.open)  /* 配色を引き継げるモデルだけ「この配色で〜」 */ + '</a></div></div>';
     return html;
@@ -204,7 +204,7 @@
     }
     if (res.error) { shell('<p class="sf-note">' + esc(res.error) + '</p><button type="button" class="sf-link" data-act="restart">' + esc(cfg.buttons.restart) + '</button>'); return; }
 
-    var html = '<div class="sf-kicker">RESULT</div><h2 class="sf-q">あなたにおすすめは</h2>';
+    var html = '<h2 class="sf-q sf-q-res">あなたにおすすめは</h2>';
     // 配色の状態（系統・色の入れ方）を決めてから描画する
     worn.res = res; worn.fams = res.recipe ? [res.recipe].concat(res.otherRecipes) : []; worn.famIdx = 0;
     var topPats = patternsOf(res.models[0].id);
@@ -212,11 +212,9 @@
     worn.insts = []; worn.rnd = null;
     res.models.forEach(function (m, i) { var k = cfg.wornMap && cfg.wornMap[m.id]; if (k) worn.insts.push({ i: i, id: m.id, key: k, view: 'front', ready: false }); });
     var hasFam = worn.fams.length > 0;
-    html += modelCard(res.models[0], true, hasFam ? res.recipe : null);
+    var i0 = hasFam ? instOf(0) : null;
+    html += modelCard(res.models[0], true, hasFam ? res.recipe : null, i0 ? stageHtml(i0, false) : '');   // 着用イメージは1位カードの中(ファーストビューに収める)
     if (hasFam) {
-      html += '<h3 class="sf-h3">おすすめの配色</h3>';
-      var i0 = instOf(0);
-      if (i0) html += stageHtml(i0, false);
       html += '<div class="sf-h4">配色の系統</div><div class="sf-rpick" id="sf-rpick">' + famChips() + '</div>';
       if (topPats.length > 1) html += '<div class="sf-h4">色の入れ方</div><div class="sf-pats" id="sf-pats">' + patChips() + '</div>';
       html += '<p class="sf-note sf-rnote">選んだあとも、シミュレーターで自由に変更できます。</p>';
