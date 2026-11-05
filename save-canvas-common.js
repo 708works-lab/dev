@@ -48,6 +48,14 @@ function _wrapTextByChar(ctx, text, maxWidth) {
   return lines;
 }
 
+// スマホ表示(sim-mobile-ui.js)はタブ切替(商品/使用イメージ等)でSVGのviewBoxを切り出し範囲に書き換える。
+// 保存画像は常に全体図を描く前提なので、複製したSVGのviewBoxを元(data-sim-orig-viewbox)へ戻す。
+// 【2026-11-05】これが無く、スマホで注文した画像が拡大・上切れになっていた(10/16のスマホ新UI以降)。
+function _restoreOrigViewBox(el) {
+  const vb = el && el.getAttribute && el.getAttribute('data-sim-orig-viewbox');
+  if (vb) el.setAttribute('viewBox', vb);
+}
+
 async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepareSvg, topCaption, bottomCaption, extra, sideArtworks, size = 1080, pad = 48 }) {
   const SIZE = size, PAD = pad;
   const leftW = 380;
@@ -139,6 +147,7 @@ async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepa
   if (svgEl) {
     const cloned = svgEl.cloneNode(true);
     cloned.style.margin = '0';
+    _restoreOrigViewBox(cloned);
     if (typeof prepareSvg === 'function') await prepareSvg(cloned);
     const fitScale = Math.min(mainW / svgW, artworkBoxH / svgH);
     const drawW = svgW * fitScale, drawH = svgH * fitScale;
@@ -172,6 +181,7 @@ async function build708SaveCanvas({ title, svgSelector, svgW, svgH, chips, prepa
       if (!el) continue;
       const c2 = el.cloneNode(true);
       c2.style.margin = '0';
+      _restoreOrigViewBox(c2);
       if (typeof a.prepareSvg === 'function') await a.prepareSvg(c2);
       const areaH = slotH - labelH;
       const sc = Math.min(sw / a.svgW, areaH / a.svgH);

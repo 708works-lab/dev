@@ -66,6 +66,8 @@
 
     var full = (svg.getAttribute('viewBox') || '0 0 100 100').split(/\s+/).map(Number);
     var origVB = svg.getAttribute('viewBox');
+    // 保存画像(build708SaveCanvas)は全体図を描く前提のため、スマホのタブ切替で書き換える前の元viewBoxを記録しておく(2026-11-05追加)
+    if (origVB && !light) svg.setAttribute('data-sim-orig-viewbox', origVB);
     function vbOf(v) {
       if (v.vb) return v.vb;
       var h = full[3] / 2; return full[0] + ' ' + (full[1] + v.half * h) + ' ' + full[2] + ' ' + h;
