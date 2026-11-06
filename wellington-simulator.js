@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-880680B5]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 // ============================================================================
 // 設定（Kolmio(kolmio-simulator.js)を土台に、Wellington用に移植。
 // Wellingtonは「ギター用」「ウクレレ用」で物理サイズが異なる2種のSVGパーツ

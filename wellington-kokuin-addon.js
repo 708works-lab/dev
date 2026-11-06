@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-FEC9E1F4]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Wellington 名入れ刻印アドオン（有料オプション、+¥1,100税込・要確認。Kolmio(kolmio-kokuin-addon.js)を土台に移植）
    既存の wellington-simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
    刻印は先端(1番=front)パーツに乗るため、色は常に wlCurState().colors[1]（先端パーツの色）を参照する。

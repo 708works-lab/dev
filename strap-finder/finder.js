@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-4C0ABD41]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 // ============================================================================
 // ストラップ診断 本体（設問・文言は finder-config.js を編集する）
 //  - #strap-finder に描画。自己完結（CSSは finder.css、名前空間 .sf-）

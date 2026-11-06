@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-58892213]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 // WELLINGTON Clear ver. タブ切替版(商品イメージ=逆U字 / 着用 前・後ろ)  2026-10-18
 // 元の wellington-clear-simulator.js からの変更点(Folklore Clear ver. folklore-clear-tabs-simulator.js と同じ構成):
 //  - プレビューをタブ化(縦長SVGは画像保存用に画面外へ残す)、図のタップでゾーン選択、保存画像に着用イメージを追加

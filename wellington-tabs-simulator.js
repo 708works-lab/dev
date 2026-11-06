@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-4CEFC424]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 // WELLINGTON(ウクレレ)シミュレーター: 商品イメージ=逆U字 / 着用イメージ(前・後ろ)のタブ切替版 (2026-10-18)
 // 元の wellington-simulator.js からの変更点(Folklore本革版 folklore-leather-simulator.js と同じ構成):
 //  - プレビューをタブ化(商品イメージ=逆U字、着用前、着用後ろ)。縦長SVG(#wl-strap-svg)は画像保存用に画面外へ残す

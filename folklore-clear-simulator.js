@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-785F4619]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 // ============================================================================
 // folklore Clear ver.（PVC×本革ハイブリッド）カラーシミュレーター
 // 本革版 folklore（simulator.js）のSVGアセットとピース配置ロジックを流用しつつ、

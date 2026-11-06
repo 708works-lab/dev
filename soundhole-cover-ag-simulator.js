@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-0E22CEF0]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 // ============================================================================
 // サウンドホールカバー｜アコースティックギター用（soundhole-cover-ag）カラーシミュレーター
 // soundhole-cover-uk-simulator.js を「完全に踏襲」する方針で、関数名・変数名・IDは一切変更せず、

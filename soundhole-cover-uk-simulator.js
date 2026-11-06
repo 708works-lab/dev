@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-FF0F3D51]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 // ============================================================================
 // サウンドホールカバー｜ウクレレ用（soundhole-cover-uk）カラーシミュレーター
 // SVGは708works提供の soundholecover_ukulele_color_order.svg をそのまま流用。

@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-6AE6CBE4]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* 708works カラーシミュレーター共通：保存用キャンバス生成ヘルパー
    【2026-09-27新設、同日2カラム化改訂】各商品(<model>-simulator.js)がそれぞれ独自に持っていた
    「保存画像を組み立てるcanvas描画コード」を1箇所に集約したもの。

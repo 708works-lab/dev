@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-ABE16EBE]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Folklore 名入れ刻印アドオン（有料オプション、+¥1,100税込）
    既存の simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
    Folkloreは10〜30枚のウロコパーツを個別に色付けできる仕様のため、刻印は

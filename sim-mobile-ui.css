@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-3E29953E]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* 708works カラーシミュレーター スマホ新UI(2026-10-16)
    JSが root に .sim-mui を付けたときだけ有効(JS失敗時は従来表示のまま)。≤480px のみ。
    構成: 上=プレビュー(ストラップ拡大/全身正面/全身背面のタブ。固定はしない) → パーツチップ(横スクロール) → カラー → 長さ・名入れ → 価格・カート。下=価格+カートの固定バー */

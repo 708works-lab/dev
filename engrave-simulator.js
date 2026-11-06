@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-11A8EBD1]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Engrave Simulator (prototype) — テキスト + フォント選択でレーザー刻印の仕上がりイメージをプレビュー */
 (function () {
   const FONTS = [

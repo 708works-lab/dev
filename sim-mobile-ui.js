@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-A3D79046]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* 708works カラーシミュレーター スマホ新UI(2026-10-16)  ※既存シミュレーターのロジックは触らず、表示の再配置だけ行う
    - プレビュー+タブ切替(固定表示はしない)(ストラップ拡大/全身正面/全身背面)
    - パーツ選択を横スクロールのチップに

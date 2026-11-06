@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-DCED0CE9]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* WELLINGTON(ウクレレ) プレビューのタブ切替(商品イメージ=逆U字 / 着用 前 / 着用 後ろ)  2026-10-18 */
 .wellington-simulator .top-area { flex-direction: column; gap: 10px; }
 .wellington-simulator .fk-preview { display: flex; flex-direction: column; gap: 8px; min-width: 0; }

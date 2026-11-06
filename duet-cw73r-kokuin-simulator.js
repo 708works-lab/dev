@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-BC37E54E]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Duet CW73R Kokuin (engrave) Simulator — Phase 2 prototype
    実際の刻印箇所SVG（duet_cw73r_kokuin_base.svg）上に、選択フォント・入力文字で
    SVG <text> を動的配置してプレビューする。位置・角度は、708worksが用意した

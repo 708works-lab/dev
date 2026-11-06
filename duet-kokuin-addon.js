@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-75197CAA]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Duet 名入れ刻印アドオン（有料オプション、+¥1,100税込）
    既存の duet-simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
    先端パーツ（CW73／CW73R）は別パーツ・別SVGのため、選択中のパーツに応じて

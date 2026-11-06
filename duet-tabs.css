@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-03A922A8]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Duet: 商品イメージ／着用イメージ(前・後ろ)の切替 (2026-10-29) */
 /* 3つの表示は同じ高さの枠に収める(タブ切替で下の要素がガタつかないように) */
 .duet-simulator { --duet-view-h: min(40svh, 340px); }

@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-56146650]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* folklore Clear ver. 名入れ刻印アドオン（有料オプション、+¥1,100税込）
    folklore-clear-simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
    PVC版は2〜19枚目がPVC（単色のみ）のため、刻印は唯一の本革部分である

@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-5FE20E98]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* SUS4 名入れ刻印アドオン（有料オプション、+¥1,100税込）
    既存の sus4-simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
    カラー選択のグローバル状態（sus4Colors, engravingColor）をそのまま参照する。

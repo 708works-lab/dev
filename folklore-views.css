@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-61819C3C]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* FOLKLORE(本革版) プレビューのタブ切替(商品イメージ=逆U字 / 着用 前 / 着用 後ろ)  2026-10-17 */
 .folklore-simulator .top-area { flex-direction: column; gap: 10px; }
 .folklore-simulator .fk-preview { display: flex; flex-direction: column; gap: 8px; min-width: 0; }

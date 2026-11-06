@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-F0BA877C]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 // ============================================================================
 // ギターピック型キーホルダー（keyholder01）カラーシミュレーター
 // SVGは708works提供の keyholder_color_order.svg をそのまま流用。

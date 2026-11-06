@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-A6C92B82]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Capo 名入れ刻印アドオン（有料オプション、+¥1,100税込）
    既存の capo-simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
    カラー選択のグローバル状態（capoColors, engravingColor）をそのまま参照する。

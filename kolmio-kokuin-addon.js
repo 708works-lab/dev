@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-3C8F2387]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Kolmio 名入れ刻印アドオン（有料オプション、+¥1,100税込・要確認）
    既存の kolmio-simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
    刻印は先端(1番)パーツに乗るため、色は常に kPieceColors[1]（先端パーツの色）を参照する。 */

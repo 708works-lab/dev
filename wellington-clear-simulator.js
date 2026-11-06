@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-8FB28897]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 // ============================================================================
 // Wellington Clear ver.（PVC×本革ハイブリッド）カラーシミュレーター
 // 本革版 wellington-simulator.js（ウクレレ用ブランチ）のSVGアセット・ピース配置ロジックを

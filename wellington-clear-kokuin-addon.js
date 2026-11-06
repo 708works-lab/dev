@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-0FB278D8]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Wellington Clear ver. 名入れ刻印アドオン（有料オプション、+¥1,100税込）
    本革版 wellington-kokuin-addon.js をフォークし、刻印・ロゴの基準ピースを
    3番目（PVC範囲）から1番目（front・本革）へ変更したもの。

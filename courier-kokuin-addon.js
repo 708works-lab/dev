@@ -1,3 +1,6 @@
+/* © 708works (ナナゼロハチワークス) All rights reserved. [708W-8E23F32C]
+ * 本ファイルの無断複製・転載・改変・派生利用を禁じます。
+ * Unauthorized copying, modification or derivative use is prohibited. */
 /* Courier 名入れ刻印アドオン（有料オプション、+¥1,100税込）
    既存の courier-simulator.js（カラーシミュレーター本体）と同じページに読み込まれる前提。
    カラー選択のグローバル状態（courierColors, engravingColor）をそのまま参照する。 */
