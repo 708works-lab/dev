@@ -1,0 +1,34 @@
+name: 商品レビューフィードを毎日更新
+
+on:
+  schedule:
+    - cron: '0 15 * * *'  # 毎日日本時間 0:00 (UTC 15:00)
+  workflow_dispatch:        # 手動実行も可能
+
+jobs:
+  update-feed:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: レビューフィード XML を生成
+        env:
+          JUDGEME_API_TOKEN: ${{ secrets.JUDGEME_API_TOKEN }}
+          SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
+        run: node update-reviews-feed.mjs
+
+      - name: 変更をコミット & プッシュ
+        run: |
+          git config user.name "708works Bot"
+          git config user.email "708works@gmail.com"
+          git add reviews-feed.xml
+          git diff --staged --quiet && echo "レビューに変更なし" || \
+            git commit -m "商品レビューフィードを更新 ($(date -u '+%Y-%m-%d'))"
+          git push
